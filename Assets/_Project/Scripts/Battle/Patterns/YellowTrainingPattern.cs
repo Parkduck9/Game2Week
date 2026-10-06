@@ -48,6 +48,10 @@ namespace Game2Week.Battle.Patterns
             warning = gameObject.AddComponent<LineRenderer>();
             warning.sharedMaterial = warningMaterial;
             warning.positionCount = 24; warning.startWidth = warning.endWidth = 0.035f;
+            // 예고선도 공격 색으로 (재질은 공유하므로 블록으로만 덮어씀)
+            var tint = BattleTexts.AttackColorTint(attackColor);
+            warning.startColor = warning.endColor = tint;
+            var block = new MaterialPropertyBlock(); block.SetColor("_BaseColor", tint); warning.SetPropertyBlock(block);
             timeToShot = warningDuration;
             BeginWarning();
         }
@@ -69,6 +73,7 @@ namespace Game2Week.Battle.Patterns
             for (int i = 0; i < warning.positionCount; i++)
                 warning.SetPosition(i,WaveTrajectory.Evaluate(origin,forward,time*i/(warning.positionCount-1f),speed,warningWaveAmplitude,warningWaveFrequency));
             warning.enabled = true; warningActive = true;
+            context.Feedback.RaiseWarningStarted(attackColor, origin);
         }
         public void Tick(float dt)
         {
@@ -83,6 +88,7 @@ namespace Game2Week.Battle.Patterns
                     var bullet = GetBullet();
                     bullet.Color = attackColor;
                     bullet.Launch(origin + dir.normalized * 0.45f, dir.normalized * speed);
+                    context.Feedback.RaiseBulletFired(attackColor, bullet.transform.position);
                     if (context.EnemyView) context.EnemyView.PlayAttack();
                 }
                 timeToShot = Mathf.Max(interval, warningDuration + 0.1f);

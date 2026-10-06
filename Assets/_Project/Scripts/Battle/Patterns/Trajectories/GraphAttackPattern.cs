@@ -7,6 +7,7 @@ namespace Game2Week.Battle.Patterns.Trajectories
     public sealed class GraphAttackPattern : MonoBehaviour, IAttackPattern, IThreatSource, IDirectablePattern
     {
         float intervalScale = 1f, speedScale = 1f;
+        bool warningAnnounced;
         public AttackColor PatternColor => definition ? definition.color : AttackColor.Yellow;
         /// <summary>Director가 Begin 전에 한 번 — 사본(snapshot)에만 적용해 원본 에셋은 그대로</summary>
         public void ApplyDifficulty(float interval, float speed) { intervalScale = interval; speedScale = speed; }
@@ -60,6 +61,7 @@ namespace Game2Week.Battle.Patterns.Trajectories
                 var block=new MaterialPropertyBlock();block.SetColor("_BaseColor",AttackTint(snapshot.color));
                 foreach(var renderer in bullet.GetComponentsInChildren<Renderer>())renderer.SetPropertyBlock(block);
                 bullet.Launch(World(shot.Origin),context.Arena.transform.TransformDirection(shot.Velocity),trajectory);
+                context.Feedback.RaiseBulletFired(snapshot.color,bullet.transform.position);
                 expiry[bullet]=shot.Time+snapshot.lifetime;
                 float age=timeline.Time-shot.Time;
                 if(age>0&&bullet.Tick(age,context)){bullet.Deactivate();context.ReportHit();}
@@ -71,6 +73,8 @@ namespace Game2Week.Battle.Patterns.Trajectories
         Bullet GetBullet(){foreach(var b in bullets)if(!b.Active)return b;var result=Instantiate(bulletPrefab,transform);bullets.Add(result);return result;}
         void DrawWarnings()
         {
+            if(timeline.WarningActive&&!warningAnnounced)context.Feedback.RaiseWarningStarted(snapshot.color,World(timeline.WarningOrigin));
+            warningAnnounced=timeline.WarningActive;
             shots.Clear();timeline.WarningShots(shots);
             while(warnings.Count<shots.Count)
             {
@@ -99,7 +103,7 @@ namespace Game2Week.Battle.Patterns.Trajectories
         {
             foreach(var b in bullets)if(b)b.Deactivate();
             foreach(var line in warnings)if(line)line.enabled=false;
-            context=null;timeline=null;shots.Clear();
+            context=null;timeline=null;shots.Clear();warningAnnounced=false;
             if(snapshot)Destroy(snapshot);snapshot=null;
         }
         void OnDestroy(){if(snapshot)Destroy(snapshot);}

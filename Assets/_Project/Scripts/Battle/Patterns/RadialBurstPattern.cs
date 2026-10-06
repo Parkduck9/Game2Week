@@ -98,6 +98,7 @@ namespace Game2Week.Battle.Patterns
             var prefab = bulletPrefabs[burstCount % bulletPrefabs.Length];
             foreach (var dir in Directions(bulletsPerBurst, burstCount * rotatePerBurst))
                 Get(prefab).Launch(origin + dir * spawnOffset, dir * bulletSpeed);
+            context.Feedback.RaiseBulletFired(AttackColor.Yellow, origin);
             burstCount++;
         }
 

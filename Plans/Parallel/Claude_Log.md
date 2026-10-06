@@ -1,6 +1,6 @@
 # Claude 작업 문서 — 할 일 · 한 일
 
-최종 갱신: 2026-10-06 · 지금 할 일: **5단계 → 6단계를 순서대로 한 번에** (같은 시간에 Codex는 7·8단계)
+최종 갱신: 2026-10-06 · 상태: **5·6단계 완료** (브랜치 `phase5-claude` 커밋) → Codex 7·8단계 완료 후 합치기 대기
 
 > 사용자 결정 (2026-10-06): **5·6단계 = Claude, 7·8단계 = Codex.** 동시 진행은 5 ↔ 7, 그다음 6 ↔ 8.
 > Claude는 "1. 할 일"을 위에서부터 진행하고, 단계마다 "3. 한 일"과 "작업량"을 추가한다.
@@ -64,9 +64,41 @@
 - 두 브랜치를 main에 합친다 (먼저 끝난 쪽부터, 나중 쪽은 main을 받아 전체 테스트) → 두 문서 내용을 TODO·WORKLOG·설계 MD·Work_Effort에 반영.
 
 ## 2. 요청 (Claude → Codex/사용자)
-- 사용자 결정 필요: 회사·게임 이름 (8단계, Codex는 자리표시자로 진행), 소리 출처 (6단계 클립).
+- 사용자 결정 필요: 회사·게임 이름 (8단계, Codex는 자리표시자로 진행), 소리 출처 (6단계 클립 — 연결 지점은 완료).
+- **사용자 확인 필요 (5단계 측정)**: 직진하면 2~4초 안에 적에게 닿아 패턴을 거의 못 보고 턴이 끝난다 — 접근 난이도를 올릴지 (`Plans/Balance_Report.html`).
+- 선택: AudioMixer를 에디터에서 만들어 `Data/Audio/AudioRouting`에 연결 (6단계 한 일 참고).
 
 ## 3. 한 일
+
+### 2026-10-06 — 6단계 완료 (브랜치 `phase5-claude`)
+
+**한 일**
+- **발사·예고 알림**: YellowTraining·Graph·Radial 패턴이 `BulletFired`·`WarningStarted`를 Raise. YellowTraining 예고선도 공격 색으로 (4단계에서 남긴 항목 해결).
+- **이펙트 모듈** (`Scripts/Battle/View/Fx/`, `BattleFxRig` 프리팹 아래 — Battle 씬 수정 없음): `IBattleFxModule`, `FxPool`(재사용).
+  - `ActionFxModule`: 회피 잔광, 점프·착지 먼지, 쳐내기 불꽃, 정지 자세 완성 빨강 고리, 색 통과(빨강은 멈춘 알갱이 / 파랑은 빠르게 흩어짐), 피격 터짐, 발사 연기, 예고 고리.
+  - 일시정지에서 멈추고, 탄막 턴이 끝나면 지운다.
+- **적 말풍선** `EnemySpeechBubble`: `EnemySpoke` → 적 머리 위 월드 글자(카메라를 향함), 3초 또는 턴 종료 시 숨김.
+- **피격 파티클 정리**: 크기 ×0.5, 적 중심에서 카메라 쪽으로 0.35m (클로즈업에서 화면을 덮던 문제).
+- **소리 연결 지점** (클립은 비어 있음, 소리 출처는 사용자 결정):
+  - `AudioRouting`: 믹서가 있으면 BGM·SFX 그룹 + 음량을 dB로, 없으면 소스 음량 = 설정값.
+  - `BattleAudio`: 기존 5종 + 회피·점프·착지·쳐내기·자세·빨강/파랑 통과·발사·예고, `BattleFeedback` 구독.
+  - `UiSoundSet` + `MenuNavigator`: 이동·확인·거부·취소. 씬 4곳·ConfirmPopup의 메뉴 전부 연결.
+  - `SceneBgm`: 씬마다, 시작할 때 서서히 커지고 전환할 때 줄어듦, 설정 음량을 계속 따름.
+- **AudioListener** 씬마다 1개 (PlayMode 경고 해결).
+- **씬 전환 페이드**: `SceneLoader`가 검은 화면 0.25초 → 로드 → 0.25초. 실제 시간 기준이라 일시정지 중에도 동작하고, `Leaving` 알림에 맞춰 배경음도 같이 줄어든다.
+
+**결정·제한**
+- Unity는 스크립트로 AudioMixer 파일을 만들 수 없다. 그래서 연결 지점(`AudioRouting`)만 만들었다.
+  - 사용자 할 일 (선택): Create ▸ Audio Mixer → BGM·SFX 그룹 → 그룹 Volume을 "BgmVolume"·"SfxVolume"으로 노출 → `Data/Audio/AudioRouting`에 연결. 연결하지 않아도 음량 설정은 동작한다.
+- 이펙트는 임시 사각 알갱이·선 고리다. 리소스가 생기면 `ActionFxModule` 생성부만 프리팹으로 바꾼다.
+- 작업 중 함정: 연결 스크립트에서 씬을 연 뒤 앞에서 잡아 둔 에셋 참조가 끊겨 값이 조용히 비었다. 씬마다 에셋을 다시 읽어 해결했고, EditMode 테스트가 씬 5개의 리스너·배경음·메뉴 효과음 연결을 검사한다.
+
+**검증**
+- 작업 폴더에서 EditMode 161/161, PlayMode 27 통과 + 1 건너뜀(`MeasureAllStages`는 `-runBalance` 전용) (`Logs/phase6_*.xml`).
+- 추가된 테스트:
+  - `Stage6Tests`: dB 변환, 믹서 없을 때 음량, `FxPool` 재사용, 씬 5개 연결.
+  - `Stage6RuntimeTests`: 말풍선 표시·숨김, 예고·발사·회피 이펙트와 효과음 알림, 턴 종료 정리, 메인 ↔ 선택 페이드.
+- 캡처 `Logs/scene_stage6_battle_fx.png`: 말풍선 "간다!", 회피 잔광.
 
 ### 2026-10-06 — 5단계 완료 (브랜치 `phase5-claude`)
 
@@ -167,3 +199,5 @@
 | 2026-10-06 | Claude | 병렬 준비 | 6-0 연결 지점(BattleFeedback·EnemySpoke·BattleFxRig 씬 연결) + 테스트, 5~8단계 지시 작성 ✓ | 5 |
 | 2026-10-06 | Claude | 패턴 누적 | PatternDirector(선택·겹침·색 규칙·예산)·난이도 프로필·만남 데이터, 패턴 3종 난이도 배율, 8개 맵 1→8종 연결, 파랑 사인파 | 14 |
 | 2026-10-06 | Claude | 패턴 누적 | 색 처음 등장 안내, 자동 플레이 측정 봇 + 리포트 HTML, Ctrl 고착 버그 수정, 테스트 9개 | 10 |
+| 2026-10-06 | Claude | 전투 연출 | 발사·예고 알림, 이펙트 모듈 8종 + 풀, 적 말풍선, 피격 파티클 정리 | 10 |
+| 2026-10-06 | Claude | 전투 연출 | 소리 연결 지점(AudioRouting·BattleAudio 13종·메뉴 효과음·씬 배경음), 리스너 정리, 씬 전환 페이드, 테스트 6개 | 10 |
