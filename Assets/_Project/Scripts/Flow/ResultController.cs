@@ -52,8 +52,7 @@ namespace Game2Week.Flow
             switch (index)
             {
                 case RetryIndex:
-                    session.BeginBattle(session.CurrentEnemy);
-                    SceneLoader.Load(SceneNames.Battle);
+                    if (session.BeginStage(Mathf.Max(0, session.StageIndex))) SceneLoader.Load(SceneNames.Battle);
                     break;
                 case MainMenuIndex:
                     SceneLoader.Load(SceneNames.MainMenu);

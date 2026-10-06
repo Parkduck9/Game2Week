@@ -27,6 +27,19 @@ namespace Game2Week.Battle
             return applied;
         }
 
+        /// <summary>다음 공격에 곱해질 배율 (공격 보석 등). 공격하면 1로 돌아간다.</summary>
+        public float NextAttackMultiplier { get; private set; } = 1f;
+
+        /// <summary>더 큰 배율만 남긴다 (중첩되지 않음).</summary>
+        public void GrantAttackBoost(float multiplier) => NextAttackMultiplier = Math.Max(NextAttackMultiplier, multiplier);
+
+        public float ConsumeAttackMultiplier()
+        {
+            var value = NextAttackMultiplier;
+            NextAttackMultiplier = 1f;
+            return value;
+        }
+
         /// <summary>실제로 회복된 HP를 돌려준다.</summary>
         public int Heal(int amount)
         {

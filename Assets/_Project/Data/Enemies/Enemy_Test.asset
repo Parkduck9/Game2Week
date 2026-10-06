@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Enemy_Test
   m_EditorClassIdentifier: Game2Week::Game2Week.Data.EnemyData
   displayName: "\uD14C\uC2A4\uD2B8 \uC801"
-  viewPrefab: {fileID: 0}
+  viewPrefab: {fileID: 5092751627827279224, guid: 36798dc51e7f08d43a07b63b022559e5, type: 3}
   maxHp: 30
   attack: 4
   defense: 0

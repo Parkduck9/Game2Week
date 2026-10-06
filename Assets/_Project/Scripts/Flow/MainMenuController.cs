@@ -28,8 +28,7 @@ namespace Game2Week.Flow
             switch (index)
             {
                 case StartIndex:
-                    session.BeginBattle();
-                    SceneLoader.Load(SceneNames.Battle);
+                    if (session.BeginStage(0)) SceneLoader.Load(SceneNames.Battle);
                     break;
                 case QuitIndex:
                     GameQuit.Quit();

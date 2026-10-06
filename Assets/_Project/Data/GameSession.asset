@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game2Week::Game2Week.Core.GameSession
   player: {fileID: 11400000, guid: d36f351fb07b0434390aebc6bb93dfc0, type: 2}
   defaultEnemy: {fileID: 11400000, guid: 2b8845b0715992a47872b52fb6f065a8, type: 2}
+  catalog: {fileID: 11400000, guid: d8c7acc5e6eb4e543a63b990558c97f6, type: 2}

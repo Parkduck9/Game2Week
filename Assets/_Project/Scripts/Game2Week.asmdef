@@ -3,7 +3,8 @@
     "rootNamespace": "Game2Week",
     "references": [
         "Unity.InputSystem",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Unity.Cinemachine"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

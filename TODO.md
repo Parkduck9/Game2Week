@@ -20,7 +20,8 @@
 - [x] M1 데이터 & 로더 — StageDefinition, StageJson(체크섬), StageValidator, StageGeometry, StageRepository, ContentCatalog + 테스트, 첫 스테이지 `stage_001`
 - [x] M2 맵툴 1차 — `Tools ▸ Stage Editor`: 목록(추가·복제·삭제·순서), 크기, 격자 배치(시작점·적·보석), 드래그 이동, 속성, 실시간 검증(오류 칸 빨간 테두리), 저장(오류 있으면 막음), 되돌리기 + 로직 테스트
 - [ ] 맵툴 사용자 확인 — 직접 써 보고 불편한 점 피드백
-- [ ] M3 게임 연결 — BattleArena.Build(가변 크기), StageSpawner, 보석 동작, GameSession 스테이지 번호
+- [x] M3 게임 연결 — BattleArena.Build(가변 크기), StageSpawner(주인공·적·보석), GemField(턴마다 확률 등장)·GemRewards, GameSession 스테이지 번호(MainMenu→1번, 재도전→같은 스테이지)
+- [ ] 보석 먹기(접촉 판정)·보상 적용은 09 탄막 턴에서 연결
 - [ ] M4 스테이지 진행 — 결과 화면 "다음 스테이지", 마지막 스테이지 처리
 - [ ] M5 맵툴 2차 — 3D 미리보기, 바로 플레이, 일괄 배치
 
@@ -31,6 +32,8 @@
 - [x] Pretendard 폰트 다운로드 (허락 받음, OFL 1.1 라이선스 파일 포함)
 - [x] 템플릿 `Assets/Scenes/SampleScene` + `Settings/SampleSceneProfile` 삭제, 빌드 목록 교체
 - [ ] 임시 `Flow/BattleFlowStub` (결과를 골라 끝내는 대역) — 06단계에서 BattleController로 교체 후 삭제, PlayMode 테스트도 함께 수정
+- [ ] 임시 `Flow/BattleStageBootstrap` — 06단계 BattleController로 합치기
+- [ ] 보석 보상 수치 임시 (`GemRewardSettings`: 회복 5, 다음 공격 ×1.5, 살려주기 +1) — 데미지 공식과 함께 확정
 - [ ] 타이틀 "타이틀 (가제)" — IP 기획 때 교체
 - [ ] 씬 전환 연출(페이드) 없음 — 필요하면 SceneLoader에 추가
 - [x] 템플릿 `InputSystem_Actions` → `_Project/Input/GameControls`로 교체
@@ -93,13 +96,14 @@
 - [x] 빌드 목록: MainMenu, Battle, Result (템플릿 SampleScene 삭제)
 
 ## 05. 3D 전투 무대 & 연출
-- [ ] 전투 아레나 — 임시 바닥/배경 지오메트리, 조명, 포그/스카이박스
-- [ ] EnemyView — 임시 모델(Primitive 조합) + Animator 훅 (Idle / Hit / Attack / Death / Spare)
-- [ ] 카메라 샷 — 기본 / 공격 클로즈업 / 적 턴, Cinemachine 블렌드
-- [ ] BattleCameraDirector — 전투 상태 이벤트 → 카메라 샷 전환
-- [ ] 임시 이펙트 — 피격·공격 파티클, 카메라 셰이크
+- [x] 전투 경기장 `BattleArena` — 스테이지 크기대로 바닥·벽·격자선, 조명 (Battle 씬)
+- [x] EnemyView — 임시 로우폴리 적(보라색 덩어리+눈+뿔, `EnemyView_TestBlob`) + 코드 애니메이션 (대기 출렁임 / 피격 흰색 번쩍+흔들림 / 공격 점프 / 처치 축소 / 살려줌 떠오름)
+- [x] 카메라 샷 4종 (Intro / Overview 탄막 턴 / EnemyFocus 메뉴 / AttackCloseUp) — Cinemachine 0.6초 블렌드, 경기장 크기에 맞춰 거리 계산
+- [x] 임시 이펙트 `BattleEffects` — 피격·보석 파티클, 카메라 흔들림(진폭 0.06m)
+- [ ] BattleCameraDirector를 전투 상태 이벤트에 연결 (06 BattleController에서)
+- [ ] 피격 파티클 위치를 적 표면/카메라 쪽으로 (07 FIGHT 연출 때)
 - [x] 전투 박스 배치 방식 → **3D 경기장** (사용자 결정 B)
-- [ ] 경기장은 스테이지 크기로 생성 (맵툴 M3와 함께), 카메라 거리도 크기에 맞춤
+- [x] 경기장은 스테이지 크기로 생성, 카메라 거리도 크기에 맞춤
 
 ## 06. 전투 UI 기본
 - [ ] BattleBox — 크기 트윈 변경, 대사창/탄막 영역 겸용

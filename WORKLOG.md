@@ -265,6 +265,32 @@
 - 배치모드 실행이 10분 넘게 걸리는 경우 있음 (Unity 클라우드 요청 타임아웃).
 - 에디터를 띄워 두면 배치모드(테스트·셋업 스크립트) 불가 → 사용자가 Unity를 닫아야 다음 자동 작업 가능.
 
+---
+
+## 2026-10-06 — 커밋 + M3 게임 연결 + 05 3D 무대
+
+### 사용자
+- 맵툴 확인 완료("잘 되네") → 커밋 `34dc202` (첫 시도는 `-m` 여러 줄이 조용히 실패 → 메시지 파일 `-F`로 성공).
+
+### 한 일
+- 로직: `GemField`(턴마다 위치별 확률, 한 턴 최대 N개, 먹은 건 다시 안 나옴), `GemRewards` + `GemRewardSettings`(임시 수치),
+  `PlayerCombatant` 다음 공격 배율(중첩 X, 한 번 쓰면 초기화).
+- `GameSession`: 스테이지 번호·현재 스테이지·카탈로그로 적 찾기. MainMenu 시작 → 1번 스테이지, 재도전 → 같은 스테이지.
+- View: `LowPolyMesh`, `BattleArena`(크기 가변 바닥·벽·격자선, 경계 제한), `StageSpawner`, `GemView`(돌기·출렁임·팝),
+  `EnemyView`(코드 애니메이션 + 흰색 번쩍), `BattleCameraDirector`(샷 4종, 경기장 크기 맞춤), `BattleEffects`.
+- 에셋: 머티리얼 11개, 로우폴리 메시 5개, 프리팹(EnemyView_TestBlob, Gem, Player_Heroine, FX 2개), Enemy_Test.viewPrefab 연결.
+- Battle 씬: 경기장·스포너·Cinemachine 카메라·이펙트·`BattleStageBootstrap`, 임시 결과 메뉴는 왼쪽 아래로.
+- 테스트: EditMode 78, PlayMode 2(씬 흐름 + 스테이지 빌드·카메라 샷 캡처) 통과. 캡처 공용화 `SceneCapture`.
+
+### 문제 → 해결
+- Gem 프리팹 참조가 씬에 비어 있었음 — 프리팹 저장 후 다른 에셋 저장으로 재임포트되며 참조가 끊김 → 경로로 다시 읽어 연결.
+- 공격 클로즈업 피격 화면이 바닥 밑으로 — Impulse 기본 세기(~1m) → 진폭 0.06m로 조절.
+
+### Claude가 기본값으로 정한 것
+- 임시 적 디자인(보라 로우폴리 덩어리 + 큰 눈 + 뿔), 보석 색(회복 초록 / 공격 주황 / 살림 분홍), 경기장 색(어두운 남색 바닥 + 밝은 벽).
+- 카메라: 탄막 턴 55° 내려다보기·FOV 40, 블렌드 0.6초.
+
 ### 다음에 할 일
-- 사용자 맵툴 확인 (Unity 에디터에 Stage Editor 열어 둠) → 피드백 반영.
-- 그다음 M3 게임 연결: BattleArena.Build(스테이지 크기), StageSpawner(주인공·적·보석), 보석 동작, GameSession 스테이지 번호 — 05단계와 함께.
+- 06 전투 UI + BattleController: 상태 머신에 실제 상태 등록(Intro → 탄막 턴 → 메뉴 2종), 하단 대사창, 메뉴 2종, 상태줄,
+  카메라·EnemyView를 BattleEvents에 연결, BattleFlowStub·BattleStageBootstrap 정리.
+- (09 일부 선행 가능) 주인공 이동·적 접촉·보석 먹기.
