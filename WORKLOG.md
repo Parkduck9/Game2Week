@@ -703,3 +703,19 @@
 ### 다음에 할 일
 - 사용자: 이번 문서 변경 커밋 여부 결정 (커밋하면 두 브랜치도 main으로 맞춤) → Codex에 7절 지시문 전달.
 - Claude: `Game2Week-claude`에서 4단계 시작.
+---
+
+## 2026-10-06 — Claude: 4단계 빨강·파랑 판정 (병렬) → main 합침
+
+### 한 일
+- `Game2Week-claude`(브랜치 `phase4-color-rules`)에서 구현·검증 후 커밋 `05f836f`, 사용자 요청으로 main에 합침 `58d2e54` (no-ff). Codex 3단계는 `Game2Week-codex`에서 진행 중.
+- Ctrl 정지 자세(`Brace` 입력, PlayerMotorModel `Bracing`/`BraceReady`), 실제 수평 속도 `PlayerMover.GroundSpeed`, `ColorRules` + `PlayerHitRule` 주입. 빨강 = 자세 + 정지, 파랑 = 실제 이동 ≥ 1.2m/s, 노랑은 색 규칙 통과 없음.
+- 색 표시(탄 색·회전 차이, 자세 원판·웅크림, HUD, 화면 밖 표시 색), 시험 패턴 `ColorTest/Pattern_RedTest·BlueTest` (맵 미연결).
+- 상세: `Plans/Parallel/Claude_Log.md`, 설계 MD 1절 "실제 적용된 4단계". 작업량 16시간 → `Work_Effort.md`.
+
+### 검증
+- 브랜치: EditMode 135/135, PlayMode 19/19. 합친 main에서 전체 재실행 (`Logs/merge4_*.xml`).
+
+### 다음에 할 일
+- Codex 3단계 완료 → Codex 브랜치에 main 받기(merge) → 전체 테스트 → main 합침 → Codex_Log 내용을 TODO·WORKLOG·설계 MD·Work_Effort에 반영.
+- 그다음 5단계 N-0 연결 지점(회피·쳐내기·색 통과 이벤트, 색 조합 검사 함수)을 main에 만들고 분할 진행.
