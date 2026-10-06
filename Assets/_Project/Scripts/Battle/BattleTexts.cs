@@ -13,7 +13,10 @@ namespace Game2Week.Battle
         public const string Spare = "살려주기";
         public const string SpareReadyColor = "#FFD84A";
 
-        public const string TurnHint = "WASD 이동 · Shift 회피 · Space 점프 · 우클릭 쳐내기 · 휠 클릭 록온";
+        public const string TurnHint = "WASD 이동 · Shift 회피 · Space 점프 · 우클릭 쳐내기 · Ctrl 정지 자세 · 휠 클릭 록온";
+        public const string BraceSettling = "자세 잡는 중";
+        public const string BraceReady = "정지 자세";
+        public const string BraceIdle = "Ctrl 정지 자세";
         public const string MissedEnemy = "* 적에게 닿지 못했다. 숨을 고르자.";
         public const string SkipTurn = "* 가만히 숨을 골랐다.";
         public const string NoItems = "* 가진 아이템이 없다.";
@@ -29,6 +32,14 @@ namespace Game2Week.Battle
             Patterns.AttackColor.Red => "빨강",
             Patterns.AttackColor.Blue => "파랑",
             _ => "노랑",
+        };
+
+        /// <summary>화면 표시용 색 (TMP 리치 텍스트·HUD)</summary>
+        public static UnityEngine.Color AttackColorTint(Patterns.AttackColor color) => color switch
+        {
+            Patterns.AttackColor.Red => new UnityEngine.Color(1f, 0.35f, 0.35f),
+            Patterns.AttackColor.Blue => new UnityEngine.Color(0.4f, 0.68f, 1f),
+            _ => new UnityEngine.Color(1f, 0.85f, 0.3f),
         };
 
         public static string FightResult(string enemyName, int damage) =>

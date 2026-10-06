@@ -82,6 +82,7 @@ namespace Game2Week.Battle.View
                 var dir = edge-Vector2.one*.5f;
                 string arrow = Mathf.Abs(dir.x)>Mathf.Abs(dir.y) ? (dir.x>0f ? "▶" : "◀") : (dir.y>0f ? "▲" : "▼");
                 indicator.text = arrow + " " + BattleTexts.AttackColorName(threats[i].Color);
+                indicator.color = BattleTexts.AttackColorTint(threats[i].Color);
                 VisibleIndicators++;
             }
         }
