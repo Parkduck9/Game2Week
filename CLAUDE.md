@@ -23,6 +23,12 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 | `Tools/serve.ps1` | 미리보기 로컬 서버 (`.claude/launch.json`의 `preview`, 포트 8790). `POST /save?name=x.glb` → `Exports/` 저장 | Claude |
 | `Exports/` | 미리보기에서 내보낸 GLB 원본 → `Assets/_Project/Art/Characters/...`로 복사해서 사용 | Claude |
 
+## Git
+- PATH에 없음 → `$env:LOCALAPPDATA\GitHubDesktop\app-3.6.6\resources\app\git\cmd\git.exe` 사용 (GitHub Desktop 업데이트 시 `app-*` 버전 폴더 확인).
+- 커밋은 사용자가 요청할 때만. 커밋 전 컴파일·테스트 통과 확인, `git diff --cached --name-only`로 Library/Exports/Logs/csproj가 없는지 확인.
+- 커밋 작성자는 저장소 git 설정을 따름 (Duck9). push는 하지 않음 (요청 시에만).
+- `.gitignore`: Unity 생성 폴더, IDE 파일, `/Exports/`(GLB 중간본), `.claude/settings.local.json` 제외.
+
 ## Unity 배치모드 (CLI)
 - 에디터: `C:\Program Files\Unity\Hub\Editor\6000.3.25f1\Editor\Unity.exe`
 - **사용자가 에디터로 프로젝트를 열어 둔 상태에서는 배치모드 실행 불가** (프로젝트 잠금) → 먼저 확인.

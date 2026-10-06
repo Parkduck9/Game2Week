@@ -26,7 +26,7 @@
 ## 🔧 바꿔야 할 것 (알려진 문제 · 정리 대상 · 확인 필요)
 > 발견하면 여기에 추가하고, 해결하면 체크 + WORKLOG에 기록한다.
 - [ ] `Tasks.md`는 여전히 "2D" — 사용자가 고칠지 결정 (Claude는 수정 금지, CLAUDE.md "달라진 점"이 우선)
-- [ ] git이 PATH에 없음 → 커밋 불가. Git for Windows 설치 또는 사용자가 커밋
+- [x] git — PATH엔 없지만 GitHub Desktop 내장 git 사용 (CLAUDE.md 참고). 첫 커밋 `dce8022`
 - [x] Pretendard 폰트 다운로드 (허락 받음, OFL 1.1 라이선스 파일 포함)
 - [x] 템플릿 `Assets/Scenes/SampleScene` + `Settings/SampleSceneProfile` 삭제, 빌드 목록 교체
 - [ ] 임시 `Flow/BattleFlowStub` (결과를 골라 끝내는 대역) — 06단계에서 BattleController로 교체 후 삭제, PlayMode 테스트도 함께 수정
@@ -51,7 +51,7 @@
 
 ## 01. 프로젝트 셋업
 - [x] Unity **6000.3.25f1** URP 프로젝트를 CLI로 현재 폴더에 생성 (Universal 3D 템플릿) + Unity용 .gitignore
-- [ ] 첫 커밋 — git이 PATH에 없음 (사용자가 커밋하거나 Git 설치 필요)
+- [x] 첫 커밋 `dce8022` (.gitignore 정리 후)
 - [x] 폴더 구조 생성 (`Assets/_Project/...`, CLAUDE.md 참고)
 - [x] Input System 1.20 설치 (템플릿 포함, activeInputHandler = 새 Input System 전용)
 - [x] Input Actions `_Project/Input/GameControls` — UI(Navigate/Submit/Cancel), Player(Move) 맵, 키보드+게임패드, 프로젝트 전역 액션으로 등록

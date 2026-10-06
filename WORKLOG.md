@@ -224,6 +224,23 @@
 - TODO.md: "맵툴 · 스테이지" 섹션 추가, 05/06/09 항목을 새 전투 방식에 맞게 수정.
 - 05 구현은 보류 — 경기장 크기·배치가 스테이지 데이터에서 오므로 맵툴 데이터 구조를 먼저 확정하는 게 맞음.
 
+---
+
+## 2026-10-06 — 맵툴 결정 + M1 시작 + 첫 커밋
+
+### 결정 (사용자 승인)
+- 보석 = 주우면 보상, **자주 나오지 않게**. 맵툴 = Unity 에디터 창. 격자 배치. 스테이지 1→n 순서. 1차 범위 확정.
+
+### Claude가 기본값으로 정한 것
+- "자주 나오지 않게" = 보석 위치마다 등장 확률(기본 25%) + 한 턴 최대 1개(`gemRules.maxPerTurn`) + 먹으면 그 전투에서 다시 안 나옴.
+- 보석 종류: heal / attack / spare (수치는 데미지 공식과 함께 확정).
+
+### 한 일
+- 계획 HTML을 확정본으로 갱신.
+- M1 코드 (테스트는 아직): `Scripts/Stages/` StageDefinition(+GridPoint, GemTypes), StageIndex, StageJson(SHA-256 체크섬), StageGeometry, StageValidator, StageRepository; `Data/ContentCatalog`.
+- 실수: `init` 접근자 사용 → Unity 컴파일 에러 → `set`으로 수정, CLAUDE.md에 규칙 추가.
+- `.gitignore` 정리 (Exports/, .claude/settings.local.json, OS 임시 파일 등), GitHub Desktop 내장 git으로 **첫 커밋 `dce8022`** (274파일, EditMode 25개 통과 상태).
+
 ### 다음에 할 일
-- 맵툴 계획 Q1~Q5 답변 받기 (특히 보석의 역할, 툴을 Unity 에디터로 할지 웹으로 할지).
-- 답변 후 계획 확정 → M1 데이터 & 로더부터.
+- M1 마무리: Stages 테스트 (JSON 왕복, 체크섬 변조 감지, 검증 규칙별, 좌표 변환, 저장소), ContentCatalog 에셋.
+- M2 맵툴 1차 (Unity 에디터 창 `Tools ▸ Stage Editor`).
