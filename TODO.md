@@ -29,8 +29,8 @@
 - [x] 5-0 연결 지점: `ColorCombinationRules`(빨강·파랑 겹침 금지·전환 유예), `EncounterMemory`(전투 동안 패턴 기록) — EditMode 152 / PlayMode 20
 - [x] 각자 할 일 문서: Codex → [Codex_Log.md](Plans/Parallel/Codex_Log.md) · Claude → [Claude_Log.md](Plans/Parallel/Claude_Log.md) (+HTML)
 - [x] 6-0 연결 지점: `BattleFeedback`(월드 사건 알림)·`BattleEvents.EnemySpoke`·`BattleFxRig` 씬 연결 — EditMode 152 / PlayMode 21
-- [ ] (Codex, 브랜치 `phase5-director`) 5~8단계 한 번에: 패턴 누적·8개 맵 → 전투 이펙트·말풍선 → 맵툴 M5 → 스토어 이미지·문구 ([Codex_Log.md](Plans/Parallel/Codex_Log.md))
-- [ ] (Claude, 브랜치 `phase5-measure`) 5~8단계 한 번에: 측정 도구·색 안내 → 소리·페이드 → 주인공 v2·리깅 → 출시 준비 ([Claude_Log.md](Plans/Parallel/Claude_Log.md))
+- [ ] (Claude, 브랜치 `phase5-claude`) **5·6단계**: 패턴 누적·8개 맵·측정·색 안내 → 전투 이펙트·말풍선·소리·페이드 ([Claude_Log.md](Plans/Parallel/Claude_Log.md))
+- [ ] (Codex, 브랜치 `phase7-codex`) **7·8단계**: 주인공 v2·리깅·애니메이션·맵툴 M5 → 출시 준비(ProductInfo·정적 폰트·스토어 이미지·문구·빌드) ([Codex_Log.md](Plans/Parallel/Codex_Log.md))
 - [ ] 두 브랜치 main에 합치기 → 전체 테스트 → 문서 반영
 > 아래 A1~A6는 v1 제작 순서 참고. 최신 제작 순서는 설계 MD의 0절을 우선하며 점프는 사용자 요청으로 포함한다.
 - [x] A1 공통 카메라 기준 이동·회피 기반 구현/검증 (최신 허리 카메라 적용)

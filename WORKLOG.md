@@ -758,3 +758,18 @@
 - 사용자: Codex에게 "`Plans/Parallel/Codex_Log.md`의 할 일을 5단계부터 8단계까지 순서대로" 전달.
 - Claude: `Game2Week-claude`에서 5단계부터.
 - 둘 다 끝나면 main에 합치기 → 전체 테스트 → 문서 반영.
+---
+
+## 2026-10-06 — Claude: 5~8단계 배분 변경 (단계 단위)
+
+### 사용자 결정
+- 단계 하나를 둘이 반씩 나누지 않고 **단계 단위로 나눔: Claude = 5·6단계, Codex = 7·8단계.** 동시 진행 5↔7 → 6↔8, 끝나면 합침.
+
+### 한 일
+- `Codex_Log.md` 다시 작성: 7단계(주인공 v2·리깅·애니메이션 + 맵툴 M5) → 8단계(ProductInfo·정적 폰트 아틀라스·스토어 이미지·설명 문구·빌드/MSIX 재검증). 이전 판의 5·6단계 지시는 취소로 명시. 씬·스테이지 JSON 수정 금지, 담당 파일 외 전부 금지.
+- `Claude_Log.md` 다시 작성: 5단계(색 안내·DifficultyProfile·PatternEncounterData·PatternDirector·8개 맵·측정 봇) → 6단계(발사·예고 알림·말풍선·이펙트·믹서·BGM·메뉴 효과음·리스너·페이드).
+- 브랜치 이름 변경: Codex `phase7-codex`, Claude `phase5-claude`.
+
+### 다음에 할 일
+- 사용자: Codex에 바뀐 지시 전달 (이미 5단계를 시작했다면 멈추고 7단계부터).
+- Claude: `Game2Week-claude`에서 5단계 계속 (색 안내 진행 중).
