@@ -10,8 +10,8 @@ namespace Game2Week.Battle.View
         [SerializeField] BattleCameraDirector cameraDirector;
         [Tooltip("피격 파티클 크기 배율 — 공격 클로즈업에서 화면을 덮지 않게")]
         [SerializeField, Range(0.1f, 1f)] float hitSizeScale = 0.5f;
-        [Tooltip("피격 파티클을 적 중심에서 카메라 쪽(적 표면)으로 당기는 거리 (m)")]
-        [SerializeField, Min(0f)] float hitTowardCamera = 0.35f;
+        [Tooltip("피격 파티클을 카메라 쪽으로 더 당기는 거리 (m). 적 피격은 BattlePresentation이 이미 0.45m 당기므로 기본 0")]
+        [SerializeField, Min(0f)] float hitTowardCamera;
 
         public void PlayHit(Vector3 position, float strength = 1f)
         {

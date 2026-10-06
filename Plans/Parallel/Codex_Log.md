@@ -57,9 +57,46 @@
 
 ## 2. 요청 (Codex → Claude/사용자)
 
-- (없음 — 생기면 여기에 적는다)
+- 7단계 피격 사건 연결: `BattleWorld.Init`에서 `player.Init(...)` 다음에 `player.GetComponent<PlayerAnimationDriver>()?.Bind(player, feedback)` 연결이 필요하다. BattleWorld는 Claude 담당이므로 수정하지 않았다. 모터 상태와 쳐내기 좌우는 PlayerActionView로 연결되어 실제 게임에서 동작하며, 피격은 공개 Bind 주입 후 동작하는 것을 테스트한다. 통합 시 이 연결을 추가한다.
+- 쓰러짐 클립은 `PlayFall()` 진입 API를 제공한다. 전투 패배 표현의 호출 지점은 담당 밖 BattlePresentation이므로 통합 시 연결이 필요하다. 기존 패배 흐름은 유지한다.
 
 ## 3. 한 일
+
+### 2026-10-06 — 7단계 주인공 v2·맵툴 M5
+
+**한 일**
+- v1 보존, 공통 코드에서 v2 제작: 얼굴 면에 눈·볼 밀착, 손 크기/두께와 머리카락 결 보강. 노란 양갈래·노란 눈·하늘 후드티·청바지 스타일 유지.
+- three.js SkinnedMesh·골격 19개(골반/척추/머리·팔/손·다리/발·양갈래), 대기/달리기/회피/점프/착지/좌우 쳐내기/정지 자세/피격/쓰러짐 10클립 포함 GLB. Exports와 Art/Characters에 저장, v2 전용 HTML 미리보기와 재현용 제작/내보내기 스크립트.
+- Unity Animator Controller·Player_Heroine 외형 교체, PlayerAnimationMap/Driver. 모터 실제 이동·회피·점프·쳐내기·정지 자세로 전환. Animator 사용 시 임시 손 큐/원판/모델 강제 변형 비활성, 기존 모델은 기존 표현 유지. 판정 높이·Bullet·씬 미변경.
+- Stage Editor: 3D 배치 미리보기/시점 회전, 보석 영역 드래그 배치·삭제, 좌우/상하 대칭 복사, 한 번 되돌리기·중복/적/시작점 보호. 바로 플레이는 검증·저장 및 씬 저장 확인 후 선택 맵을 재생하고 종료 시 원래 씬 구성을 복원.
+- 기본안: 리깅은 현재 로우폴리 파츠를 스킨 메시로 바꾸는 방식. 새 모델링 도구나 에셋 구매 없이 원본 코드를 유지한다. 미리보기 의존성 three.js 0.170.0과 MIT 라이선스를 Preview/vendor에 고정 저장.
+
+**검증/남은 연결**
+- 전체 EditMode 156/156: Logs/phase7_editmode.xml. 전체 PlayMode 22/22: Logs/phase7_playmode.xml. 실제 스킨·회피·점프·자세/피격 매핑, 기존 입력/쳐내기/색 통과/8개 맵/결말 회귀.
+- 최종 편집기 컴파일·v2 정면/측면/후면·맵 3D 렌더 정상 종료: Logs/phase7_preview.log. 실제 전투 캡처 Logs/scene_heroine_v2_*.png와 모델 정면 확인.
+- 피격 Bind와 쓰러짐 호출은 담당 밖 조립 코드가 필요해 2절에 남겼다. 피격 테스트는 공개 Bind로 실제 BattleFeedback을 주입하며, 쓰러짐은 공개 API를 호출해 검사한다. 이 두 항목의 자동 연결 완료로 기록하지 않는다.
+- 맵툴 바로 플레이의 저장 대화상자·원래 씬 복귀 직접 조작은 사용자 확인 대상. 스테이지 JSON/씬을 작업 과정에서 수정하지 않았다.
+- 최종 외형 보정: 얼굴 장식 삼각형을 세분화해 면 겹침을 없앴고 정지 자세의 손을 가슴 앞으로 모았다. 실제 팔 골격 회전을 추가 검사한 PlayMode 22/22 통과 (Logs/phase8_playmode.xml), 정면/측면/후면과 맵 3D 확인 이미지를 Reference/*_v2.png 및 stage_editor_m5.png에 보관.
+
+### 다음에 할 일
+- Codex 7·8단계 구현 및 검증을 마쳤다. 통합 담당자가 2절의 피격 Bind·쓰러짐 호출을 연결하고, 최종 통합 폴더에서 맵툴 바로 플레이 대화상자/복귀 직접 조작 및 스토어 캡처를 확인한다. main 병합·푸시는 하지 않았다.
+
+### 2026-10-06 — 8단계 출시 준비
+
+**한 일**
+- ProductInfo.asset에 회사/제품/버전/표시 이름/설명/패키지 ID/게시자를 모았다. 사전 로드로 UiTexts의 제목을 제공하며, 빌드가 PlayerSettings를 적용하고 Builds/product_info.json을 내보낸다. MSIX는 이 JSON을 기본값으로 읽고 명령행 재지정을 허용한다. 회사 DefaultCompany·제품 Game2Week·버전 0.1.0 유지.
+- 기존 Regular·Bold 폰트 GUID를 유지해 정적 SDF로 전환: KS X 1001 한글 2,350자·ASCII·기호, 현재 코드/데이터/JSON의 한글 531자 포함. 두 굵기 각각 2,459자·4096 아틀라스 2페이지. 한글 누락 없음. 선택 기호 ✖만 원본 폰트 미지원이며 현재 게임 문구에는 없다. 검사 기록 Logs/font_coverage_Pretendard-*.txt.
+- imagegen으로 원본 레퍼런스를 참고한 제목 글자 없는 아이콘/홍보 일러스트 2종 생성. Reference/store에 원본, 아이콘 300/150/71/44, 와이드 310×150, 대표 1920×1080 및 실제 PlayMode 캡처 5장. Tools/msix/Images의 패키지 로고에 연결하고 재현용 크기 변환 스크립트 제공. 생성 일러스트와 실제 캡처를 README에서 구분.
+- Plans/Store_Listing.md·HTML에 한국어 짧은/긴 소개·특징 5개·검색어·고유 요소 점검 기록. 이름 {게임 이름} 유지. Store_Guide.html에 이름 확정 시 ProductInfo/파트너 센터 값/세이브 이전을 설정하는 위치와 실제 캡처 경로 추가.
+- 배치 빌드 숨김 실행, 프로젝트 안 출력 경로 검증, 실제 빌드 버전의 패키지 전달을 보강. 자동 생성된 담당 밖 설정/카탈로그는 복원했다. 씬·맵 JSON·Claude 문서/코드 미변경.
+
+**검증**
+- 전체 EditMode 163/163 (Logs/phase8_editmode.xml), 게임 PlayMode 22/22 (Logs/phase8_playmode.xml). 패키지 자체 Windows 입력 테스트는 별도 전체 실행에서 2개 통과·2개 기존 Ignore였으며, 프로젝트 테스트는 모두 통과.
+- Tools/build_windows.ps1: Windows x64 v0.1.0 성공, 167MB·79초 (Logs/build_windows.log). ProductInfo 기반 JSON과 사전 로드 확인.
+- Tools/package_msix.ps1 -NoSign: makeappx 검증 및 포장 성공. Builds/Msix/Game2Week.Dev_0.1.0.0_x64.msix (54,854,978바이트). 매니페스트 제품 ID/게시자/버전/표시 이름과 커스텀 로고 확인. 미서명 개발 ID이므로 등록용 ID 확정 후 재포장한다.
+- Builds/Windows/Game2Week.exe 15초 실행 생존, 게임 예외/오류 없음 (Logs/phase8_player.log). 종료 시 D3D12 리소스 해제 경고 1줄 기록. 이번 검사에서 시작한 게임만 종료, Claude Unity는 건드리지 않았다.
+- 정적 폰트는 PlayMode·빌드 전후 SHA256 동일. 폰트 에셋 각 약 68MB는 한글 전체를 포함한 정적 텍스처 비용이다.
+- 스토어 게시/패키지 설치/인증서 등록은 하지 않았다. 피격/쓰러짐 자동 호출은 2절의 통합 요청으로 남는다.
 
 ### 2026-10-06 — 3단계 Pattern Editor (브랜치 `phase3-pattern-editor` → main `020df2f`)
 
@@ -98,3 +135,7 @@
 | 2026-10-06 | Codex | 패턴 에디터 | 8종 궤적·그래프 적분·일정·런타임·경고 ✓ | 16 |
 | 2026-10-06 | Codex | 패턴 에디터 | 편집 창·3D 미리보기·에셋 CRUD·카탈로그 ✓ | 16 |
 | 2026-10-06 | Codex | 패턴 에디터 | 수식/일정/에셋 테스트·전투 회귀·기록 ✓ | 8 |
+| 2026-10-06 | Codex | 캐릭터 | v2 면/손/머리 보강·19골격·10클립·GLB·Animator·회귀 검증 | 24 |
+| 2026-10-06 | Codex | 맵툴 | M5 3D 미리보기·바로 플레이·영역/대칭·검증 | 12 |
+| 2026-10-06 | Codex | 출시 | ProductInfo·세이브 경로 보호·정적 한글 폰트·누락 검사 | 8 |
+| 2026-10-06 | Codex | 출시 | 스토어 이미지/문구·패키지 로고·Windows/MSIX·회귀·기록 | 12 |

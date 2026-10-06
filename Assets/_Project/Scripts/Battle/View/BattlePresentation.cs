@@ -74,12 +74,33 @@ namespace Game2Week.Battle.View
                     if (enemy) enemy.PlaySpared();
                     break;
                 case BattleOutcome.PlayerDefeated:
-                    // 임시 패배 연출: 주인공이 파편으로 흩어지며 사라짐
+                    // 패배 연출: (리깅된 모델이면) 쓰러지는 동작 → 파편으로 흩어지며 사라짐
                     if (!player) break;
-                    effects.PlayHit(player.transform.position + Vector3.up * 0.5f, 1.5f);
-                    player.SetVisible(false);
+                    var driver = player.GetComponentInChildren<Animation.PlayerAnimationDriver>();
+                    if (driver && driver.IsReady)
+                    {
+                        driver.PlayFall();
+                        StartCoroutine(VanishAfter(FallSeconds));
+                    }
+                    else Vanish();
                     break;
             }
+        }
+
+        /// <summary>쓰러지는 동작을 보여 주는 시간 — 결과 화면 전환(패배 상태) 전에 끝나야 함</summary>
+        const float FallSeconds = 0.45f;
+
+        System.Collections.IEnumerator VanishAfter(float seconds)
+        {
+            yield return new WaitForSeconds(seconds);
+            Vanish();
+        }
+
+        void Vanish()
+        {
+            if (!player) return;
+            effects.PlayHit(player.transform.position + Vector3.up * 0.5f, 1.5f);
+            player.SetVisible(false);
         }
     }
 }

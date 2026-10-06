@@ -16,9 +16,12 @@ namespace Game2Week.Battle.View
         Material handMaterial, braceMaterial;
         float deflectionLeft;
         float outgoingSide = 1f;
+        Animation.PlayerAnimationDriver animationDriver;
         public void Init(PlayerMover mover, Transform characterModel)
         {
             player = mover; model = characterModel;
+            animationDriver=GetComponent<Animation.PlayerAnimationDriver>();
+            if(animationDriver){animationDriver.Bind(mover);if(animationDriver.IsReady)return;}
             var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             go.name = "RightHand_ParryCue";
             Destroy(go.GetComponent<Collider>());
@@ -42,10 +45,11 @@ namespace Game2Week.Battle.View
             disc.GetComponent<Renderer>().sharedMaterial = braceMaterial;
             disc.SetActive(false);
         }
-        public void PlayDeflection(float side) { outgoingSide = side; deflectionLeft = 0.24f; }
+        public void PlayDeflection(float side) { outgoingSide = side; deflectionLeft = 0.24f; if(animationDriver)animationDriver.SetParrySide(side); }
         void LateUpdate()
         {
             if (!player || player.Motor == null || Time.timeScale <= 0f) return;
+            if(animationDriver&&animationDriver.IsReady)return;
             deflectionLeft = Mathf.Max(0f, deflectionLeft - Time.deltaTime);
             float progress = deflectionLeft > 0f ? 1f - deflectionLeft / 0.24f : player.Motor.ParryProgress;
             bool parry = deflectionLeft > 0f || player.Motor.Parrying;
