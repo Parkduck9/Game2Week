@@ -50,6 +50,9 @@ namespace Game2Week.Battle.View
             if (!spawner.Player.TryGetComponent(out player)) player = spawner.Player.gameObject.AddComponent<PlayerMover>();
             player.Init(spawner.Arena, actionSettings, feedback);
             hitRule = new PlayerHitRule(player, feedback);
+            // 리깅된 모델이면 애니메이션 구동기에 피격·쳐내기 방향 알림 연결 (7단계 통합)
+            var animation = player.GetComponentInChildren<Animation.PlayerAnimationDriver>();
+            if (animation) animation.Bind(player, feedback);
         }
 
         public void ResetPlayer()
