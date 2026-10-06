@@ -32,7 +32,7 @@ namespace Game2Week.EditorTools.Stages
         {
             [GemTypes.Heal] = "회복", [GemTypes.Attack] = "공격", [GemTypes.Spare] = "살림",
         };
-        static readonly string[] ToolLabels = { "선택/이동", "주인공 시작점", "적", "보석", "지우개" };
+        static readonly string[] ToolLabels = { "선택/이동", "시작점", "적", "보석", "지우개", "영역 보석", "영역 삭제" };
 
         StageEditorModel model;
         ContentCatalog catalog;
@@ -41,6 +41,10 @@ namespace Game2Week.EditorTools.Stages
         Vector2 issuesScroll;
         string statusMessage = string.Empty;
         bool dragging;
+        bool preview3D,regionDragging;
+        GridPoint regionFrom,regionTo;
+        StagePreview3D stagePreview;
+        float previewYaw=20,previewPitch=45;
 
         [MenuItem("Tools/Stage Editor")]
         public static void Open()
@@ -55,11 +59,13 @@ namespace Game2Week.EditorTools.Stages
             catalog = ContentCatalogUtility.LoadOrCreate();
             model = new StageEditorModel(new StageRepository(StageRepository.DefaultDirectory), catalog);
             model.Load();
+            stagePreview=new StagePreview3D();
             statusMessage = $"스테이지 {model.Count}개 불러옴";
         }
 
         void OnDestroy()
         {
+            stagePreview?.Dispose();
             if (model == null || !model.HasUnsavedChanges) return;
             if (EditorUtility.DisplayDialog("Stage Editor", "저장하지 않은 변경이 있어요. 저장할까요?", "저장", "버리기"))
                 Save();
@@ -69,10 +75,17 @@ namespace Game2Week.EditorTools.Stages
         {
             HandleShortcuts();
             DrawToolbar();
+            DrawBatchToolbar();
 
-            var body = new Rect(0, EditorGUIUtility.singleLineHeight + 6, position.width, position.height - EditorGUIUtility.singleLineHeight - 6 - IssuesHeight);
+            var body = new Rect(0, EditorGUIUtility.singleLineHeight * 2 + 12, position.width, position.height - EditorGUIUtility.singleLineHeight * 2 - 12 - IssuesHeight);
             DrawStageList(new Rect(body.x, body.y, ListWidth, body.height));
-            DrawCanvas(new Rect(body.x + ListWidth, body.y, body.width - ListWidth - InspectorWidth, body.height));
+            var canvas=new Rect(body.x + ListWidth, body.y, body.width - ListWidth - InspectorWidth, body.height);
+            if(preview3D&&model.Current!=null)
+            {
+                if(Event.current.type==EventType.Repaint)GUI.DrawTexture(canvas,stagePreview.Render(canvas,model.Current,previewYaw,previewPitch));
+                if(Event.current.type==EventType.MouseDrag&&canvas.Contains(Event.current.mousePosition)){previewYaw+=Event.current.delta.x;previewPitch=Mathf.Clamp(previewPitch-Event.current.delta.y,10,80);Event.current.Use();Repaint();}
+            }
+            else DrawCanvas(canvas);
             DrawInspector(new Rect(body.xMax - InspectorWidth, body.y, InspectorWidth, body.height));
             DrawIssues(new Rect(0, body.yMax, position.width, IssuesHeight));
         }
@@ -105,6 +118,18 @@ namespace Game2Week.EditorTools.Stages
 
                 var saveLabel = model.HasUnsavedChanges ? "저장 *" : "저장";
                 if (GUILayout.Button(saveLabel, EditorStyles.toolbarButton, GUILayout.Width(60))) Save();
+            }
+        }
+
+        void DrawBatchToolbar()
+        {
+            using(new EditorGUILayout.HorizontalScope(EditorStyles.toolbar))
+            {
+                preview3D=GUILayout.Toggle(preview3D,"3D 미리보기",EditorStyles.toolbarButton,GUILayout.Width(110));
+                if(GUILayout.Button("바로 플레이",EditorStyles.toolbarButton,GUILayout.Width(100)))statusMessage=StageQuickPlay.Start(model)?"선택 스테이지 플레이":"검증 오류·씬 저장 취소로 실행하지 않았습니다.";
+                if(GUILayout.Button("보석 좌우 복사",EditorStyles.toolbarButton,GUILayout.Width(110)))statusMessage=$"보석 {model.MirrorGems(true)}개 복사";
+                if(GUILayout.Button("보석 상하 복사",EditorStyles.toolbarButton,GUILayout.Width(110)))statusMessage=$"보석 {model.MirrorGems(false)}개 복사";
+                GUILayout.Label(preview3D?"드래그: 시점 회전":"영역 도구: 드래그 후 놓으면 일괄 편집",EditorStyles.miniLabel);
             }
         }
 
@@ -214,6 +239,11 @@ namespace Game2Week.EditorTools.Stages
                     DrawOutline(CellRect(cell), ErrorColor, 2f);
 
             HandleCanvasInput(rect, origin, px, w, d);
+            if(regionDragging)
+            {
+                var a=CellRect(regionFrom);var b=CellRect(regionTo);
+                DrawOutline(Rect.MinMaxRect(Mathf.Min(a.x,b.x),Mathf.Min(a.y,b.y),Mathf.Max(a.xMax,b.xMax),Mathf.Max(a.yMax,b.yMax)),Color.cyan,2);
+            }
         }
 
         void HandleCanvasInput(Rect rect, Vector2 origin, float px, int w, int d)
@@ -224,6 +254,13 @@ namespace Game2Week.EditorTools.Stages
             var local = e.mousePosition - origin;
             var cell = new GridPoint(Mathf.FloorToInt(local.x / px), d - 1 - Mathf.FloorToInt(local.y / px));
             bool inside = local.x >= 0 && local.y >= 0 && cell.x < w && cell.z >= 0;
+            if(model.Tool==StageTool.GemRegion||model.Tool==StageTool.EraseRegion)
+            {
+                if(e.type==EventType.MouseDown&&inside&&e.button==0){regionFrom=regionTo=cell;regionDragging=true;e.Use();}
+                else if(e.type==EventType.MouseDrag&&regionDragging){regionTo=new GridPoint(Mathf.Clamp(cell.x,0,w-1),Mathf.Clamp(cell.z,0,d-1));e.Use();Repaint();}
+                else if(e.type==EventType.MouseUp&&regionDragging){statusMessage=$"보석 {model.EditGemRegion(regionFrom,regionTo,model.Tool==StageTool.EraseRegion)}개 변경";regionDragging=false;e.Use();Repaint();}
+                return;
+            }
 
             switch (e.type)
             {

@@ -13,6 +13,8 @@ namespace Game2Week.EditorTools.Stages
         Enemy,
         Gem,
         Erase,
+        GemRegion,
+        EraseRegion,
     }
 
     public enum StageItemKind
@@ -321,6 +323,34 @@ namespace Game2Week.EditorTools.Stages
         }
 
         public void EndDrag() => dragSnapshotTaken = false;
+
+        /// <summary>사각 영역 보석 편집을 되돌리기 한 번으로 처리한다. 적/시작점은 보존한다.</summary>
+        public int EditGemRegion(GridPoint from,GridPoint to,bool erase)
+        {
+            if(Current==null)return 0;
+            int x0=Mathf.Max(0,Mathf.Min(from.x,to.x)),x1=Mathf.Min(Current.grid.width-1,Mathf.Max(from.x,to.x));
+            int z0=Mathf.Max(0,Mathf.Min(from.z,to.z)),z1=Mathf.Min(Current.grid.depth-1,Mathf.Max(from.z,to.z));
+            var cells=new List<GridPoint>();
+            for(int z=z0;z<=z1;z++)for(int x=x0;x<=x1;x++)
+            {var p=new GridPoint(x,z);var here=ItemAt(p);if(erase?here.Kind==StageItemKind.Gem:here.Kind==StageItemKind.None)cells.Add(p);}
+            if(cells.Count==0)return 0;
+            Edit(s=>{foreach(var p in cells){if(erase)s.gems.RemoveAll(g=>g.position.x==p.x&&g.position.z==p.z);else s.gems.Add(new StageGem{id=NextGemId(),position=p});}});
+            Selection=StageItemRef.None;return cells.Count;
+        }
+        /// <summary>보석만 빈 반대편 칸으로 복사한다. 충돌·중앙 중복은 건너뛴다.</summary>
+        public int MirrorGems(bool horizontal)
+        {
+            if(Current==null)return 0;
+            var copies=new List<StageGem>();
+            foreach(var g in Current.gems)
+            {
+                var p=horizontal?new GridPoint(Current.grid.width-1-g.position.x,g.position.z):new GridPoint(g.position.x,Current.grid.depth-1-g.position.z);
+                if(ItemAt(p).Kind!=StageItemKind.None||copies.Any(c=>c.position.x==p.x&&c.position.z==p.z))continue;
+                copies.Add(new StageGem{position=p,type=g.type,spawnChance=g.spawnChance});
+            }
+            if(copies.Count>0)Edit(s=>{foreach(var g in copies){g.id=NextGemId();s.gems.Add(g);}});
+            return copies.Count;
+        }
 
         string NextGemId()
         {
