@@ -48,6 +48,6 @@ motion('Dodge',.22,(n,u)=>n==='Spine'?[.5*pulse(u),0,0]:n.includes('UpperLeg')?[
 motion('Jump',.65,(n,u)=>n.includes('UpperLeg')?[-.5*pulse(u),0,0]:n.includes('LowerLeg')?[.8*pulse(u),0,0]:n.includes('UpperArm')?[-.7*pulse(u),0,0]:[0,0,0]);
 motion('Land',.16,(n,u)=>n==='Spine'?[.25*pulse(u),0,0]:n.includes('LowerLeg')?[.45*pulse(u),0,0]:[0,0,0]);
 for(const side of [1,-1])motion(side>0?'ParryLeft':'ParryRight',.4,(n,u)=>n==='RightUpperArm'?[-1.35*pulse(u),side*(u-.5)*2.3*pulse(u),-.4*pulse(u)]:n==='RightForeArm'?[-.75*pulse(u),side*.6*pulse(u),0]:n==='Spine'?[0,side*.22*wave(u),0]:[0,0,0]);
-motion('Brace',1,(n,u)=>n==='Spine'?[.3,0,0]:n.includes('UpperArm')?[-.95,0,n.startsWith('Right')?.4:-.4]:n.includes('ForeArm')?[-1,0,0]:n.includes('LowerLeg')?[.35,0,0]:n.includes('UpperLeg')?[-.2,0,0]:[0,0,0]);
+motion('Brace',1,(n,u)=>n==='Spine'?[.3,0,0]:n.includes('UpperArm')?[0,n.startsWith('Right')?-1.6:1.6,n.startsWith('Right')?.15:-.15]:n.includes('ForeArm')?[0,0,n.startsWith('Right')?1:-1]:n.includes('LowerLeg')?[.35,0,0]:n.includes('UpperLeg')?[-.2,0,0]:[0,0,0]);
 motion('Hit',.28,(n,u)=>n==='Spine'?[-.35*pulse(u),0,.12*pulse(u)]:n==='HeadBone'?[-.15*pulse(u),0,0]:[0,0,0]);
 motion('Fall',.65,(n,u)=>n==='Hips'?[-Math.PI*.48*u,0,0]:n.includes('UpperArm')?[-.5*u,0,0]:[0,0,0]);

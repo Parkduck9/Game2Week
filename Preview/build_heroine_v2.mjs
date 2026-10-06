@@ -2,7 +2,18 @@ import fs from 'node:fs';
 const input=fs.readFileSync('Preview/heroine_preview.html','utf8');
 let model=input.slice(input.indexOf('const COLORS ='),input.indexOf("const view = document.getElementById"));
 // v1은 유지하고 같은 파츠 제작 코드를 v2의 공통 모듈로 추출한다.
-model=model.replace('0.0035 + layer * 0.0012','0.0005 + layer * 0.00025');
+model=model.replace('0.0035 + layer * 0.0012','0.0015 + layer * 0.0008');
+model=model.replace('  geo.translate(cx, cy, 0);',`  // 작은 삼각형으로 나눠 얼굴의 평면 경계를 따라가게 한다.
+  for(let level=0;level<2;level++){
+    const src=(geo.index?geo.toNonIndexed():geo).attributes.position;const vertices=[];
+    for(let i=0;i<src.count;i+=3){
+      const a=new THREE.Vector3().fromBufferAttribute(src,i),b=new THREE.Vector3().fromBufferAttribute(src,i+1),c=new THREE.Vector3().fromBufferAttribute(src,i+2);
+      const ab=a.clone().lerp(b,.5),bc=b.clone().lerp(c,.5),ca=c.clone().lerp(a,.5);
+      for(const v of [a,ab,ca,ab,b,bc,ca,bc,c,ab,bc,ca])vertices.push(v.x,v.y,v.z);
+    }
+    geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
+  }
+  geo.translate(cx, cy, 0);`);
 model=model.replace(/function faceZ\(x, y\) \{[\s\S]*?\n\}/,`function faceZ(x,y) {
   const face=head.children.find(p=>p.name==='Face');
   const surface=new THREE.Mesh(face.geometry,face.material);

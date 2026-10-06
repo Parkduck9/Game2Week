@@ -27,7 +27,10 @@ namespace Game2Week.Tests
             yield return new WaitForSeconds(.65f);Press(keyboard.dKey);PressAndRelease(keyboard.leftShiftKey);yield return new WaitForSeconds(.1f);
             Assert.AreEqual(PlayerMotion.Dodge,driver.Current);Release(keyboard.dKey);SceneCapture.Save("heroine_v2_dodge");
             yield return new WaitForSeconds(.3f);Press(keyboard.leftCtrlKey);yield return new WaitForSeconds(.14f);
-            Assert.AreEqual(PlayerMotion.Brace,driver.Current);SceneCapture.Save("heroine_v2_brace");Release(keyboard.leftCtrlKey);
+            Assert.AreEqual(PlayerMotion.Brace,driver.Current);
+            var arm=System.Array.Find(driver.GetComponentsInChildren<Transform>(),t=>t.name=="RightUpperArm");
+            Assert.IsNotNull(arm);Assert.Greater(Quaternion.Angle(Quaternion.identity,arm.localRotation),20f,"정지 자세 클립이 실제 팔 골격을 움직여야 한다.");
+            SceneCapture.Save("heroine_v2_brace");Release(keyboard.leftCtrlKey);
             battle.World.Feedback.RaisePlayerHit(driver.transform.position);yield return new WaitForSeconds(.05f);
             Assert.AreEqual(PlayerMotion.Hit,driver.Current);yield return new WaitForSeconds(.3f);
             driver.PlayFall();yield return new WaitForSeconds(.2f);Assert.AreEqual(PlayerMotion.Fall,driver.Current);

@@ -123,9 +123,19 @@ function faceZ(x,y) {
 }
 // 얼굴 곡면에 붙이는 평면 파츠 (눈, 눈썹, 입, 볼터치)
 function decal(name, geo, cx, cy, layer, matName) {
+  // 작은 삼각형으로 나눠 얼굴의 평면 경계를 따라가게 한다.
+  for(let level=0;level<2;level++){
+    const src=(geo.index?geo.toNonIndexed():geo).attributes.position;const vertices=[];
+    for(let i=0;i<src.count;i+=3){
+      const a=new THREE.Vector3().fromBufferAttribute(src,i),b=new THREE.Vector3().fromBufferAttribute(src,i+1),c=new THREE.Vector3().fromBufferAttribute(src,i+2);
+      const ab=a.clone().lerp(b,.5),bc=b.clone().lerp(c,.5),ca=c.clone().lerp(a,.5);
+      for(const v of [a,ab,ca,ab,b,bc,ca,bc,c,ab,bc,ca])vertices.push(v.x,v.y,v.z);
+    }
+    geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
+  }
   geo.translate(cx, cy, 0);
   const p = geo.attributes.position;
-  for (let i = 0; i < p.count; i++) p.setZ(i, faceZ(p.getX(i), p.getY(i)) + 0.0005 + layer * 0.00025);
+  for (let i = 0; i < p.count; i++) p.setZ(i, faceZ(p.getX(i), p.getY(i)) + 0.0015 + layer * 0.0008);
   return part(name, geo, matName, head);
 }
 
@@ -291,7 +301,7 @@ motion('Dodge',.22,(n,u)=>n==='Spine'?[.5*pulse(u),0,0]:n.includes('UpperLeg')?[
 motion('Jump',.65,(n,u)=>n.includes('UpperLeg')?[-.5*pulse(u),0,0]:n.includes('LowerLeg')?[.8*pulse(u),0,0]:n.includes('UpperArm')?[-.7*pulse(u),0,0]:[0,0,0]);
 motion('Land',.16,(n,u)=>n==='Spine'?[.25*pulse(u),0,0]:n.includes('LowerLeg')?[.45*pulse(u),0,0]:[0,0,0]);
 for(const side of [1,-1])motion(side>0?'ParryLeft':'ParryRight',.4,(n,u)=>n==='RightUpperArm'?[-1.35*pulse(u),side*(u-.5)*2.3*pulse(u),-.4*pulse(u)]:n==='RightForeArm'?[-.75*pulse(u),side*.6*pulse(u),0]:n==='Spine'?[0,side*.22*wave(u),0]:[0,0,0]);
-motion('Brace',1,(n,u)=>n==='Spine'?[.3,0,0]:n.includes('UpperArm')?[-.95,0,n.startsWith('Right')?.4:-.4]:n.includes('ForeArm')?[-1,0,0]:n.includes('LowerLeg')?[.35,0,0]:n.includes('UpperLeg')?[-.2,0,0]:[0,0,0]);
+motion('Brace',1,(n,u)=>n==='Spine'?[.3,0,0]:n.includes('UpperArm')?[0,n.startsWith('Right')?-1.6:1.6,n.startsWith('Right')?.15:-.15]:n.includes('ForeArm')?[0,0,n.startsWith('Right')?1:-1]:n.includes('LowerLeg')?[.35,0,0]:n.includes('UpperLeg')?[-.2,0,0]:[0,0,0]);
 motion('Hit',.28,(n,u)=>n==='Spine'?[-.35*pulse(u),0,.12*pulse(u)]:n==='HeadBone'?[-.15*pulse(u),0,0]:[0,0,0]);
 motion('Fall',.65,(n,u)=>n==='Hips'?[-Math.PI*.48*u,0,0]:n.includes('UpperArm')?[-.5*u,0,0]:[0,0,0]);
 
