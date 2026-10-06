@@ -33,6 +33,8 @@ namespace Game2Week.Core
         /// <summary>탄막 턴 이동 입력 (Player 맵이 켜져 있을 때만 값이 들어온다).</summary>
         public Vector2 Move => move != null && move.enabled ? Vector2.ClampMagnitude(move.ReadValue<Vector2>(), 1f) : Vector2.zero;
         public Vector2 Look => look != null && look.enabled ? look.ReadValue<Vector2>() : Vector2.zero;
+        /// <summary>정지 자세 버튼(Ctrl)을 누르고 있는지 — 빨강 공격 통과 조건</summary>
+        public bool BraceHeld => brace != null && brace.enabled && brace.IsPressed();
         public bool ConsumeDodge() => Consume(ref dodgePending);
         public bool ConsumeJump() => Consume(ref jumpPending);
         public bool ConsumeParry() => Consume(ref parryPending);
@@ -50,7 +52,7 @@ namespace Game2Week.Core
         InputAction cancel;
         InputAction move;
         InputAction pause;
-        InputAction look, dodge, jump, parry, lockOn;
+        InputAction look, dodge, jump, parry, lockOn, brace;
         bool dodgePending, jumpPending, parryPending, lockPending;
         Vector2Int lastNavigate;
 
@@ -71,6 +73,7 @@ namespace Game2Week.Core
             jump = playerMap.FindAction("Jump");
             parry = playerMap.FindAction("Parry");
             lockOn = playerMap.FindAction("LockOn");
+            brace = playerMap.FindAction("Brace");
             if (dodge != null) dodge.performed += OnDodge;
             if (jump != null) jump.performed += OnJump;
             if (parry != null) parry.performed += OnParry;

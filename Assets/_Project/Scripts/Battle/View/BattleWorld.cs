@@ -25,10 +25,12 @@ namespace Game2Week.Battle.View
         StageSpawner spawner;
         StageDefinition stage;
         PlayerMover player;
+        PlayerHitRule hitRule;
         float invulnerableLeft;
         int pendingDamage;
 
         public PlayerMover Player => player;
+        public PlayerHitRule HitRule => hitRule;
         public PatternRunner Patterns => patternRunner;
         public ThreatFeedbackView ThreatFeedback => threatFeedback;
         public void BindThreatVolume(System.Func<float> volume) { if (threatFeedback) threatFeedback.Bind(patternRunner,player,volume); }
@@ -42,6 +44,7 @@ namespace Game2Week.Battle.View
             stage = stageDefinition;
             if (!spawner.Player.TryGetComponent(out player)) player = spawner.Player.gameObject.AddComponent<PlayerMover>();
             player.Init(spawner.Arena, actionSettings);
+            hitRule = new PlayerHitRule(player);
         }
 
         public void ResetPlayer()
@@ -59,6 +62,7 @@ namespace Game2Week.Battle.View
             if (deltaTime <= 0f) { player.Motor.ClearBuffer(); actionInput?.ClearPlayerCommands(); return; }
             if (actionInput)
             {
+                player.Motor.SetBrace(actionInput.BraceHeld);
                 if (actionInput.ConsumeDodge()) player.Motor.RequestDodge();
                 if (actionInput.ConsumeJump()) player.Motor.RequestJump();
                 if (actionInput.ConsumeParry()) player.Motor.RequestParry();
@@ -99,7 +103,8 @@ namespace Game2Week.Battle.View
             pendingDamage = 0;
             var enemy = spawner.Enemy;
             var context = new PatternContext(spawner.Arena, enemy ? enemy.transform : spawner.Arena.transform, enemy,
-                player.transform, player.Radius, damagePerHit, OnPlayerHit, player);
+                player.transform, player.Radius, damagePerHit, OnPlayerHit, player, hitRule);
+            hitRule.ResetCounts();
             patternRunner.Begin(pattern, context, spawner.Arena.transform);
         }
 
