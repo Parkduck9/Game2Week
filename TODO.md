@@ -16,9 +16,10 @@
 
 ## ▶ 진행 중: 맵툴 · 스테이지 시스템 (계획: `Plans/MapTool_Plan.html`)
 - [x] 계획 작성 (요구사항 정리, JSON 스키마 제안, 툴 화면, 검증 규칙, 구현 단계 M1~M5)
-- [ ] 확인 필요 답변 받기 — Q1 보석의 역할 · Q2 툴 형태 · Q3 격자/자유 · Q4 진행 방식 · Q5 1차 범위 `[결정 필요]`
-- [ ] M1 데이터 & 로더 — StageDefinition, JSON 읽기/쓰기, 체크섬, 검증기, StageRepository + 테스트
-- [ ] M2 맵툴 1차 — 목록, 크기, 격자 배치(시작점·적·보석), 속성, 검증, 저장, 되돌리기
+- [x] 확인 필요 답변 — 보석=주우면 보상(드물게) · Unity 에디터 창 · 격자 · 1→n 순서 · 1차 범위 확정
+- [x] M1 데이터 & 로더 — StageDefinition, StageJson(체크섬), StageValidator, StageGeometry, StageRepository, ContentCatalog + 테스트, 첫 스테이지 `stage_001`
+- [x] M2 맵툴 1차 — `Tools ▸ Stage Editor`: 목록(추가·복제·삭제·순서), 크기, 격자 배치(시작점·적·보석), 드래그 이동, 속성, 실시간 검증(오류 칸 빨간 테두리), 저장(오류 있으면 막음), 되돌리기 + 로직 테스트
+- [ ] 맵툴 사용자 확인 — 직접 써 보고 불편한 점 피드백
 - [ ] M3 게임 연결 — BattleArena.Build(가변 크기), StageSpawner, 보석 동작, GameSession 스테이지 번호
 - [ ] M4 스테이지 진행 — 결과 화면 "다음 스테이지", 마지막 스테이지 처리
 - [ ] M5 맵툴 2차 — 3D 미리보기, 바로 플레이, 일괄 배치

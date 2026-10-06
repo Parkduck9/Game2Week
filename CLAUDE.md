@@ -37,6 +37,8 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 - Unity 설정 파일을 정규식으로 고칠 땐 범위를 좁힌다 (들여쓰기만으로 매칭하면 다른 블록까지 바뀜). 원본은 템플릿 tgz에서 복구 가능.
 - `AssetDatabase.ImportPackage`는 배치모드에서 비동기 → `.unitypackage`는 `-importPackage <경로> -quit`로 따로 실행.
 - 임시 에디터 스크립트는 `Assets/Editor/`에 두고 실행 후 폴더째 삭제.
+- 배치모드가 10분 넘게 걸릴 때가 있음 — Unity 클라우드 요청 타임아웃 대기. 오래 걸리면 `run_in_background`로 돌리고 로그 확인.
+- 맵툴 등 에디터를 띄워 사용자에게 보여 줄 땐 `-batchmode` 없이 `-projectPath . -executeMethod <창 여는 메서드>`. 이후엔 프로젝트가 잠겨 배치모드 불가.
 
 ## Tasks.md와 달라진 점 (사용자 결정, 2026-10-06)
 - Tasks.md 1번의 "2D" → **3D 프로젝트**. 3D는 전투 연출 + **탄막 회피도 3D 경기장에서** (2026-10-06 변경).
@@ -114,13 +116,16 @@ Assets/_Project/
 │  │  ├─ View/        EnemyView, BattleCameraDirector, 이펙트 (3D 연출)
 │  │  ├─ Player/      플레이어 마커 이동·피격
 │  │  └─ Patterns/    IAttackPattern, Bullet, 패턴 구현
-│  └─ Data/           ScriptableObject 정의
+│  ├─ Stages/         스테이지 JSON 데이터·검증·저장소 (StageDefinition, StageJson, StageValidator, StageRepository)
+│  └─ Data/           ScriptableObject 정의 (+ ContentCatalog: 스테이지의 이름 → 에셋)
+├─ Editor/            에디터 전용 (asmdef: Game2Week.Editor) — 맵툴 Tools ▸ Stage Editor
 ├─ Data/              Enemy, Item, Pattern 에셋
 ├─ Art/Placeholder/   임시 모델·머티리얼·스프라이트
 ├─ Prefabs/
 ├─ Input/             GameControls.inputactions (프로젝트 전역 액션)
-├─ Tests/EditMode/    NUnit 테스트 (asmdef: Game2Week.Tests.EditMode)
+├─ Tests/EditMode/    NUnit 테스트 (asmdef: Game2Week.Tests.EditMode, Editor 어셈블리도 참조)
 └─ Tests/PlayMode/    씬 흐름 테스트 + 화면 캡처 → Logs/scene_*.png
+Assets/StreamingAssets/Stages/   stages.json(순서) + stage_XXX.json — 맵툴로만 편집
 ```
 
 ## 코드 규칙

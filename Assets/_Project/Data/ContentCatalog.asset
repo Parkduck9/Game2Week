@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01407df71aff9c74f8a2f17144dd313e, type: 3}
+  m_Name: ContentCatalog
+  m_EditorClassIdentifier: Game2Week::Game2Week.Data.ContentCatalog
+  enemies:
+  - {fileID: 11400000, guid: 2b8845b0715992a47872b52fb6f065a8, type: 2}
+  patterns:
+  - {fileID: 11400000, guid: c1c6e4638125bbb42a39b78446000747, type: 2}

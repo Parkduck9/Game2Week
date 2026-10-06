@@ -241,6 +241,30 @@
 - 실수: `init` 접근자 사용 → Unity 컴파일 에러 → `set`으로 수정, CLAUDE.md에 규칙 추가.
 - `.gitignore` 정리 (Exports/, .claude/settings.local.json, OS 임시 파일 등), GitHub Desktop 내장 git으로 **첫 커밋 `dce8022`** (274파일, EditMode 25개 통과 상태).
 
+---
+
+## 2026-10-06 — M1 완료 + M2 맵툴 1차
+
+### 한 일
+- 문서 커밋 `aaf6a65`.
+- M1: `StageTests` (JSON 왕복, 체크섬 변조 감지, 검증 규칙별, 좌표 변환, 저장소). `ContentCatalog` 에셋 생성.
+  `stage_001`("1-1 첫 만남", 12×14칸, 보석 3개: 회복·공격·살림, Pattern_Test)과 `stages.json`을 StageRepository 경로로 생성.
+- M2: `Assets/_Project/Editor/` (asmdef `Game2Week.Editor`)
+  - `StageEditorModel` — 편집 로직 전부 (도구별 클릭, 드래그 = 되돌리기 1번, 스냅샷 되돌리기 최대 100, 스테이지 추가/복제/삭제/순서,
+    저장: 오류 있는 스테이지가 하나라도 있으면 아무것도 안 씀, id 바꾸면 파일 이름도 바뀜, 지운 스테이지 파일 삭제).
+  - `StageEditorWindow` — IMGUI 창: 툴바(도구·되돌리기·카탈로그 새로고침·다시 불러오기·저장), 왼쪽 목록, 가운데 격자(위=적 쪽),
+    오른쪽 속성(id·이름·크기·셀 크기·적 종류·턴 시간·패턴·보석 규칙·선택한 보석의 종류/확률), 아래 검증 결과. Ctrl+Z/Y/S.
+  - `ContentCatalogUtility` — 카탈로그 생성/새로고침.
+- 테스트: EditMode 70개 전부 통과.
+
+### Claude가 기본값으로 정한 것
+- 주인공 시작점·적은 지울 수 없음 (항상 1개씩), 지우개는 보석만. 이미 뭔가 있는 칸에 배치하면 그 항목을 선택.
+- 새 보석 기본값: 회복, 등장 확률 25%. 확률은 5% 단위, 턴 시간은 0.5초 단위로 반올림.
+
+### 주의
+- 배치모드 실행이 10분 넘게 걸리는 경우 있음 (Unity 클라우드 요청 타임아웃).
+- 에디터를 띄워 두면 배치모드(테스트·셋업 스크립트) 불가 → 사용자가 Unity를 닫아야 다음 자동 작업 가능.
+
 ### 다음에 할 일
-- M1 마무리: Stages 테스트 (JSON 왕복, 체크섬 변조 감지, 검증 규칙별, 좌표 변환, 저장소), ContentCatalog 에셋.
-- M2 맵툴 1차 (Unity 에디터 창 `Tools ▸ Stage Editor`).
+- 사용자 맵툴 확인 (Unity 에디터에 Stage Editor 열어 둠) → 피드백 반영.
+- 그다음 M3 게임 연결: BattleArena.Build(스테이지 크기), StageSpawner(주인공·적·보석), 보석 동작, GameSession 스테이지 번호 — 05단계와 함께.

@@ -3,6 +3,7 @@
     "rootNamespace": "Game2Week.Tests",
     "references": [
         "Game2Week",
+        "Game2Week.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

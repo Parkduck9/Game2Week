@@ -1,0 +1,11 @@
+{
+    "schemaVersion": 1,
+    "stages": [
+        "stage_001"
+    ],
+    "_tool": {
+        "generatedBy": "StageEditor",
+        "toolVersion": 1,
+        "checksum": "sha256:84ee36ece1eb3630e88aeefb3511b26d37b648af6eebac5eded4f51d2eeed79e"
+    }
+}
