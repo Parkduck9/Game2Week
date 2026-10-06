@@ -18,7 +18,10 @@
 - [x] 2단계 랜덤 조준·사인파·측면 발사·거리 경고음·화면 밖 표시, 1-2/1-3 연결. EditMode 125 / PlayMode 16 전체 통과, 실제 화면 확인 (손/소리 임시).
 - [x] 병렬 작업 계획 [MD](Plans/Parallel_Work_Plan.md) · [HTML](Plans/Parallel_Work_Plan.html) — 3단계 Codex / 4단계 Claude, 파일 담당표·worktree·합치기 규칙·Codex 지시문
 - [x] 0단계 연결 지점: `ITrajectory`·`AttackColor`·`IHitRule`·`ThreatPoint`, Bullet 궤적/색/피해 규칙, 쳐내기는 노랑만. EditMode 128 / PlayMode 16 통과
-- [ ] worktree 두 개(`Game2Week-codex`, `Game2Week-claude`) 만들고 Codex에 지시문 전달
+- [x] worktree 두 개 생성 (`Game2Week-codex` / `Game2Week-claude`, Library 복사, 둘 다 EditMode 128 통과)
+- [x] 이후 단계 5~8 분할 계획 (영역별 기본 담당 + 단계별 N-0 연결 지점) — 계획 8절
+- [x] 작업량 표시 (사람 기준) — `Plans/Work_Effort.md` + 대시보드 카드
+- [ ] Codex에 계획 7절 지시문 전달 (사용자)
 - [ ] (Codex) Unity Pattern Editor: 8종 궤적·발사 간격·속도 그래프, 동일 런타임 평가 경로와 3D 미리보기 구현/검증
 - [ ] (Claude) 빨강 Ctrl 정지 자세·파랑 실제 이동 판정 구현/검증 (맵 연결·조합 규칙은 5단계)
 - [ ] 3·4단계 main에 합치기 → 전체 테스트 → TODO·WORKLOG·설계 MD 갱신, worktree 정리

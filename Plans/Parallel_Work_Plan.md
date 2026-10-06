@@ -1,6 +1,6 @@
 # Claude · Codex 병렬 작업 계획 (3·4단계)
 
-작성일: 2026-10-06 · 상태: 0단계 연결 지점 구현 완료, 3·4단계 분할 대기
+작성일: 2026-10-06 · 상태: 0단계 커밋(`0d3a146`)·worktree 생성 완료, 3·4단계 진행 대기 · 5~8단계 분할 계획 포함
 
 HTML 보기: [Parallel_Work_Plan.html](Parallel_Work_Plan.html) · 액션 설계: [Action_Balance_Plan.md](Action_Balance_Plan.md)
 
@@ -130,13 +130,52 @@ C:\Unity\Game2Week\Game2Week-codex 폴더(브랜치 phase3-pattern-editor)에서
 - Parallel_Work_Plan.md 3절의 "Codex" 담당 파일만 고친다. 공용·Claude 담당 파일이 필요하면 멈추고 나에게 알려.
 - 연결 지점(ITrajectory, TrajectoryLaunch, Bullet.Launch의 trajectory 인자, Bullet.Color, ThreatPoint)을 사용한다.
 - Unity 배치모드·테스트는 -projectPath C:\Unity\Game2Week\Game2Week-codex 로만 실행.
-- TODO.md·WORKLOG.md·CLAUDE.md·Action_Balance_Plan은 고치지 말고, 진행 기록은 Plans/Parallel/Codex_Log.md에 쓴다
-  (각 기록 끝에 "### 다음에 할 일").
+- TODO.md·WORKLOG.md·CLAUDE.md·Action_Balance_Plan·Work_Effort.md는 고치지 말고, 진행 기록은 Plans/Parallel/Codex_Log.md에 쓴다
+  (각 기록 끝에 "### 다음에 할 일", 파일 맨 아래 "## 작업량" 표에 끝낸 작업마다
+  | 날짜 | Codex | 단계 | 작업 | 사람 기준 시간 | 한 줄 — 중급 Unity 개발자 1명 기준 추정, 8시간=1일).
 - 커밋·푸시는 내가 요청할 때만. 커밋 전 EditMode/PlayMode 전체 통과, 폰트 에셋(Pretendard-Regular SDF.asset) 되돌리기.
 - ActionPhaseOneSetup/ActionPhaseTwoSetup은 다시 실행하지 마 (Claude 담당 Battle 씬을 고침).
 ```
 
+## 8. 이후 단계도 같은 방식으로
+
+### 기본 담당 영역
+
+단계마다 새로 정하지 않도록 **영역 단위로 주인을 정해 둔다.** 새 작업은 그 영역 주인이 맡고, 두 영역에 걸치면 아래 "N-0 연결 지점"을 먼저 만든다.
+
+| 영역 | 기본 담당 | 대표 경로 |
+|---|---|---|
+| 패턴·탄막·궤적·Pattern Editor | Codex | `Scripts/Battle/Patterns/`(Bullet 제외), `Editor/Patterns/`, `Data/Patterns/` |
+| 맵·맵툴·ContentCatalog | Codex | `Editor/Stages/`, `StreamingAssets/Stages/`, `Data/ContentCatalog.asset` |
+| 전투 이펙트·적 연출 (파티클·말풍선·잔상) | Codex | `View/BattleEffects.cs`, `View/EnemyView.cs`, `Prefabs/FX/`, 새 이펙트 파일 |
+| 이미지 생성 (스토어·아이콘·컨셉) | Codex | `Reference/` (새 파일 `_v2` 등) |
+| 플레이어·입력·카메라·피격 판정 | Claude | `PlayerMotorModel`, `PlayerMover`, `PlayerActionView`, `InputReader`, `BattleCameraDirector`, `Bullet`, `BattleWorld` |
+| 전투 흐름·상태·전투 UI | Claude | `Battle/States/`, `Battle/UI/`, `BattleController`, `Scenes/Battle.unity` |
+| 씬 흐름·세이브·설정·공용 UI·오디오 | Claude | `Scripts/Flow/`, `Scripts/Save/`, `Scripts/UI/`, `Scripts/Core/`, `BattleAudio`, 나머지 씬 |
+| 캐릭터 모델·리깅 | Claude | `Preview/`, `Art/Characters/` |
+| 빌드·출시 | Claude | `Tools/build_windows.ps1`, `Tools/package_msix.ps1`, `Tools/msix/`, `ProjectSettings/` |
+
+### 단계별 분할 계획
+
+| 단계 | 먼저 (main, N-0 연결 지점) | Codex | Claude | 합친 뒤 |
+|---|---|---|---|---|
+| **5 누적·밸런스** | 회피·쳐내기·색 통과 이벤트를 `BattleEvents`에 추가, 색 조합 검사 순수 함수(`ColorCombinationRules`) | PatternDirector·DifficultyProfile·EncounterData (셔플 백·간격·공유 예산), 8개 맵에 1→8종 연결, 조합 허용 목록 데이터 | 자동 플레이 측정 도구 (봇이 맵별 피격·접근 시간·회피/쳐내기 사용률 기록 → 리포트 HTML), 색 첫 등장 안내 문구·HUD | 측정 리포트로 수치 조정 (데이터는 Codex 담당) → 사용자 플레이 확인 |
+| **6 연출·사운드** | `BattleAudio`/이펙트 훅 이벤트 목록 확정 | 피격 파티클 크기·위치, 적 말풍선(월드 UI), 회피 잔상·착지 먼지·쳐내기 효과 | AudioMixer + 음량 설정 연결, BGM·메뉴/전투 효과음 훅, AudioListener 정리, 씬 전환 페이드 | 실제 소리 자원 연결 (출처는 `[결정 필요]`) |
+| **7 캐릭터·툴** | 애니메이션 상태 이름 목록 (`PlayerActionView` ↔ Animator) | 맵툴 M5: 3D 미리보기·바로 플레이·일괄 배치 | 주인공 v2 + 리깅 + 애니메이션 (쳐내기 오른손 두 방향·회피·점프·정지 자세) | 맵툴에서 바로 플레이로 새 모델 확인 |
+| **8 출시 준비** | 사용자 결정: 회사·게임 이름, 아이콘 방향 | 스토어 이미지·아이콘 세트, 스토어 설명 문구 초안 (`Plans/Store_*`) | 이름 반영 (PlayerSettings·MSIX 매니페스트·UI 문구), 정적 폰트 아틀라스, 빌드·MSIX 재검증 | 사용자: 집에서 설치·삭제·제출 (`Store_Guide.html`) |
+
+- IP 기획(세계관·캐릭터·시스템 명칭)은 사용자와 정하는 일이라 병렬 대상이 아니다. 정해지면 문구는 `BattleTexts`·`UiTexts`(Claude), 적·패턴 이름은 데이터(Codex)로 나눠 반영한다.
+- 단계마다 이 계획의 3절 담당표를 그 단계 기준으로 다시 써서 main에 커밋한 뒤 브랜치를 나눈다. 브랜치 이름은 `phaseN-<주제>`.
+- 한쪽이 먼저 끝나면 다음 단계의 자기 몫을 시작해도 된다. 단, 다음 단계의 N-0 연결 지점이 main에 없으면 먼저 사용자에게 알린다.
+
+## 9. 작업량 기록 (사람 기준)
+
+- 기준 파일: [Work_Effort.md](Work_Effort.md). 대시보드(`TodoList.html`)의 "작업량 — 사람 기준" 카드가 이 표를 읽어 Claude·Codex 막대, 영역별 표, 최근 작업을 보여 준다.
+- **사람 기준 시간** = 중급 Unity 개발자 1명이 같은 결과(코드 + 테스트 + 문서)를 직접 만들 때의 추정 시간, 8시간 = 1일. AI가 실제로 쓴 시간이 아니다.
+- 작업을 끝낼 때마다 그 작업을 한 쪽이 한 줄 추가한다: `| 날짜 | 누가 | 단계 | 작업 | 시간 |`. 단계 열은 같은 이름을 재사용한다 (영역별 합계가 묶이도록).
+- 병렬 기간에는 각자 로그 파일 맨 아래 "작업량" 표에 같은 형식으로 적고, main에 합칠 때 `Work_Effort.md`로 옮긴다 (공용 파일이라 병렬 중 직접 고치지 않음).
+
 ## 다음에 할 일
 
-- 사용자: 이 계획 확인 → 0단계 커밋 요청 → worktree 두 개 만들기 (Claude가 만들어도 됨) → Codex에 7절 지시문 전달.
-- Claude: `Game2Week-claude`에서 4단계 시작, 기록은 `Plans/Parallel/Claude_Log.md`.
+- 사용자: 계획 7절 지시문을 Codex에 전달 (worktree 두 개는 만들어 둠).
+- Claude: `Game2Week-claude`(브랜치 `phase4-color-rules`)에서 4단계 시작, 기록은 `Plans/Parallel/Claude_Log.md`.

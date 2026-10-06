@@ -71,6 +71,8 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 - 각자 worktree 폴더(`..\Game2Week-codex`, `..\Game2Week-claude`)에서 작업하고 **담당 밖 파일은 고치지 않는다.** 배치모드도 자기 폴더에서만.
 - 병렬 기간에는 TODO·WORKLOG·CLAUDE·설계 MD를 고치지 않고 `Plans/Parallel/<이름>_Log.md`에 기록 → 합칠 때 main에서 반영.
 - 연결 지점(`ITrajectory`, `AttackColor`, `IHitRule`, `ThreatPoint`, `PatternContext`)은 공용 — 바꿔야 하면 사용자에게 먼저 알린다.
+- 이후 단계(5~8)도 같은 방식: 영역별 기본 담당(계획 8절) + 단계마다 N-0 연결 지점을 main에 먼저.
+- **작업량(사람 기준)**: 작업을 끝낼 때마다 `Plans/Work_Effort.md`에 한 줄 (중급 Unity 개발자 1명 추정 시간, 8시간=1일). 대시보드가 Claude·Codex 막대로 표시. 병렬 중에는 로그 파일의 "작업량" 표에 적고 합칠 때 옮긴다.
 - 계획 MD → HTML: `Tools/render_plan.mjs <md>`. `node`는 PATH에 없음 → `C:\Program Files\Adobe\Adobe Creative Cloud Experience\libs\node.exe` (v20) 사용.
 
 ## 확정된 결정 (사용자 승인됨)

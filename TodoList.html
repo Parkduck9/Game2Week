@@ -9,18 +9,21 @@
     --bg: #f6f5f2; --surface: #ffffff; --text: #1b1b1b; --muted: #6b6b6b;
     --line: #e2e0da; --accent: #3d6fb6; --done: #9a9a9a; --ok: #2f8a4c;
     --tag-bg: #f1ece2; --warn-bg: #fff6e6; --warn-line: #f0c77a; --warn-text: #8a5a00;
+    --claude: #d97a3a; --codex: #3d6fb6;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg: #101010; --surface: #191919; --text: #f0f0f0; --muted: #a0a0a0;
       --line: #2e2e2e; --accent: #8fb3ff; --done: #6a6a6a; --ok: #6cc98a;
       --tag-bg: #262626; --warn-bg: #221b0f; --warn-line: #6a5420; --warn-text: #f0c77a;
+      --claude: #f0a06a; --codex: #8fb3ff;
     }
   }
   :root[data-theme="dark"] {
     --bg: #101010; --surface: #191919; --text: #f0f0f0; --muted: #a0a0a0;
     --line: #2e2e2e; --accent: #8fb3ff; --done: #6a6a6a; --ok: #6cc98a;
     --tag-bg: #262626; --warn-bg: #221b0f; --warn-line: #6a5420; --warn-text: #f0c77a;
+    --claude: #f0a06a; --codex: #8fb3ff;
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.6 "Pretendard", "Malgun Gothic", system-ui, sans-serif; }
@@ -64,6 +67,19 @@
   pre { background: var(--tag-bg); padding: 10px 12px; border-radius: 6px; overflow-x: auto; }
   pre code { background: none; padding: 0; }
   code.decide { background: var(--warn-bg); color: var(--warn-text); border: 1px solid var(--warn-line); }
+  .effort { margin-bottom: 20px; }
+  .effort .who { display: grid; grid-template-columns: 64px minmax(0, 1fr) 150px; gap: 10px; align-items: center; font-size: 13.5px; margin: 6px 0; }
+  .effort .who .mini { height: 10px; background: var(--line); border-radius: 5px; overflow: hidden; }
+  .effort .who .mini i { display: block; height: 100%; }
+  .effort .who .n { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .effort .split { display: flex; height: 14px; border-radius: 7px; overflow: hidden; margin: 4px 0 10px; }
+  .effort .split i { display: block; height: 100%; }
+  .c-claude { background: var(--claude); } .c-codex { background: var(--codex); }
+  .effort table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+  .effort th, .effort td { border-bottom: 1px solid var(--line); padding: 3px 6px; text-align: left; }
+  .effort td.num, .effort th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .effort .note { color: var(--muted); font-size: 12px; margin-top: 6px; }
+  .effort details summary { cursor: pointer; font-size: 13px; color: var(--muted); margin-top: 8px; }
   .error { background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 10px; padding: 16px; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
@@ -124,6 +140,34 @@ function lastBlock(md, heading) {
   return out;
 }
 
+// Plans/Work_Effort.md 표: | 날짜 | 누가 | 단계 | 작업 | 사람 기준(시간) |
+function effortCard(md) {
+  if (!md) return '';
+  const rows = md.split(/\r?\n/).filter(l => /^\|\s*\d{4}-/.test(l)).map(l => {
+    const c = l.trim().replace(/^\||\|$/g, '').split('|').map(s => s.trim());
+    return { who: c[1], stage: c[2], task: c[3], hours: parseFloat(c[4]) || 0 };
+  });
+  if (!rows.length) return '';
+  const people = ['Claude', 'Codex'];
+  const sum = f => rows.filter(f).reduce((a, r) => a + r.hours, 0);
+  const total = sum(() => true);
+  const of = p => sum(r => r.who === p);
+  const days = h => (h / 8).toFixed(1);
+  const cls = p => 'c-' + p.toLowerCase();
+  const max = Math.max(...people.map(of), 1);
+  const whoRows = people.map(p => `<div class="who"><b>${p}</b><span class="mini"><i class="${cls(p)}" style="width:${of(p) / max * 100}%"></i></span>
+    <span class="n">${of(p)}시간 · ${days(of(p))}일 · ${total ? Math.round(of(p) / total * 100) : 0}%</span></div>`).join('');
+  const split = people.map(p => `<i class="${cls(p)}" style="width:${total ? of(p) / total * 100 : 0}%" title="${p}"></i>`).join('');
+  const stages = [...new Set(rows.map(r => r.stage))];
+  const stageRows = stages.map(s => `<tr><td>${esc(s)}</td>${people.map(p => `<td class="num">${sum(r => r.stage === s && r.who === p) || ''}</td>`).join('')}<td class="num">${sum(r => r.stage === s)}</td></tr>`).join('');
+  const recent = rows.slice(-6).reverse().map(r => `<tr><td>${esc(r.who)}</td><td>${esc(r.task)}</td><td class="num">${r.hours}</td></tr>`).join('');
+  return `<div class="card effort"><h2>작업량 — 사람 기준 (합계 ${total}시간 · ${days(total)}일)</h2>
+    <div class="split">${split}</div>${whoRows}
+    <details><summary>영역별 (시간)</summary><table><thead><tr><th>영역</th>${people.map(p => `<th class="num">${p}</th>`).join('')}<th class="num">합계</th></tr></thead><tbody>${stageRows}</tbody></table></details>
+    <details><summary>최근 작업</summary><table><tbody>${recent}</tbody></table></details>
+    <div class="note">중급 Unity 개발자 1명이 직접 만들 때의 추정 시간 (8시간 = 1일). 기준: <a href="/Plans/Work_Effort.md">Plans/Work_Effort.md</a></div></div>`;
+}
+
 function render(docs) {
   const secs = sections(docs.todo);
   const fixSec = secs.find(s => s.title.includes('바꿔야 할 것'));
@@ -154,6 +198,7 @@ function render(docs) {
       <div class="card warn"><h2>🔧 바꿔야 할 것 (${fixOpen.length})</h2><ul>${fixOpen.map(li).join('') || '<li>없음</li>'}</ul></div>
       <div class="card warn"><h2>❓ 결정 필요 (${decide.length})</h2><ul>${decide.map(li).join('') || '<li>없음</li>'}</ul></div>
     </div>
+    ${effortCard(docs.effort)}
     <div class="card"><h2>단계별 진행</h2><div class="phases">${phaseRows}</div></div>
     <div class="tabs">${TABS.map(([k, n]) => `<button data-tab="${k}" class="${k === current ? 'on' : ''}">${n}</button>`).join('')}</div>
     <div class="doc" id="doc"></div>`;
@@ -175,6 +220,10 @@ async function load(force) {
       return [k, await r.text()];
     }));
     const docs = Object.fromEntries(entries);
+    try { // 작업량 표는 없어도 대시보드는 동작
+      const r = await fetch('/Plans/Work_Effort.md', { cache: 'no-store' });
+      docs.effort = r.ok ? await r.text() : '';
+    } catch (e) { docs.effort = ''; }
     const text = JSON.stringify(docs);
     if (force || text !== lastText) {
       lastText = text;

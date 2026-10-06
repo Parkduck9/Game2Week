@@ -685,3 +685,21 @@
 ### 다음에 할 일
 - 사용자: 계획 확인 → 0단계 커밋 요청 → worktree 두 개 생성(Claude가 해도 됨) → Codex에 계획 7절 지시문 전달.
 - Claude: `Game2Week-claude`(브랜치 `phase4-color-rules`)에서 4단계 시작.
+---
+
+## 2026-10-06 — Claude: worktree 생성 + 이후 단계 분할 계획 + 작업량 표시
+
+### 한 일
+- 0단계 커밋·푸시 `0d3a146`.
+- worktree 두 개: `..\Game2Week-codex` (`phase3-pattern-editor`), `..\Game2Week-claude` (`phase4-color-rules`). 원래 폴더의 Library(2.1GB)를 복사해 첫 실행 약 90초. 두 폴더 모두 EditMode 128/128.
+- 계획 8절: 영역별 기본 담당 (Codex = 패턴·맵·전투 이펙트·이미지, Claude = 플레이어·입력·카메라·판정·흐름·UI·세이브·오디오·캐릭터·출시)과 5~8단계 분할표 (단계마다 N-0 연결 지점을 main에 먼저).
+- 계획 9절 + `Plans/Work_Effort.md`: 사람 기준 작업량 표 (중급 Unity 개발자 1명 추정, 8시간=1일). WORKLOG 기록마다 시간을 추정해 채움 — 현재 Claude 205시간(25.6일), Codex 87시간(10.9일).
+- `TodoList.html`에 "작업량 — 사람 기준" 카드: 비율 막대, 사람별 막대, 영역별 표, 최근 작업. 표가 없어도 대시보드는 동작.
+
+### 주의
+- worktree에서 Unity를 돌리면 `ProjectSettings/EditorBuildSettings.asset`·`ShaderGraphSettings.asset`이 줄바꿈만 바뀌어 M으로 보임 (내용 diff 없음) — 커밋에서 빼거나 무시.
+- 이번 문서 변경(8·9절, Work_Effort, 대시보드)은 아직 커밋 전이라 두 worktree 브랜치에는 없음. Codex 지시문(7절)에는 작업량 기록 규칙을 직접 넣어 둠.
+
+### 다음에 할 일
+- 사용자: 이번 문서 변경 커밋 여부 결정 (커밋하면 두 브랜치도 main으로 맞춤) → Codex에 7절 지시문 전달.
+- Claude: `Game2Week-claude`에서 4단계 시작.
