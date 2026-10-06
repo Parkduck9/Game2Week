@@ -98,6 +98,7 @@ MonoBehaviour:
   input: {fileID: 11400000, guid: 0683d937dd4d47f4cb1abde27d1656cc, type: 2}
   view: {fileID: 4681771649786237868}
   horizontal: 1
+  sounds: {fileID: 11400000, guid: 6a8cd2954acfa91469d48eddb6e87cc8, type: 2}
 --- !u!1 &2959213522555950428
 GameObject:
   m_ObjectHideFlags: 0

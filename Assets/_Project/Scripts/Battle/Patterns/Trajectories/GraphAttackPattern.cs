@@ -4,8 +4,19 @@ using Game2Week.Data.Patterns;
 
 namespace Game2Week.Battle.Patterns.Trajectories
 {
-    public sealed class GraphAttackPattern : MonoBehaviour, IAttackPattern, IThreatSource
+    public sealed class GraphAttackPattern : MonoBehaviour, IAttackPattern, IThreatSource, IDirectablePattern
     {
+        float intervalScale = 1f, speedScale = 1f;
+        bool warningAnnounced;
+        public AttackColor PatternColor => definition ? definition.color : AttackColor.Yellow;
+        /// <summary>Director가 Begin 전에 한 번 — 사본(snapshot)에만 적용해 원본 에셋은 그대로</summary>
+        public void ApplyDifficulty(float interval, float speed) { intervalScale = interval; speedScale = speed; }
+        static void ScaleCurve(AnimationCurve curve, float scale)
+        {
+            var keys = curve.keys;
+            for (int i = 0; i < keys.Length; i++) { keys[i].value *= scale; keys[i].inTangent *= scale; keys[i].outTangent *= scale; }
+            curve.keys = keys;
+        }
         [SerializeField] GraphPatternDefinition definition;
         [SerializeField] Bullet bulletPrefab;
         [SerializeField] Material warningMaterial;
@@ -27,6 +38,8 @@ namespace Game2Week.Battle.Patterns.Trajectories
             var errors=PatternGraphRules.Validate(definition);
             if(errors.Count>0||!bulletPrefab){Debug.LogError("패턴 시작 실패: "+string.Join(" / ",errors));return;}
             snapshot=Instantiate(definition);snapshot.hideFlags=HideFlags.HideAndDontSave;
+            if(!Mathf.Approximately(intervalScale,1f))ScaleCurve(snapshot.interval,intervalScale);
+            snapshot.speed*=speedScale;
             context=value;trajectory=GraphTrajectory.Create(snapshot);timeline=new PatternTimeline(snapshot);
             timeline.Advance(0,Local(value.Enemy.position),Local(value.Player.position),value.Arena.Size,shots);
             DrawWarnings();
@@ -48,6 +61,7 @@ namespace Game2Week.Battle.Patterns.Trajectories
                 var block=new MaterialPropertyBlock();block.SetColor("_BaseColor",AttackTint(snapshot.color));
                 foreach(var renderer in bullet.GetComponentsInChildren<Renderer>())renderer.SetPropertyBlock(block);
                 bullet.Launch(World(shot.Origin),context.Arena.transform.TransformDirection(shot.Velocity),trajectory);
+                context.Feedback.RaiseBulletFired(snapshot.color,bullet.transform.position);
                 expiry[bullet]=shot.Time+snapshot.lifetime;
                 float age=timeline.Time-shot.Time;
                 if(age>0&&bullet.Tick(age,context)){bullet.Deactivate();context.ReportHit();}
@@ -59,6 +73,8 @@ namespace Game2Week.Battle.Patterns.Trajectories
         Bullet GetBullet(){foreach(var b in bullets)if(!b.Active)return b;var result=Instantiate(bulletPrefab,transform);bullets.Add(result);return result;}
         void DrawWarnings()
         {
+            if(timeline.WarningActive&&!warningAnnounced)context.Feedback.RaiseWarningStarted(snapshot.color,World(timeline.WarningOrigin));
+            warningAnnounced=timeline.WarningActive;
             shots.Clear();timeline.WarningShots(shots);
             while(warnings.Count<shots.Count)
             {
@@ -87,7 +103,7 @@ namespace Game2Week.Battle.Patterns.Trajectories
         {
             foreach(var b in bullets)if(b)b.Deactivate();
             foreach(var line in warnings)if(line)line.enabled=false;
-            context=null;timeline=null;shots.Clear();
+            context=null;timeline=null;shots.Clear();warningAnnounced=false;
             if(snapshot)Destroy(snapshot);snapshot=null;
         }
         void OnDestroy(){if(snapshot)Destroy(snapshot);}

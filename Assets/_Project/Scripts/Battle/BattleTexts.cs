@@ -17,6 +17,9 @@ namespace Game2Week.Battle
         public const string BraceSettling = "자세 잡는 중";
         public const string BraceReady = "정지 자세";
         public const string BraceIdle = "Ctrl 정지 자세";
+        /// <summary>빨강·파랑이 전투에서 처음 나올 때 잠깐 보여 주는 안내</summary>
+        public const string RedGuide = "빨강 공격! Ctrl을 누르고 멈추면 통과한다";
+        public const string BlueGuide = "파랑 공격! 계속 움직이면 통과한다";
         public const string MissedEnemy = "* 적에게 닿지 못했다. 숨을 고르자.";
         public const string SkipTurn = "* 가만히 숨을 골랐다.";
         public const string NoItems = "* 가진 아이템이 없다.";

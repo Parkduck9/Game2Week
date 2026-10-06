@@ -91,7 +91,8 @@ namespace Game2Week.Tests
 
             battle.Context.ChangeState(BattleStateId.EnemyTurn);
             yield return new WaitForSeconds(1.2f);
-            var pattern = battle.World.Patterns.CurrentObject.GetComponent<Game2Week.Battle.Patterns.YellowTrainingPattern>();
+            // 1-2부터 PatternDirector 아래에서 첫 턴은 새 패턴(노랑 사인파) 단독
+            var pattern = battle.World.Patterns.CurrentObject.GetComponentInChildren<Game2Week.Battle.Patterns.YellowTrainingPattern>();
             Assert.Greater(pattern.ActiveBullets, 0);
             SceneCapture.Save("stage2_EnemyTurn");
 
