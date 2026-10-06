@@ -29,6 +29,7 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 - 커밋은 사용자가 요청할 때만. 커밋 전 컴파일·테스트 통과 확인, `git diff --cached --name-only`로 Library/Exports/Logs/csproj가 없는지 확인.
 - 커밋 작성자는 저장소 git 설정을 따름 (Duck9).
 - 원격: `origin` = https://github.com/Parkduck9/Game2Week (main 추적). push는 사용자가 요청할 때만. 인증은 GitHub Desktop의 credential manager.
+- **Git LFS** (2026-10-06): 정적 폰트 `Assets/_Project/Art/Fonts/Pretendard-*SDF.asset`(각 약 65MB)은 LFS (`.gitattributes`). 처음 받은 폴더·새 worktree에서 폰트가 133바이트 포인터로 보이면 `git lfs checkout` (Unity에서 폰트가 깨짐). 50MB 넘는 새 바이너리도 LFS에 추가.
 - 여러 줄 커밋 메시지는 `-m` 대신 파일로 `-F` (PowerShell에서 `-m` 여러 줄이 조용히 실패한 적 있음).
 - `.gitignore`: Unity 생성 폴더, IDE 파일, `/Exports/`(GLB 중간본), `.claude/settings.local.json` 제외.
 
