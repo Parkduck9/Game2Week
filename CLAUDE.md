@@ -67,6 +67,13 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 - 후속 사용자 지정: 적 접촉 후 메뉴 유지, 캐릭터 뒤 허리 카메라+마우스 회전/록온, 노랑 우클릭 쳐내기/Shift 회피/점프, 이후 Ctrl 빨강 정지 자세 필수·파랑 이동, 접근할수록 커지는 경고음, 플레이어 위치 랜덤 조준, 8종 그래프 궤적+발사 간격/속도 제작 툴. 최신 기준은 설계 MD 0절.
 - 쳐내기는 오른손으로 왼쪽에서 오는 탄을 오른쪽 어깨 뒤로, 오른쪽 탄을 왼쪽 어깨 뒤로 흘린다. 입력 방향으로 이동을 계속한다. 적에게 단순 반사하는 방식이나 강제 뒤 밀림이 아니다. 점프는 후속 답변으로 포함이 확정됐고, 록온 가운데 버튼/점프 Space는 기본안이다.
 
+### 5~8단계 결과로 생긴 규칙 (2026-10-06 합침)
+- 맵 패턴은 `PatternDirector` + `PatternEncounterData`/`DifficultyProfile`(`Data/Patterns/Director/`)로 누적 — 새 패턴은 `IDirectablePattern` 구현(색·난이도 배율). 1-1만 단일 패턴.
+- 월드 사건은 `BattleFeedback`, 이펙트는 `BattleFxRig` 프리팹 아래 `IBattleFxModule`(씬 수정 없이), 소리는 `BattleAudio`·`UiSoundSet`·`SceneBgm` + `AudioRouting`(믹서 선택). 씬 전환은 `SceneLoader`(페이드 0.25초, `FadeSeconds`).
+- 이름·버전은 `Data/ProductInfo.asset` 한 곳 (회사 `DefaultCompany`는 세이브 경로라 확정 전까지 유지). 폰트는 정적 아틀라스 — 새 한글 문구는 `FontCoverageTests`가 검사.
+- 밸런스 측정: `-runBalance`로 `BalanceMeasurementTests.MeasureAllStages` → `node Tools/render_balance_report.mjs`.
+- 에디터 스크립트 함정 추가: (3) `EditorSceneManager.OpenScene` 뒤에는 앞에서 잡은 에셋 참조가 끊길 수 있음 → 씬마다 다시 `LoadAssetAtPath`.
+
 ### 병렬 작업 (2026-10-06, 사용자 결정)
 - 3단계(Pattern Editor) = **Codex**, 4단계(빨강·파랑) = **Claude**. 기준: `Plans/Parallel_Work_Plan.md` (파일 담당표·worktree·합치기 규칙).
 - 각자 worktree 폴더(`..\Game2Week-codex`, `..\Game2Week-claude`)에서 작업하고 **담당 밖 파일은 고치지 않는다.** 배치모드도 자기 폴더에서만.

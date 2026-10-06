@@ -773,3 +773,27 @@
 ### 다음에 할 일
 - 사용자: Codex에 바뀐 지시 전달 (이미 5단계를 시작했다면 멈추고 7단계부터).
 - Claude: `Game2Week-claude`에서 5단계 계속 (색 안내 진행 중).
+---
+
+## 2026-10-06 — Claude: 5~8단계 합침 (Claude 5·6 / Codex 7·8) + 통합 연결
+
+### 한 일
+- Claude 5·6단계 (`phase5-claude`) → main `f8a7e07`. Codex 7·8단계 (`phase7-codex`)에 main을 받아 통합 → main `35b9af4`. 두 브랜치가 겹친 파일 0개.
+- Codex 통합 요청 2개 연결: `BattleWorld`가 `PlayerAnimationDriver`에 `BattleFeedback` 연결(피격 동작), `BattlePresentation` 패배 때 `PlayFall()` → 0.45초 뒤 파편·사라짐. 피격 파티클 카메라 쪽 이중 당김 제거. `IntegrationTests`.
+- 통합 테스트: EditMode 172/172, PlayMode 29/29 (+측정 전용 1 건너뜀).
+- 문서: TODO·작업량(Claude 5·6 44시간, Codex 7·8 56시간, 통합 3시간)·설계 MD("실제 적용된 5단계")·CLAUDE.md(새 규칙·에디터 함정 3)·병렬 계획 상태 갱신.
+
+### 5~8단계 요약 (상세는 두 로그)
+- 5 (Claude): PatternDirector·난이도 프로필, 8개 맵 1→8종(간격 1.40→0.65초), 색 처음 등장 안내, 자동 플레이 측정 봇 + `Plans/Balance_Report.html`, Ctrl 고착 버그 수정.
+- 6 (Claude): 발사·예고 알림, 이펙트 모듈 8종, 적 말풍선, 소리 연결 지점(믹서 선택), 리스너 정리, 씬 전환 페이드.
+- 7 (Codex): 주인공 v2·19골격·10클립·Animator, 맵툴 M5(3D 미리보기·바로 플레이·영역/대칭 배치).
+- 8 (Codex): ProductInfo, 정적 한글 폰트(각 약 68MB), 스토어 이미지·문구, Windows 빌드 167MB·MSIX 55MB 재검증.
+
+### 결정 필요 / 사용자 확인
+- 적 접근 난이도: 직진하면 2~4초면 적에게 닿아 패턴을 거의 못 봄 (측정 리포트).
+- 소리 출처, 회사·게임 이름 (ProductInfo 한 곳만 바꾸면 됨).
+- 직접 확인: 주인공 v2 외형·동작, 맵툴 바로 플레이·대칭 배치, Pattern Editor, 스토어 이미지.
+
+### 다음에 할 일
+- 사용자 플레이 확인 → 접근 난이도·간격 조정 결정.
+- 작업 폴더(worktree) 두 개는 남겨 둠 — 다음 병렬 작업 때 main으로 맞춰 재사용하거나 `git worktree remove`로 정리.

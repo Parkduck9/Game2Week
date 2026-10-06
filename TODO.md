@@ -29,9 +29,12 @@
 - [x] 5-0 연결 지점: `ColorCombinationRules`(빨강·파랑 겹침 금지·전환 유예), `EncounterMemory`(전투 동안 패턴 기록) — EditMode 152 / PlayMode 20
 - [x] 각자 할 일 문서: Codex → [Codex_Log.md](Plans/Parallel/Codex_Log.md) · Claude → [Claude_Log.md](Plans/Parallel/Claude_Log.md) (+HTML)
 - [x] 6-0 연결 지점: `BattleFeedback`(월드 사건 알림)·`BattleEvents.EnemySpoke`·`BattleFxRig` 씬 연결 — EditMode 152 / PlayMode 21
-- [ ] (Claude, 브랜치 `phase5-claude`) **5·6단계**: 패턴 누적·8개 맵·측정·색 안내 → 전투 이펙트·말풍선·소리·페이드 ([Claude_Log.md](Plans/Parallel/Claude_Log.md))
-- [ ] (Codex, 브랜치 `phase7-codex`) **7·8단계**: 주인공 v2·리깅·애니메이션·맵툴 M5 → 출시 준비(ProductInfo·정적 폰트·스토어 이미지·문구·빌드) ([Codex_Log.md](Plans/Parallel/Codex_Log.md))
-- [ ] 두 브랜치 main에 합치기 → 전체 테스트 → 문서 반영
+- [x] (Claude) **5·6단계**: PatternDirector·8개 맵 1→8종(간격 1.40→0.65초)·측정 봇·색 안내·Ctrl 고착 버그 수정 → 이펙트·말풍선·소리 연결 지점·리스너·씬 전환 페이드 ([Claude_Log.md](Plans/Parallel/Claude_Log.md))
+- [x] (Codex) **7·8단계**: 주인공 v2·19골격·10클립·Animator·맵툴 M5 → ProductInfo·정적 한글 폰트·스토어 이미지/문구·빌드·MSIX 재검증 ([Codex_Log.md](Plans/Parallel/Codex_Log.md))
+- [x] 두 브랜치 main에 합치기 (`f8a7e07`·`35b9af4`) + 통합 요청 2개 연결(피격 애니메이션·패배 쓰러짐) → 통합 EditMode 172 / PlayMode 29(+측정 전용 1)
+- [ ] 적 접근 난이도 결정 — 측정 봇이 2~4초면 적에게 닿음 ([Balance_Report](Plans/Balance_Report.html)) `[결정 필요]`
+- [ ] 직접 확인 (사용자): 주인공 v2 외형·동작, 맵툴 M5 바로 플레이·대칭 배치, Pattern Editor 조작, 스토어 이미지
+- [ ] (선택) AudioMixer를 에디터에서 만들어 `Data/Audio/AudioRouting`에 연결 / 소리 클립 채우기 (출처 `[결정 필요]`)
 > 아래 A1~A6는 v1 제작 순서 참고. 최신 제작 순서는 설계 MD의 0절을 우선하며 점프는 사용자 요청으로 포함한다.
 - [x] A1 공통 카메라 기준 이동·회피 기반 구현/검증 (최신 허리 카메라 적용)
 - [x] A2 실제 점프·높이/상대 이동 충돌 구현/검증 (최신 노랑 직선으로 시험, 충격파는 v1 참고안)
@@ -85,16 +88,15 @@
 - [x] 템플릿 `Assets/Scenes/SampleScene` + `Settings/SampleSceneProfile` 삭제, 빌드 목록 교체
 - [x] 임시 `BattleFlowStub` / `BattleStageBootstrap` 삭제 → `BattleController`로 교체, PlayMode 테스트 수정
 - [x] 임시 공격 → 07 타이밍 공격으로 교체
-- [ ] 클로즈업에서 피격 파티클(큐브)이 화면에 비해 큼 — 크기·위치 다듬기
-- [ ] 적 대사 말풍선(월드 스페이스) 아직 없음 — 지금은 탄막 턴 상단 표시줄에 적 대사
-- [ ] 테스트 실행 시 Input System 패키지 테스트가 섞임 (manifest testables) → 항상 `-assemblyNames Game2Week.Tests.*`로 실행
-- [ ] `Pretendard-Regular SDF.asset`(동적 폰트)이 플레이·테스트 때마다 글자가 추가돼 git 변경으로 잡힘 — 출시 전 정적 아틀라스(KS X 1001 + 영문)로 굽거나 커밋 전 되돌리기 `[결정 필요]`
-- [ ] 음량 설정은 저장만 됨 — 사운드가 생기면 AudioMixer에 연결
-- [ ] PlayMode 로그에 AudioListener 없음 경고 — 사운드 연결 시 씬별 리스너 확인
+- [x] 클로즈업에서 피격 파티클(큐브)이 화면에 비해 큼 — 6단계 크기 ×0.5
+- [x] 적 대사 말풍선(월드 스페이스) — 6단계 `EnemySpeechBubble`- [ ] 테스트 실행 시 Input System 패키지 테스트가 섞임 (manifest testables) → 항상 `-assemblyNames Game2Week.Tests.*`로 실행
+- [x] `Pretendard-Regular SDF.asset` 동적 폰트 git 변경 문제 — 8단계(Codex)에서 정적 아틀라스(KS X 1001 2,350자 + ASCII·기호, 게임 한글 531자 포함)로 해결. 폰트 에셋이 각 약 68MB
+- [x] 음량 설정 연결 — 6단계 `AudioRouting`·`SceneBgm`·`BattleAudio`·메뉴 효과음이 설정값을 따름 (믹서는 선택)
+- [x] AudioListener 없음 경고 — 6단계에서 씬마다 1개로 정리
 - [ ] 회사 이름 `DefaultCompany` — 세이브 폴더 경로에 들어가므로 **출시 전에** 확정해야 함 (출시 후 바꾸면 기존 세이브를 못 찾음)
 - [ ] 보석 보상 수치 임시 (`GemRewardSettings`: 회복 5, 다음 공격 ×1.5, 살려주기 +1) — 데미지 공식과 함께 확정
 - [ ] 타이틀 "타이틀 (가제)" — IP 기획 때 교체
-- [ ] 씬 전환 연출(페이드) 없음 — 필요하면 SceneLoader에 추가
+- [x] 씬 전환 연출(페이드) — 6단계 `SceneLoader` 검은 화면 0.25초 + 배경음 같이 줄이기
 - [x] 템플릿 `InputSystem_Actions` → `_Project/Input/GameControls`로 교체
 - [x] 타깃 플랫폼 **PC 전용** 확정 → Mobile 품질 레벨 + Mobile_RPAsset/Renderer 삭제
 - [ ] 테스트 데이터 수치는 임시 (주인공 HP 20·공격 10, 테스트 적 HP 30·공격 4, 살려주기 기준 2, 붕대 10·주먹밥 15) — 데미지 공식 정할 때 같이 확정
