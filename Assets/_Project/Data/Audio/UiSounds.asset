@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f1e31d3edbfa984ab81bece7c2106c2, type: 3}
+  m_Name: UiSounds
+  m_EditorClassIdentifier: Game2Week::Game2Week.UI.UiSoundSet
+  session: {fileID: 11400000, guid: bcd5c4b35165bb04e997d0129c5692da, type: 2}
+  routing: {fileID: 11400000, guid: 36d368ad46d112d4ba48d48ea56ebf49, type: 2}
+  move: {fileID: 0}
+  submit: {fileID: 0}
+  cancel: {fileID: 0}
+  denied: {fileID: 0}

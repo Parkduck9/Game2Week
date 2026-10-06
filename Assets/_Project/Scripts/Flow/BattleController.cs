@@ -42,6 +42,7 @@ namespace Game2Week.Flow
         public StageSpawner Spawner => spawner;
         public BattleCameraDirector CameraDirector => cameraDirector;
         public BattleFxRig FxRig { get; private set; }
+        public BattleAudio Audio => audioHooks;
         public bool IsReady { get; private set; }
 
         void Start()
@@ -70,7 +71,11 @@ namespace Game2Week.Flow
             BattleStates.RegisterAll(machine, Context);
 
             presentation.Bind(events, spawner.Enemy, world.Player);
-            if (audioHooks) audioHooks.Bind(events, () => session.Save.Settings.sfxVolume);
+            if (audioHooks)
+            {
+                audioHooks.Bind(events, () => session.Save.Settings.sfxVolume);
+                audioHooks.BindFeedback(world.Feedback);
+            }
             if (fxRigPrefab)
             {
                 FxRig = Instantiate(fxRigPrefab, transform);

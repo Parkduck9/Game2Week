@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Game2Week.Battle.Patterns
 {
     /// <summary>예고 때 목표를 고정하는 노랑 공격. 에셋으로 직선/사인파·랜덤 조준·측면 교대를 설정한다.</summary>
-    public sealed class YellowTrainingPattern : MonoBehaviour, IAttackPattern, IThreatSource
+    public sealed class YellowTrainingPattern : MonoBehaviour, IAttackPattern, IThreatSource, IDirectablePattern
     {
         [SerializeField] Bullet bulletPrefab;
         [SerializeField] AttackColor attackColor = AttackColor.Yellow;
@@ -31,6 +31,15 @@ namespace Game2Week.Battle.Patterns
         public bool WarningActive => warningActive;
         public int ActiveBullets { get { int count = 0; foreach (var b in bullets) if (b.Active) count++; return count; } }
         public IReadOnlyList<Bullet> Bullets => bullets;
+        public AttackColor PatternColor => attackColor;
+        public float Interval => interval;
+        public float Speed => speed;
+
+        public void ApplyDifficulty(float intervalScale, float speedScale)
+        {
+            interval = Mathf.Max(warningDuration + 0.1f, interval * intervalScale);
+            speed *= speedScale;
+        }
 
         public void Begin(PatternContext value)
         {
@@ -39,6 +48,10 @@ namespace Game2Week.Battle.Patterns
             warning = gameObject.AddComponent<LineRenderer>();
             warning.sharedMaterial = warningMaterial;
             warning.positionCount = 24; warning.startWidth = warning.endWidth = 0.035f;
+            // 예고선도 공격 색으로 (재질은 공유하므로 블록으로만 덮어씀)
+            var tint = BattleTexts.AttackColorTint(attackColor);
+            warning.startColor = warning.endColor = tint;
+            var block = new MaterialPropertyBlock(); block.SetColor("_BaseColor", tint); warning.SetPropertyBlock(block);
             timeToShot = warningDuration;
             BeginWarning();
         }
@@ -60,6 +73,7 @@ namespace Game2Week.Battle.Patterns
             for (int i = 0; i < warning.positionCount; i++)
                 warning.SetPosition(i,WaveTrajectory.Evaluate(origin,forward,time*i/(warning.positionCount-1f),speed,warningWaveAmplitude,warningWaveFrequency));
             warning.enabled = true; warningActive = true;
+            context.Feedback.RaiseWarningStarted(attackColor, origin);
         }
         public void Tick(float dt)
         {
@@ -74,6 +88,7 @@ namespace Game2Week.Battle.Patterns
                     var bullet = GetBullet();
                     bullet.Color = attackColor;
                     bullet.Launch(origin + dir.normalized * 0.45f, dir.normalized * speed);
+                    context.Feedback.RaiseBulletFired(attackColor, bullet.transform.position);
                     if (context.EnemyView) context.EnemyView.PlayAttack();
                 }
                 timeToShot = Mathf.Max(interval, warningDuration + 0.1f);

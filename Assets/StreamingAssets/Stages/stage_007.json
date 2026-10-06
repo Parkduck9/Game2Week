@@ -44,12 +44,12 @@
     "enemyTurn": {
         "duration": 10.0,
         "patterns": [
-            "Pattern_Test2"
+            "Attack_Stage_1-7"
         ]
     },
     "_tool": {
         "generatedBy": "StageEditor",
         "toolVersion": 1,
-        "checksum": "sha256:cf243973dd37643efdd82103db739ad5b7e28e648ae864ff4deb85353725b436"
+        "checksum": "sha256:ad2ca21e7a386917bb4d5afe1f24451121f53739e8f8c17eced121d568c3a7e0"
     }
 }

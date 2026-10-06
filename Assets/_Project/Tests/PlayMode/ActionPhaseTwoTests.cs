@@ -21,7 +21,8 @@ namespace Game2Week.Tests
             BattleController battle=null;
             yield return SceneFlowTests.EnterStage(2,c=>battle=c);
             battle.Context.ChangeState(BattleStateId.EnemyTurn);
-            var pattern=(YellowTrainingPattern)battle.World.Patterns.Current;
+            // 5단계부터 1-3은 PatternDirector가 첫 턴에 새 패턴(측면 교대)을 단독으로 돌린다 (간격 배율 1.10/1.40 적용)
+            var pattern=battle.World.Patterns.CurrentObject.GetComponentInChildren<YellowTrainingPattern>();
             var firstTarget=pattern.WarningTarget;
             yield return new WaitForSeconds(1.2f);
             Assert.Greater(pattern.Bullets.Count,0);

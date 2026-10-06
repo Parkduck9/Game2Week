@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>밸런스 측정 리포트</title>
+<style>
+:root{--bg:#f7f7f4;--panel:#fff;--text:#1f2328;--muted:#5d6670;--line:#dcdfe3;--hit:#d9534f;--red:#d33;--blue:#2f6fd6}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16181c;--panel:#1e2127;--text:#e6e8eb;--muted:#9aa3ad;--line:#333842;--hit:#ef7b77;--red:#ff6b6b;--blue:#7fb0ff}}
+:root[data-theme="dark"]{--bg:#16181c;--panel:#1e2127;--text:#e6e8eb;--muted:#9aa3ad;--line:#333842;--hit:#ef7b77;--red:#ff6b6b;--blue:#7fb0ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 "Pretendard","Malgun Gothic",system-ui,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:28px 16px 60px}h1{font-size:24px;margin:0 0 4px}p{color:var(--muted);margin:4px 0 14px}
+.table{overflow-x:auto}table{border-collapse:collapse;width:100%;background:var(--panel)}th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:600;font-size:13px;color:var(--muted)}small{color:var(--muted)}.cell{position:relative;min-width:110px}
+.bar{display:block;height:8px;border-radius:4px;margin-bottom:3px}.bar.hit{background:var(--hit)}.red{color:var(--red)}.blue{color:var(--blue)}
+</style></head><body><main>
+<h1>밸런스 측정 리포트</h1>
+<p>측정 2026-10-06 16:38 · 맵 8개 · 자동 봇 측정 — 사람 플레이 체감을 대신하지 않음. 봇: 적에게 직진, 노랑은 가까우면 쳐내기/옆 회피, 빨강은 Ctrl 정지, 파랑은 계속 이동, 메뉴에선 공격.</p>
+<div class="table"><table><thead><tr><th>맵</th><th>피격</th><th>적 접근 성공/턴</th><th>회피 · 쳐내기 · 점프</th><th>정지 자세 · 통과 빨강/파랑</th><th>남은 HP</th><th>결과</th></tr></thead>
+<tbody><tr>
+    <td><b>1-1 첫 만남</b><br><small>stage_001</small></td>
+    <td><div class="cell"><span class="bar hit" style="width:0%"></span><b>0</b></div><small>턴당 0.0</small></td>
+    <td>2/2<br><small>평균 1.5초</small></td>
+    <td>2 · 0 · 0</td>
+    <td>0 · <span class="red">0</span> / <span class="blue">0</span></td>
+    <td>20/20</td>
+    <td>처치<br><small>5초</small></td></tr><tr>
+    <td><b>1-2 주황빛 결정</b><br><small>stage_002</small></td>
+    <td><div class="cell"><span class="bar hit" style="width:100%"></span><b>3</b></div><small>턴당 1.0</small></td>
+    <td>3/3<br><small>평균 2.0초</small></td>
+    <td>3 · 0 · 0</td>
+    <td>0 · <span class="red">0</span> / <span class="blue">0</span></td>
+    <td>5/20</td>
+    <td>처치<br><small>9초</small></td></tr><tr>
+    <td><b>1-3 좁은 방</b><br><small>stage_003</small></td>
+    <td><div class="cell"><span class="bar hit" style="width:66.66666666666666%"></span><b>2</b></div><small>턴당 1.0</small></td>
+    <td>2/2<br><small>평균 1.5초</small></td>
+    <td>2 · 0 · 0</td>
+    <td>0 · <span class="red">0</span> / <span class="blue">0</span></td>
+    <td>12/20</td>
+    <td>처치<br><small>5초</small></td></tr><tr>
+    <td><b>1-4 넓은 들판</b><br><small>stage_004</small></td>
+    <td><div class="cell"><span class="bar hit" style="width:100%"></span><b>3</b></div><small>턴당 1.0</small></td>
+    <td>3/3<br><small>평균 2.7초</small></td>
+    <td>2 · 0 · 0</td>
+    <td>3 · <span class="red">3</span> / <span class="blue">0</span></td>
+    <td>5/20</td>
+    <td>처치<br><small>11초</small></td></tr><tr>
+    <td><b>1-5 결정의 방</b><br><small>stage_005</small></td>
+    <td><div class="cell"><span class="bar hit" style="width:66.66666666666666%"></span><b>2</b></div><small>턴당 0.7</small></td>
+    <td>3/3<br><small>평균 2.3초</small></td>
+    <td>3 · 0 · 0</td>
+    <td>0 · <span class="red">0</span> / <span class="blue">0</span></td>
+    <td>10/20</td>
+    <td>처치<br><small>10초</small></td></tr><tr>
+    <td><b>1-6 가로지르는 빛</b><br><small>stage_006</small></td>
+    <td><div class="cell"><span class="bar hit" style="width:0%"></span><b>0</b></div><small>턴당 0.0</small></td>
+    <td>2/2<br><small>평균 3.0초</small></td>
+    <td>1 · 2 · 0</td>
+    <td>0 · <span class="red">0</span> / <span class="blue">2</span></td>
+    <td>20/20</td>
+    <td>처치<br><small>8초</small></td></tr><tr>
+    <td><b>1-7 긴 접근</b><br><small>stage_007</small></td>
+    <td><div class="cell"><span class="bar hit" style="width:100%"></span><b>3</b></div><small>턴당 1.0</small></td>
+    <td>3/3<br><small>평균 3.8초</small></td>
+    <td>3 · 2 · 0</td>
+    <td>4 · <span class="red">4</span> / <span class="blue">0</span></td>
+    <td>5/20</td>
+    <td>처치<br><small>14초</small></td></tr><tr>
+    <td><b>1-8 중심의 결정</b><br><small>stage_008</small></td>
+    <td><div class="cell"><span class="bar hit" style="width:0%"></span><b>0</b></div><small>턴당 0.0</small></td>
+    <td>3/3<br><small>평균 1.5초</small></td>
+    <td>0 · 0 · 0</td>
+    <td>0 · <span class="red">0</span> / <span class="blue">0</span></td>
+    <td>20/20</td>
+    <td>처치<br><small>7초</small></td></tr></tbody></table></div>
+<p>원본: Logs\balance_report.json · node Tools/render_balance_report.mjs 로 생성</p>
+</main></body></html>
