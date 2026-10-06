@@ -4,8 +4,18 @@ using Game2Week.Data.Patterns;
 
 namespace Game2Week.Battle.Patterns.Trajectories
 {
-    public sealed class GraphAttackPattern : MonoBehaviour, IAttackPattern, IThreatSource
+    public sealed class GraphAttackPattern : MonoBehaviour, IAttackPattern, IThreatSource, IDirectablePattern
     {
+        float intervalScale = 1f, speedScale = 1f;
+        public AttackColor PatternColor => definition ? definition.color : AttackColor.Yellow;
+        /// <summary>Director가 Begin 전에 한 번 — 사본(snapshot)에만 적용해 원본 에셋은 그대로</summary>
+        public void ApplyDifficulty(float interval, float speed) { intervalScale = interval; speedScale = speed; }
+        static void ScaleCurve(AnimationCurve curve, float scale)
+        {
+            var keys = curve.keys;
+            for (int i = 0; i < keys.Length; i++) { keys[i].value *= scale; keys[i].inTangent *= scale; keys[i].outTangent *= scale; }
+            curve.keys = keys;
+        }
         [SerializeField] GraphPatternDefinition definition;
         [SerializeField] Bullet bulletPrefab;
         [SerializeField] Material warningMaterial;
@@ -27,6 +37,8 @@ namespace Game2Week.Battle.Patterns.Trajectories
             var errors=PatternGraphRules.Validate(definition);
             if(errors.Count>0||!bulletPrefab){Debug.LogError("패턴 시작 실패: "+string.Join(" / ",errors));return;}
             snapshot=Instantiate(definition);snapshot.hideFlags=HideFlags.HideAndDontSave;
+            if(!Mathf.Approximately(intervalScale,1f))ScaleCurve(snapshot.interval,intervalScale);
+            snapshot.speed*=speedScale;
             context=value;trajectory=GraphTrajectory.Create(snapshot);timeline=new PatternTimeline(snapshot);
             timeline.Advance(0,Local(value.Enemy.position),Local(value.Player.position),value.Arena.Size,shots);
             DrawWarnings();

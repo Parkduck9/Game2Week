@@ -35,12 +35,12 @@
     "enemyTurn": {
         "duration": 7.0,
         "patterns": [
-            "Pattern_YellowSide"
+            "Attack_Stage_1-3"
         ]
     },
     "_tool": {
         "generatedBy": "StageEditor",
         "toolVersion": 1,
-        "checksum": "sha256:f8893b4c2c4b8b7890686843ba18040bc6b77748df85e559ea0ff5f8e3c63a2d"
+        "checksum": "sha256:83a63b2cc796193bff5364f755882761d9ceb045568af6aa4a6916ad16f5897a"
     }
 }

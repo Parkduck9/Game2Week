@@ -7,7 +7,7 @@ namespace Game2Week.Battle.Patterns
     /// 방사형 결정탄: 적에게서 일정 간격으로 여러 방향 탄을 한꺼번에 쏜다.
     /// 물결마다 각도를 조금씩 돌려 같은 자리에 안 맞게 하고, 탄 종류(색)를 번갈아 쓴다.
     /// </summary>
-    public sealed class RadialBurstPattern : MonoBehaviour, IAttackPattern
+    public sealed class RadialBurstPattern : MonoBehaviour, IAttackPattern, IDirectablePattern, IThreatSource
     {
         [SerializeField] Bullet[] bulletPrefabs;
         [SerializeField, Min(3)] int bulletsPerBurst = 10;
@@ -32,6 +32,20 @@ namespace Game2Week.Battle.Patterns
                 foreach (var b in pool) if (b.Active) n++;
                 return n;
             }
+        }
+
+        public AttackColor PatternColor => AttackColor.Yellow;
+
+        public void ApplyDifficulty(float intervalScale, float speedScale)
+        {
+            burstInterval = Mathf.Max(0.2f, burstInterval * intervalScale);
+            bulletSpeed *= speedScale;
+        }
+
+        public void CollectThreats(List<ThreatPoint> threats)
+        {
+            if (context == null) return;
+            foreach (var b in pool) if (b.Active && !b.Deflected) threats.Add(new ThreatPoint(b.transform.position, b.Color));
         }
 
         /// <summary>한 물결의 방향 (바닥 평면, 단위 벡터)</summary>

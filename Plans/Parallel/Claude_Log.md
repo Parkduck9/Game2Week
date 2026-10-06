@@ -22,7 +22,7 @@
 
 **연결 지점 (main에 있음)**: `ColorCombinationRules`(빨강·파랑 동시 위험 금지, 전환 유예 0.6초), `EncounterMemory` + `PatternContext.Memory`(전투 동안 유지되는 패턴 기록).
 
-1. **색 처음 등장 안내** — 진행 중: `ColorGuideModel`(순수 로직, 색당 한 번) + `ColorGuideView`(Battle 씬 상단 문구, 3초), `BattleTexts.RedGuide/BlueGuide`.
+1. **색 처음 등장 안내** — 완료: `ColorGuideModel`(순수 로직, 색당 한 번) + `ColorGuideView`(Battle 씬 상단 문구, 3초), `BattleTexts.RedGuide/BlueGuide`.
 2. **DifficultyProfile** (ScriptableObject): 단계별 기준 발사 간격(1.40 → 0.65초), 탄속 배율, 동시 위험 상한(1~4단계 1, 5단계부터 2), 공유 예산(초당 발사 수·살아 있는 탄 수).
 3. **PatternEncounterData** (ScriptableObject): 이 맵에서 새로 배우는 패턴 1개, 이미 배운 패턴 목록, 허용 조합, 사용할 DifficultyProfile.
 4. **PatternDirector** (IAttackPattern + IThreatSource 루트 프리팹):
@@ -67,6 +67,42 @@
 - 사용자 결정 필요: 회사·게임 이름 (8단계, Codex는 자리표시자로 진행), 소리 출처 (6단계 클립).
 
 ## 3. 한 일
+
+### 2026-10-06 — 5단계 완료 (브랜치 `phase5-claude`)
+
+**한 일**
+- **PatternDirector** (`Scripts/Battle/Patterns/Director/`): 순수 로직 `DirectorPlanner` + 실행 컴포넌트.
+  - 턴마다 패턴 하나를 고른다. 새 패턴(0번)은 2초 이상 보여 주기 전까지 매 턴 단독으로 먼저 나온다.
+  - 그 뒤로는 셔플 백(연속 금지, 시드 재현)으로 순환한다.
+  - 동시 상한 2인 단계에서는 색이 겹쳐도 되는 두 번째 패턴을 1.6초 뒤 겹친다. 빨강+파랑은 금지하고, 살아 있는 위험이 상한 이상이면 미룬다.
+  - 하위 패턴의 위험 위치를 모아 경고음·화면 밖 표시·측정 봇에 넘기고, 턴이 끝나면 하위 패턴을 모두 정리한다.
+- **DifficultyProfile·PatternEncounterData** (`Scripts/Data/Patterns/`) + **IDirectablePattern**.
+  - YellowTraining·Graph·Radial 패턴이 난이도 배율(간격 × 기준/1.40, 탄속 ×)을 Begin 전에 한 번만 받는다.
+  - Graph 패턴은 정의 사본에만 적용한다.
+- **8개 맵 연결** (`StageEditorModel`로 저장, 검증 오류 0): 1-1은 `Pattern_YellowTraining` 단독, 1-2~1-8은 `Attack_Stage_1-n`(Director). 새 패턴 순서:
+  - 노랑 사인파 → 측면 교대 → **빨강** 직선 → 노랑 포물선 → **파랑** 사인파(새로 만듦) → 원호 → 8자 (1 → 8종 누적).
+  - 기준 간격 1.40 → 0.65초, 탄속 ×1.00 → ×1.33, 동시 상한 1-5부터 2, 위험 상한 6 → 16.
+- **색 처음 등장 안내**: `ColorGuideModel` + `ColorGuideView`(Battle 씬 상단, 3초).
+  - "빨강 공격! Ctrl을 누르고 멈추면 통과한다" / "파랑 공격! 계속 움직이면 통과한다", 전투마다 색당 한 번.
+- **자동 플레이 측정 도구** `BalanceMeasurementTests`:
+  - 실제 키 입력 봇이 적에게 직진하면서 대응한다. 앞에서 오는 빨강은 Ctrl, 가까운 노랑은 쳐내기·옆 회피, 메뉴에서는 공격.
+  - `BattleFeedback`으로 사건을 세서 `Logs/balance_report.json`에 쓴다 → `Tools/render_balance_report.mjs` → `Plans/Balance_Report.html`.
+  - 전체 측정은 `-runBalance` 명령줄일 때만 돈다. 일반 실행은 1-1 짧은 확인만.
+- **버그 수정 (측정 봇이 찾음)**: Ctrl을 누른 채 메뉴로 가서 떼면 정지 자세가 안 풀려 다음 턴·다음 맵에서 움직일 수 없었다.
+  - 원인: 입력 맵이 꺼진 동안 뗀 것을 `IsPressed()`가 모름.
+  - `InputReader`가 누름·뗌 이벤트로 직접 기억하고, 입력 모드가 바뀔 때 지우게 했다 (실제로 누르고 있으면 다시 들어옴). 회귀 테스트 추가.
+- 기존 테스트 조정: `BattleStageTests`·`ActionPhaseTwoTests`에서 1-2·1-3 패턴을 Director 아래 하위 패턴으로 찾도록.
+
+**측정 결과** (`Plans/Balance_Report.html`): 봇이 8개 맵을 모두 2~3턴 만에 처치했다. 맵마다 피격 0~3, 적 접근 평균 1.5~3.8초.
+- **사용자 확인 필요**: 직진하면 2~4초 안에 적에게 닿아서, 패턴을 몇 발 보지 못하고 턴이 끝난다. 접근을 더 어렵게 할지 결정이 필요하다 (예: 적 주변 접근 시간·첫 발사 시점·맵 크기·턴 구조). 봇은 단순 직진형이라 사람 체감과 다를 수 있다.
+
+**검증**
+- 작업 폴더에서 EditMode 157/157, PlayMode 26/26 (`Logs/phase5_*.xml`, 8개 맵 측정 포함).
+- 추가된 테스트:
+  - `PatternDirectorTests` 5개: 새 패턴 우선, 셔플 백, 색 겹침 금지, 8개 맵 누적·간격 감소, 색 안내.
+  - `PatternDirectorRuntimeTests` 2개: 1-5 단독 소개 → 기록 유지 → 두 패턴 겹침 → 정리, 1-4 빨강 안내 한 번.
+  - `BalanceMeasurementTests`, Ctrl 고착 회귀 테스트.
+- 캡처: `Logs/scene_director_stage5_overlap.png`, `scene_director_red_guide.png`.
 
 ### 2026-10-06 — 6-0 연결 지점 (main)
 - `BattleFeedback`: 월드 사건 알림 창구 — 회피·점프·착지·쳐내기(쪽 방향)·정지 자세 완성·피격·색 통과(같은 색 0.25초에 한 번)·발사·예고. `BattleWorld.Feedback`, `PatternContext.Feedback`.
@@ -129,3 +165,5 @@
 | 2026-10-06 | Claude | 액션 4단계 | Ctrl 정지 자세 입력·이동 모델, 실제 속도, 빨강/파랑 색 규칙 + 주입, 색 표시·HUD, 시험 패턴, EditMode 7·PlayMode 3 ✓ | 16 |
 | 2026-10-06 | Claude | 병렬 준비 | 3단계 통합 테스트·합치기, 5-0 연결 지점(색 조합 규칙·전투 기록) + 테스트, 할 일 문서 정리 ✓ | 4 |
 | 2026-10-06 | Claude | 병렬 준비 | 6-0 연결 지점(BattleFeedback·EnemySpoke·BattleFxRig 씬 연결) + 테스트, 5~8단계 지시 작성 ✓ | 5 |
+| 2026-10-06 | Claude | 패턴 누적 | PatternDirector(선택·겹침·색 규칙·예산)·난이도 프로필·만남 데이터, 패턴 3종 난이도 배율, 8개 맵 1→8종 연결, 파랑 사인파 | 14 |
+| 2026-10-06 | Claude | 패턴 누적 | 색 처음 등장 안내, 자동 플레이 측정 봇 + 리포트 HTML, Ctrl 고착 버그 수정, 테스트 9개 | 10 |

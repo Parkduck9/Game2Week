@@ -33,8 +33,12 @@ namespace Game2Week.Core
         /// <summary>탄막 턴 이동 입력 (Player 맵이 켜져 있을 때만 값이 들어온다).</summary>
         public Vector2 Move => move != null && move.enabled ? Vector2.ClampMagnitude(move.ReadValue<Vector2>(), 1f) : Vector2.zero;
         public Vector2 Look => look != null && look.enabled ? look.ReadValue<Vector2>() : Vector2.zero;
-        /// <summary>정지 자세 버튼(Ctrl)을 누르고 있는지 — 빨강 공격 통과 조건</summary>
-        public bool BraceHeld => brace != null && brace.enabled && brace.IsPressed();
+        /// <summary>
+        /// 정지 자세 버튼(Ctrl)을 누르고 있는지 — 빨강 공격 통과 조건.
+        /// IsPressed()는 맵이 꺼진 동안(메뉴) 뗀 것을 모르고 눌린 채로 남을 수 있어, 누름/뗌을 직접 기억하고 모드가 바뀌면 지운다.
+        /// 다시 켤 때 실제로 누르고 있으면 initialStateCheck로 다시 눌림이 들어온다.
+        /// </summary>
+        public bool BraceHeld => braceDown && CurrentMode == Mode.Player;
         public bool ConsumeDodge() => Consume(ref dodgePending);
         public bool ConsumeJump() => Consume(ref jumpPending);
         public bool ConsumeParry() => Consume(ref parryPending);
@@ -53,7 +57,7 @@ namespace Game2Week.Core
         InputAction move;
         InputAction pause;
         InputAction look, dodge, jump, parry, lockOn, brace;
-        bool dodgePending, jumpPending, parryPending, lockPending;
+        bool dodgePending, jumpPending, parryPending, lockPending, braceDown;
         Vector2Int lastNavigate;
 
         void OnEnable()
@@ -78,6 +82,7 @@ namespace Game2Week.Core
             if (jump != null) jump.performed += OnJump;
             if (parry != null) parry.performed += OnParry;
             if (lockOn != null) lockOn.performed += OnLockOn;
+            if (brace != null) { brace.performed += OnBraceDown; brace.canceled += OnBraceUp; }
 
             navigate.performed += OnNavigate;
             navigate.canceled += OnNavigate;
@@ -99,12 +104,14 @@ namespace Game2Week.Core
             if (jump != null) jump.performed -= OnJump;
             if (parry != null) parry.performed -= OnParry;
             if (lockOn != null) lockOn.performed -= OnLockOn;
+            if (brace != null) { brace.performed -= OnBraceDown; brace.canceled -= OnBraceUp; }
             DisableAll();
         }
 
         public void EnableUI()
         {
             ClearPlayerCommands();
+            braceDown = false;
             playerMap?.Disable();
             uiMap?.Enable();
             systemMap?.Enable();
@@ -115,6 +122,7 @@ namespace Game2Week.Core
         public void EnablePlayer()
         {
             ClearPlayerCommands();
+            braceDown = false; // 실제로 누르고 있으면 맵을 켤 때 initialStateCheck로 다시 들어온다
             uiMap?.Disable();
             playerMap?.Enable();
             systemMap?.Enable();
@@ -131,6 +139,7 @@ namespace Game2Week.Core
         public void DisableAll()
         {
             ClearPlayerCommands();
+            braceDown = false;
             uiMap?.Disable();
             playerMap?.Disable();
             systemMap?.Disable();
@@ -164,5 +173,7 @@ namespace Game2Week.Core
         void OnJump(InputAction.CallbackContext _) { if (CurrentMode == Mode.Player) jumpPending = true; }
         void OnParry(InputAction.CallbackContext _) { if (CurrentMode == Mode.Player) parryPending = true; }
         void OnLockOn(InputAction.CallbackContext _) { if (CurrentMode == Mode.Player) lockPending = true; }
+        void OnBraceDown(InputAction.CallbackContext _) => braceDown = true;
+        void OnBraceUp(InputAction.CallbackContext _) => braceDown = false;
     }
 }

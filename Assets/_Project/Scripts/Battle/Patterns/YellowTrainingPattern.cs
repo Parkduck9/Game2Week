@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Game2Week.Battle.Patterns
 {
     /// <summary>예고 때 목표를 고정하는 노랑 공격. 에셋으로 직선/사인파·랜덤 조준·측면 교대를 설정한다.</summary>
-    public sealed class YellowTrainingPattern : MonoBehaviour, IAttackPattern, IThreatSource
+    public sealed class YellowTrainingPattern : MonoBehaviour, IAttackPattern, IThreatSource, IDirectablePattern
     {
         [SerializeField] Bullet bulletPrefab;
         [SerializeField] AttackColor attackColor = AttackColor.Yellow;
@@ -31,6 +31,15 @@ namespace Game2Week.Battle.Patterns
         public bool WarningActive => warningActive;
         public int ActiveBullets { get { int count = 0; foreach (var b in bullets) if (b.Active) count++; return count; } }
         public IReadOnlyList<Bullet> Bullets => bullets;
+        public AttackColor PatternColor => attackColor;
+        public float Interval => interval;
+        public float Speed => speed;
+
+        public void ApplyDifficulty(float intervalScale, float speedScale)
+        {
+            interval = Mathf.Max(warningDuration + 0.1f, interval * intervalScale);
+            speed *= speedScale;
+        }
 
         public void Begin(PatternContext value)
         {
