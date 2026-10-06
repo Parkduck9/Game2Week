@@ -64,7 +64,7 @@
 - `BattleFeedback`: 월드 사건 알림 창구 — 회피·점프·착지·쳐내기(쪽 방향)·정지 자세 완성·피격·색 통과(같은 색 0.25초에 한 번)·발사·예고. `BattleWorld.Feedback`, `PatternContext.Feedback`.
   - 주인공 쪽 Raise 연결 완료: `PlayerMover`(회피·점프·착지·자세·쳐내기), `BattleWorld`(실제 피격), `PlayerHitRule`(색 통과). 발사·예고 Raise는 Codex 6단계.
 - `BattleEvents.EnemySpoke`: 탄막 턴 시작 때 적 대사 (말풍선용).
-- `BattleFxRig` + 프리팹 `Prefabs/Battle/Fx/BattleFxRig.prefab`: Battle 씬의 `BattleController.fxRigPrefab`에 연결 → 만들어서 `Bind(events, feedback, spawner)`. Codex가 이 프리팹 아래에 이펙트를 붙이면 씬을 안 고쳐도 됨.
+- `BattleFxRig` + 프리팹 `Prefabs/Battle/FX/BattleFxRig.prefab`: Battle 씬의 `BattleController.fxRigPrefab`에 연결 → 만들어서 `Bind(events, feedback, spawner)`. Codex가 이 프리팹 아래에 이펙트를 붙이면 씬을 안 고쳐도 됨.
 - `FeedbackContractTests` (PlayMode): FxRig 연결, 적 대사·회피·점프·착지 알림.
 - 7·8단계는 서로 겹치는 파일이 없어 연결 지점이 필요 없음 (Codex 7단계는 기존 `GameSession.BeginStage` 등 공개 API만 사용).
 

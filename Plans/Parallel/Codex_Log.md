@@ -66,7 +66,7 @@
 **연결 지점 (main에 있음)**
 - `BattleFeedback` (`BattleWorld.Feedback`, `PatternContext.Feedback`): `PlayerDodged`·`PlayerJumped`·`PlayerLanded`·`PlayerParried(탄 위치, 빠져나가는 쪽 ±1)`·`PlayerBraced`·`PlayerHit`·`ColorPassed(색, 위치)` — 주인공 쪽은 Claude 코드가 이미 Raise한다. `BulletFired(색, 위치)`·`WarningStarted(색, 위치)`는 **패턴이 Raise해야 한다 (Codex)**.
 - `BattleEvents.EnemySpoke(대사)` — 탄막 턴 시작 때 Raise됨. 그 밖에 `StateChanged`·`EnemyDamaged`·`PlayerDamaged`·`BattleEnded`.
-- `BattleFxRig` (`Scripts/Battle/View/Fx/BattleFxRig.cs`) + 프리팹 `Prefabs/Battle/Fx/BattleFxRig.prefab` — Battle 씬에 이미 연결돼 있고, BattleController가 만들어 `Bind(events, feedback, spawner)` 한다. **새 이펙트는 이 프리팹 아래에 붙이고 `OnBound()`에서 구독** → 씬을 고칠 필요 없음. `BattleFxRig.cs`와 프리팹은 이 단계부터 Codex 담당 (Bind 시그니처만 유지).
+- `BattleFxRig` (`Scripts/Battle/View/Fx/BattleFxRig.cs`) + 프리팹 `Prefabs/Battle/FX/BattleFxRig.prefab` — Battle 씬에 이미 연결돼 있고, BattleController가 만들어 `Bind(events, feedback, spawner)` 한다. **새 이펙트는 이 프리팹 아래에 붙이고 `OnBound()`에서 구독** → 씬을 고칠 필요 없음. `BattleFxRig.cs`와 프리팹은 이 단계부터 Codex 담당 (Bind 시그니처만 유지).
 
 **만들 것**
 1. 패턴(`GraphAttackPattern`·`YellowTrainingPattern`·`PatternDirector` 하위)이 발사·예고 때 `context.Feedback.RaiseBulletFired / RaiseWarningStarted`.
@@ -77,7 +77,7 @@
 6. 풀링 (매 발사 Instantiate 금지), 일시정지(Time.timeScale 0)에서 멈춤, 전투 종료 시 정리.
 7. 테스트: FxRig 구독·이펙트 생성·풀 재사용·종료 정리, 말풍선 표시/숨김. 화면 캡처는 `SceneCapture.Save`.
 
-**담당 파일**: `Scripts/Battle/View/Fx/` (BattleFxRig 포함), 새 `Prefabs/Battle/Fx/` 하위, 기존 `BattleEffects.cs`·`BattlePresentation.cs`·`EnemyView.cs`·`Prefabs/Battle/FX_*`·`Prefabs/Enemies/`, `Art/Placeholder/Materials/FX_*` · 테스트 새 `Tests/*/BattleFx*`. **주의**: `BattleWorld`가 `BattleEffects.PlayGemPickup`, `BattleController`가 `BattlePresentation.Bind(events, enemy, player)`를 부르므로 이 둘의 공개 메서드는 유지. 카메라 흔들림은 기존처럼 `BattleCameraDirector.Shake`만 사용 (진폭 조절).
+**담당 파일**: `Scripts/Battle/View/Fx/` (BattleFxRig 포함), 새 `Prefabs/Battle/FX/` 하위, 기존 `BattleEffects.cs`·`BattlePresentation.cs`·`EnemyView.cs`·`Prefabs/Battle/FX_*`·`Prefabs/Enemies/`, `Art/Placeholder/Materials/FX_*` · 테스트 새 `Tests/*/BattleFx*`. **주의**: `BattleWorld`가 `BattleEffects.PlayGemPickup`, `BattleController`가 `BattlePresentation.Bind(events, enemy, player)`를 부르므로 이 둘의 공개 메서드는 유지. 카메라 흔들림은 기존처럼 `BattleCameraDirector.Shake`만 사용 (진폭 조절).
 
 ### 7단계 — 맵툴 2차 (M5)
 
