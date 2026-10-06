@@ -68,6 +68,45 @@ namespace Game2Week.Tests
             Assert.Less(battle.Context.Enemy.CurrentHp, battle.Context.Enemy.MaxHp);
 
             yield return new WaitForSeconds(0.9f);
+            battle.Context.ChangeState(BattleStateId.Defeat);
+            yield return new WaitForSeconds(0.6f);
+            Assert.IsFalse(spawner.Player.GetComponentInChildren<Renderer>().enabled, "패배 연출: 주인공 사라짐");
+            SceneCapture.Save("battle_6_Defeat");
+        }
+
+        /// <summary>11단계 확장성: 코드 수정 없이 에셋만으로 만든 1-2 (주황 적, 빠른 결정탄, 8×9m 경기장)</summary>
+        [UnityTest]
+        public IEnumerator Stage2_FromAssetsOnly_Works()
+        {
+            SceneManager.LoadScene(SceneNames.StageSelect);
+            yield return SceneFlowTests.WaitForScene(SceneNames.StageSelect);
+            Object.FindAnyObjectByType<StageSelectController>().Choose(1);
+            yield return SceneFlowTests.WaitForScene(SceneNames.Battle);
+            BattleController battle = null;
+            yield return SceneFlowTests.WaitForBattle(c => battle = c);
+
+            Assert.AreEqual("stage_002", battle.Context.Stage.id);
+            Assert.AreEqual(new Vector2(8f, 9f), battle.Spawner.Arena.Size);
+            Assert.AreEqual("주황 테스트 적", battle.Context.Enemy.Data.DisplayName);
+            Assert.AreEqual(3, battle.Context.Enemy.Data.Acts.Count);
+
+            battle.Context.ChangeState(BattleStateId.EnemyTurn);
+            yield return new WaitForSeconds(1.2f);
+            var pattern = battle.World.Patterns.CurrentObject.GetComponent<Game2Week.Battle.Patterns.RadialBurstPattern>();
+            Assert.Greater(pattern.ActiveBullets, 0);
+            SceneCapture.Save("stage2_EnemyTurn");
+
+            battle.Context.ChangeState(BattleStateId.ActionMenu);
+            yield return new WaitForSeconds(1f);
+            SceneCapture.Save("stage2_ActionMenu");
+        }
+
+        [UnityTest]
+        public IEnumerator ItemMenu_Capture()
+        {
+            SceneManager.LoadScene(SceneNames.Battle);
+            BattleController battle = null;
+            yield return SceneFlowTests.WaitForBattle(c => battle = c);
             battle.Context.ChangeState(BattleStateId.ItemMenu);
             yield return new WaitForSeconds(0.8f);
             SceneCapture.Save("battle_5_ItemMenu");

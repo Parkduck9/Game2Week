@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>교체할 리소스 목록</title>
+<style>
+  :root {
+    --bg: #f6f5f2; --surface: #ffffff; --text: #1b1b1b; --muted: #6b6b6b; --line: #e2e0da;
+    --accent: #3d6fb6; --ok: #2f8a4c; --warn-bg: #fff6e6; --warn-line: #f0c77a; --warn-text: #8a5a00; --code-bg: #f1ece2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #101010; --surface: #191919; --text: #f0f0f0; --muted: #a0a0a0; --line: #2e2e2e;
+      --accent: #8fb3ff; --ok: #6cc98a; --warn-bg: #221b0f; --warn-line: #6a5420; --warn-text: #f0c77a; --code-bg: #232323;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #101010; --surface: #191919; --text: #f0f0f0; --muted: #a0a0a0; --line: #2e2e2e;
+    --accent: #8fb3ff; --ok: #6cc98a; --warn-bg: #221b0f; --warn-line: #6a5420; --warn-text: #f0c77a; --code-bg: #232323;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.6 "Pretendard", "Malgun Gothic", system-ui, sans-serif; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 28px 16px 80px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 18px; }
+  h2 { font-size: 19px; margin: 32px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin: 10px 0; }
+  .warn { background: var(--warn-bg); border-color: var(--warn-line); }
+  .warn b { color: var(--warn-text); }
+  .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 720px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; background: var(--bg); }
+  tr:last-child td { border-bottom: 0; }
+  code { font-family: Consolas, "D2Coding", monospace; font-size: 12.5px; background: var(--code-bg); padding: 0 4px; border-radius: 3px; }
+  .tag { font-size: 12px; font-weight: 700; border-radius: 4px; padding: 0 6px; white-space: nowrap; }
+  .gpt { background: #e7f6ec; color: var(--ok); }
+  .tbd { background: var(--warn-bg); color: var(--warn-text); }
+  .done { background: #eaf1fb; color: var(--accent); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .gpt { background: #13281a; } :root:not([data-theme="light"]) .done { background: #18233a; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>교체할 리소스 목록 · 규격</h1>
+  <p class="sub">지금은 모두 임시(코드로 만든 로우폴리 도형·단색). 아래 경로에 같은 이름/연결로 바꿔 끼우면 코드 수정 없이 교체된다.</p>
+
+  <div class="card warn">
+    <b>결정 필요</b>: 3D 모델 출처(에셋 스토어 / Blender 직접 / AI 3D 생성), 게임 이름(로고·스토어), 사운드 출처.
+    <span class="tag gpt">ChatGPT</span> = Codex 이미지 생성으로 가능 · <span class="tag tbd">미정</span> = 출처 결정 필요 · <span class="tag done">있음</span> = 이미 만듦
+  </div>
+
+  <h2>3D 모델 (로우폴리, 단색 머티리얼)</h2>
+  <div class="table-wrap"><table>
+    <tr><th>항목</th><th>지금</th><th>규격</th><th>교체 위치 / 연결</th><th>출처</th></tr>
+    <tr><td>주인공</td><td>three.js로 만든 GLB v1 (리깅 없음)</td><td>≤ 8k 삼각형, 키 ≈ 1m, +Z 정면, 발바닥 원점 · 리깅 + 대기/달리기/피격/승리/패배 애니메이션</td><td><code>Art/Characters/Heroine/</code> → <code>Prefabs/Battle/Player_Heroine</code>의 Model 교체</td><td><span class="tag tbd">미정</span></td></tr>
+    <tr><td>적 (테스트 적 2종)</td><td>보라·주황 덩어리 + 눈 + 뿔</td><td>≤ 5k 삼각형, 바닥 원점, +Z 정면 · 피격/공격/처치/살려줌 애니메이션 (지금은 코드 연출)</td><td>새 프리팹에 <code>EnemyView</code> 붙이고 <code>EnemyData.viewPrefab</code>에 연결</td><td><span class="tag tbd">미정</span></td></tr>
+    <tr><td>결정탄</td><td>발광 팔면체 (청록·보라)</td><td>≤ 50 삼각형, 진행 방향 +Z, 반지름 ≈ 0.14m</td><td><code>Prefabs/Battle/Patterns/Bullet_*</code>의 Visual</td><td><span class="tag tbd">미정</span></td></tr>
+    <tr><td>보석</td><td>팔면체 (회복 초록·공격 주황·살림 분홍)</td><td>≤ 100 삼각형, 종류별 색/모양 구분</td><td><code>Prefabs/Battle/Gem</code> (종류별 머티리얼 목록)</td><td><span class="tag tbd">미정</span></td></tr>
+    <tr><td>경기장</td><td>큐브 바닥·벽·격자선</td><td>크기 가변이라 타일/9-slice 방식 바닥 + 벽 모듈</td><td><code>BattleArena</code>의 머티리얼 3종 (바닥·벽·격자선)</td><td><span class="tag tbd">미정</span></td></tr>
+    <tr><td>이펙트</td><td>큐브 파티클</td><td>피격·보석 획득·패배 파편</td><td><code>Prefabs/Battle/FX_*</code></td><td><span class="tag tbd">미정</span></td></tr>
+  </table></div>
+
+  <h2>2D 이미지</h2>
+  <div class="table-wrap"><table>
+    <tr><th>항목</th><th>규격</th><th>위치</th><th>출처</th></tr>
+    <tr><td>타이틀 배경</td><td>1920×1080, 글자 없음</td><td><code>Reference/title_screen.png</code> → 메인 메뉴 배경으로 쓸지 결정</td><td><span class="tag done">있음</span></td></tr>
+    <tr><td>스토어 스크린샷</td><td>1920×1080 (최소 1장, 권장 4장)</td><td><code>Reference/store_screenshot.png</code> + 실제 게임 캡처(<code>Logs/scene_*.png</code>)</td><td><span class="tag done">있음</span></td></tr>
+    <tr><td>게임 로고</td><td>투명 PNG, 가로형</td><td>메인 메뉴 제목(TMP 대신)</td><td><span class="tag gpt">ChatGPT</span> (이름 확정 후)</td></tr>
+    <tr><td>앱 아이콘 (MSIX)</td><td>StoreLogo 50² · Square44² · Square150² · Wide 310×150 PNG</td><td><code>Tools/msix/Images/</code> (없으면 스크립트가 임시 생성)</td><td><span class="tag gpt">ChatGPT</span></td></tr>
+    <tr><td>스토어 목록 아이콘</td><td>300×300 PNG</td><td>파트너 센터 업로드</td><td><span class="tag gpt">ChatGPT</span></td></tr>
+    <tr><td>UI 스킨</td><td>대사창 테두리(9-slice), 메뉴 커서 아이콘(지금 "&gt; "), 게이지 바</td><td><code>BattleUi</code> 아래 Image들</td><td><span class="tag gpt">ChatGPT</span></td></tr>
+  </table></div>
+
+  <h2>사운드</h2>
+  <div class="table-wrap"><table>
+    <tr><th>항목</th><th>연결 지점</th><th>출처</th></tr>
+    <tr><td>효과음: 적 피격 · 빗나감 · 주인공 피격 · 승리 · 패배</td><td><code>BattleAudio</code> (Battle 씬) 클립 칸에 넣으면 바로 재생, 음량 = 설정의 효과음</td><td><span class="tag tbd">미정</span></td></tr>
+    <tr><td>효과음: 메뉴 이동·확인·취소, 대사 출력음, 게이지 멈춤, 보석 획득</td><td>연결 지점 추가 필요 (MenuNavigator·DialogueBox·TimingGaugeView·BattleWorld)</td><td><span class="tag tbd">미정</span></td></tr>
+    <tr><td>배경음: 메인 · 전투 · 엔딩</td><td>BGM 재생기 + AudioMixer (설정의 배경음 음량) 추가 필요</td><td><span class="tag tbd">미정</span></td></tr>
+  </table></div>
+
+  <h2>글꼴</h2>
+  <div class="card">Pretendard (OFL) <span class="tag done">있음</span> — 동적 아틀라스라 플레이할 때마다 에셋이 바뀜. 출시 전 정적 아틀라스(완성형 2350자 + 영문·기호)로 굽는 것을 권장.</div>
+</div>
+</body>
+</html>

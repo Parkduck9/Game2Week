@@ -24,6 +24,8 @@ namespace Game2Week.Flow
         [SerializeField] StatusBar statusBar;
         [SerializeField] PauseMenu pauseMenu;
         [SerializeField] EnemyHealthBar enemyHealthBar;
+        [Tooltip("효과음 연결 지점 (선택)")]
+        [SerializeField] BattleAudio audioHooks;
 
         BattleStateMachine machine;
         bool finished;
@@ -62,7 +64,8 @@ namespace Game2Week.Flow
             Context = new BattleContext(machine, events, input, ui, world, stage, player, enemy, gems, gemRewards, Finish, StagePatternSource(stage));
             BattleStates.RegisterAll(machine, Context);
 
-            presentation.Bind(events, spawner.Enemy);
+            presentation.Bind(events, spawner.Enemy, world.Player);
+            if (audioHooks) audioHooks.Bind(events, () => session.Save.Settings.sfxVolume);
             statusBar.Bind(events, player.Data.DisplayName, player.Data.Level, player.CurrentHp, player.MaxHp);
             if (enemyHealthBar) enemyHealthBar.Bind(events, enemyData.DisplayName, enemy.CurrentHp, enemy.MaxHp);
             machine.StateChanged += (_, id) => events.RaiseStateChanged(id);

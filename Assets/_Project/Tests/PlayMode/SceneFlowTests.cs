@@ -82,7 +82,7 @@ namespace Game2Week.Tests
             var result = Find<ResultController>();
             Assert.AreEqual("전투 종료", result.Title);
             StringAssert.Contains(UiTexts.NewRecord, result.TimeText);
-            Assert.AreEqual(UiTexts.ToEnding, result.Items[0], "스테이지가 1개뿐 → 마지막 → 엔딩으로");
+            Assert.AreEqual(UiTexts.NextStage, result.Items[0], "1-1 클리어 → 다음 스테이지(1-2) 해금");
             SceneCapture.Save("result_victory");
 
             result.Choose(UiTexts.Retry);
@@ -98,6 +98,8 @@ namespace Game2Week.Tests
             result.Choose(UiTexts.StageSelect);
             yield return WaitForScene(SceneNames.StageSelect);
             StringAssert.Contains("최고", Find<StageSelectController>().Items[0]);
+            Assert.AreEqual(2, Find<StageSelectController>().Items.Count, "1-2가 열림");
+            StringAssert.Contains(UiTexts.NoRecord, Find<StageSelectController>().Items[1]);
             SceneCapture.Save("stage_select");
 
             Find<StageSelectController>().Back();
@@ -131,6 +133,15 @@ namespace Game2Week.Tests
             yield return WaitForScene(SceneNames.StageSelect);
 
             yield return PlayStageOne(BattleOutcome.EnemyDefeated);
+            Find<ResultController>().Choose(UiTexts.NextStage);
+            yield return WaitForScene(SceneNames.Battle);
+            BattleController battle = null;
+            yield return WaitForBattle(c => battle = c);
+            Assert.AreEqual("stage_002", battle.Context.Stage.id);
+            battle.Context.FinishBattle(BattleOutcome.EnemySpared);
+            yield return WaitForScene(SceneNames.Result);
+
+            Assert.AreEqual(UiTexts.ToEnding, Find<ResultController>().Items[0], "마지막 스테이지 첫 클리어 → 엔딩으로");
             Find<ResultController>().Choose(UiTexts.ToEnding);
             yield return WaitForScene(SceneNames.Ending);
             yield return new WaitForSeconds(2f);

@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9816ac249ce96f949966d58961edc1fd, type: 3}
+  m_Name: Enemy_Test2
+  m_EditorClassIdentifier: Game2Week::Game2Week.Data.EnemyData
+  displayName: "\uC8FC\uD669 \uD14C\uC2A4\uD2B8 \uC801"
+  viewPrefab: {fileID: 8507462718094043349, guid: eb888dc149aa82c4985edc37b1ccded0, type: 3}
+  maxHp: 45
+  attack: 5
+  defense: 2
+  checkText: "* \uC8FC\uD669 \uD14C\uC2A4\uD2B8 \uC801 - \uACF5\uACA9 5 \uBC29\uC5B4
+    2\n* \uC131\uACA9\uC774 \uAE09\uD558\uB2E4."
+  encounterText: "* \uC8FC\uD669 \uD14C\uC2A4\uD2B8 \uC801\uC774 \uAD74\uB7EC\uC654\uB2E4!"
+  flavorTexts:
+  - "* \uC8FC\uD669 \uD14C\uC2A4\uD2B8 \uC801\uC774 \uC81C\uC790\uB9AC\uC5D0\uC11C
+    \uD1B5\uD1B5 \uB6F4\uB2E4."
+  - "* \uACF5\uAE30\uAC00 \uB530\uB73B\uD574\uC84C\uB2E4."
+  enemyTurnLines:
+  - "\uBE68\uB9AC\uBE68\uB9AC!"
+  - "\uB354 \uBE60\uB974\uAC8C!"
+  spareText: "* \uC8FC\uD669 \uD14C\uC2A4\uD2B8 \uC801\uC744 \uC0B4\uB824 \uC8FC\uC5C8\uB2E4."
+  defeatText: "* \uC8FC\uD669 \uD14C\uC2A4\uD2B8 \uC801\uC744 \uC4F0\uB7EC\uB728\uB838\uB2E4."
+  acts:
+  - displayName: "\uCE6D\uCC2C\uD558\uAE30"
+    resultText: "* \uBE60\uB974\uB2E4\uACE0 \uCE6D\uCC2C\uD588\uB2E4.\n* \uC6B0\uCB50\uD574\uD55C\uB2E4."
+    spareProgress: 1
+  - displayName: "\uAC19\uC774 \uB6F0\uAE30"
+    resultText: "* \uAC19\uC774 \uD1B5\uD1B5 \uB6F0\uC5C8\uB2E4.\n* \uC2E0\uB098
+      \uBCF4\uC778\uB2E4."
+    spareProgress: 2
+  - displayName: "\uAE30\uB2E4\uB9AC\uAE30"
+    resultText: "* \uAC00\uB9CC\uD788 \uAE30\uB2E4\uB838\uB2E4.\n* ...\uC2EC\uC2EC\uD574
+      \uBCF4\uC778\uB2E4."
+    spareProgress: 0
+  spareThreshold: 3
+  attackPatterns:
+  - {fileID: 11400000, guid: d2298e2d19a29e04cb5d8666980ad51c, type: 2}
+  patternOrder: 0

@@ -414,3 +414,18 @@
 ### 다음에 할 일
 - 10·11 검증: 처치·살려주기·패배 루트 실제 플레이, 두 번째 적/패턴을 에셋 복제만으로 추가해 보기.
 - 사용자 결정 대기: 게임 이름·회사 이름, Flee 여부, 3D 모델 출처, 동적 폰트 처리.
+---
+
+## 2026-10-06 — 10·11 검증 완료
+
+### 한 일
+- 10: 패배 연출(주인공 파편 + 사라짐 + 흔들림, 카메라는 전체 샷), `BattlePresentation`에 주인공 연결.
+- 11-1 `BattleRouteTests`: InputTestFixture 키보드 봇이 1-1을 **처치(6.1초) · 살려주기(5.7초) · 패배(6.8초, timeScale 3)** 세 결말까지 실제 입력으로 플레이 → 결과 화면·세이브 기록 확인.
+- 11-2 확장성: 에디터 API만으로(코드 수정 0) `Enemy_Test2` + `EnemyView_TestBlob_Orange`(프리팹 Variant), `Pattern_Test2` + `Pattern_RadialBurst_Fast`(Variant: 6발·0.75초·3.3m/s·25°), `stage_002`(16×18칸, 보석 2, StageRepository 저장) → `Stage2_FromAssetsOnly_Works` 통과. 스테이지가 2개라 서비스 흐름 테스트도 "다음 스테이지 → 1-2 → 엔딩"으로 갱신.
+- 11-3 `BattleAudio`(효과음 연결 지점), 11-4 `Plans/Resource_List.html`(교체 리소스·규격·위치·출처), 대시보드 링크.
+- 테스트: EditMode 106, PlayMode 10 전부 통과. **완료 기준(DoD) 5개 모두 체크.**
+
+### 다음에 할 일
+- 사용자 결정 대기: 게임·회사 이름(세이브 경로!), Flee, 3D 모델 출처, 동적 폰트, 사운드 출처.
+- 집에서: `Plans/Store_Guide.html` 순서대로 설치·삭제 확인 → 스토어 제출.
+- 남은 다듬기: 클로즈업 피격 파티클 크기, 적 말풍선, 메뉴 효과음·BGM 연결 지점, 맵툴 2차(M5), 주인공 모델 v2·리깅.

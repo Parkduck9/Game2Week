@@ -3,29 +3,34 @@ using UnityEngine;
 namespace Game2Week.Battle.View
 {
     /// <summary>
-    /// 전투 이벤트 → 3D 연출 (카메라 샷, 적 애니메이션, 이펙트). 로직은 이 클래스를 모른다.
+    /// 전투 이벤트 → 3D 연출 (카메라 샷, 적·주인공 연출, 이펙트). 로직은 이 클래스를 모른다.
     /// </summary>
     public sealed class BattlePresentation : MonoBehaviour
     {
         [SerializeField] BattleCameraDirector cameraDirector;
         [SerializeField] BattleEffects effects;
+        [Tooltip("피격 파티클을 카메라 쪽으로 당기는 거리 (m) — 적 몸에 묻히지 않게")]
+        [SerializeField] float hitTowardCamera = 0.45f;
 
         BattleEvents events;
         EnemyView enemy;
+        PlayerMover player;
 
         public static BattleShot ShotFor(BattleStateId state) => state switch
         {
             BattleStateId.Intro => BattleShot.Intro,
             BattleStateId.EnemyTurn => BattleShot.Overview,
             BattleStateId.Fight => BattleShot.AttackCloseUp,
+            BattleStateId.Defeat => BattleShot.Overview,
             _ => BattleShot.EnemyFocus,
         };
 
-        public void Bind(BattleEvents battleEvents, EnemyView enemyView)
+        public void Bind(BattleEvents battleEvents, EnemyView enemyView, PlayerMover playerMover)
         {
             Unbind();
             events = battleEvents;
             enemy = enemyView;
+            player = playerMover;
             events.StateChanged += OnStateChanged;
             events.EnemyDamaged += OnEnemyDamaged;
             events.PlayerDamaged += OnPlayerDamaged;
@@ -50,10 +55,9 @@ namespace Game2Week.Battle.View
         {
             if (amount <= 0 || !enemy) return;
             enemy.PlayHit();
-            // 적 몸 안에 묻히지 않게 카메라 쪽 표면에서 터뜨린다
             var pos = enemy.transform.position + Vector3.up * 0.6f;
             var cam = Camera.main;
-            if (cam) pos += (cam.transform.position - pos).normalized * 0.6f;
+            if (cam) pos += (cam.transform.position - pos).normalized * hitTowardCamera;
             effects.PlayHit(pos);
         }
 
@@ -61,9 +65,21 @@ namespace Game2Week.Battle.View
 
         void OnBattleEnded(BattleOutcome outcome)
         {
-            if (!enemy) return;
-            if (outcome == BattleOutcome.EnemyDefeated) enemy.PlayDefeated();
-            else if (outcome == BattleOutcome.EnemySpared) enemy.PlaySpared();
+            switch (outcome)
+            {
+                case BattleOutcome.EnemyDefeated:
+                    if (enemy) enemy.PlayDefeated();
+                    break;
+                case BattleOutcome.EnemySpared:
+                    if (enemy) enemy.PlaySpared();
+                    break;
+                case BattleOutcome.PlayerDefeated:
+                    // 임시 패배 연출: 주인공이 파편으로 흩어지며 사라짐
+                    if (!player) break;
+                    effects.PlayHit(player.transform.position + Vector3.up * 0.5f, 1.5f);
+                    player.SetVisible(false);
+                    break;
+            }
         }
     }
 }

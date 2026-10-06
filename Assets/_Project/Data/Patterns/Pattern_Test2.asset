@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02178c6dab15cd6468e439a991232290, type: 3}
+  m_Name: Pattern_Test2
+  m_EditorClassIdentifier: Game2Week::Game2Week.Data.AttackPatternData
+  displayName: "\uBE60\uB978 \uACB0\uC815\uD0C4"
+  patternPrefab: {fileID: 7901585803645836398, guid: d67f9f4ed6b4a5541a1664c60b39ce50, type: 3}

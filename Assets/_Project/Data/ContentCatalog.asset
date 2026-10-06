@@ -14,5 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game2Week::Game2Week.Data.ContentCatalog
   enemies:
   - {fileID: 11400000, guid: 2b8845b0715992a47872b52fb6f065a8, type: 2}
+  - {fileID: 11400000, guid: 5f06e16e344f18543acf657f25a95bd2, type: 2}
   patterns:
   - {fileID: 11400000, guid: c1c6e4638125bbb42a39b78446000747, type: 2}
+  - {fileID: 11400000, guid: d2298e2d19a29e04cb5d8666980ad51c, type: 2}
