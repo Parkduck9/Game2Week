@@ -19,7 +19,9 @@ namespace Game2Week.Battle.View
             var motor = world.Player.Motor;
             string dodge = motor.DodgeCooldown > 0f ? $"회피 {motor.DodgeCooldown:0.0}초" : "회피 준비";
             string parry = motor.ParryCooldown > 0f ? $"쳐내기 {motor.ParryCooldown:0.0}초" : "쳐내기 준비";
-            label.text = $"{dodge}  ·  {parry}  ·  {(cameraDirector.IsLockedOn ? "록온" : "자유 시점")}";
+            string brace = motor.BraceReady ? $"<color=#FF5A5A>{BattleTexts.BraceReady}</color>"
+                : motor.Bracing ? BattleTexts.BraceSettling : BattleTexts.BraceIdle;
+            label.text = $"{dodge}  ·  {parry}  ·  {brace}  ·  {(cameraDirector.IsLockedOn ? "록온" : "자유 시점")}";
         }
     }
 }

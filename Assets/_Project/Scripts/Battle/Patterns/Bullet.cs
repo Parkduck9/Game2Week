@@ -14,8 +14,17 @@ namespace Game2Week.Battle.Patterns
         [SerializeField] bool parryable;
         [SerializeField] AttackColor color = AttackColor.Yellow;
 
+        // 색만으로 구분하지 않도록 회전도 다르게: 빨강 = 멈춰 있음(정지 자세), 파랑 = 빠르게 돎(움직이기)
+        static readonly UnityEngine.Color RedTint = new(1f, 0.25f, 0.25f, 1f);
+        static readonly UnityEngine.Color BlueTint = new(0.3f, 0.62f, 1f, 1f);
+        const float BlueSpinMultiplier = 2f;
+        static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+        static readonly int ColorId = Shader.PropertyToID("_Color");
+
         Vector3 velocity;
         ITrajectory trajectory;
+        Renderer[] renderers;
+        MaterialPropertyBlock tintBlock;
         TrajectoryLaunch launch;
         float elapsed;
 
@@ -36,6 +45,7 @@ namespace Game2Week.Battle.Patterns
             this.trajectory = trajectory;
             launch = new TrajectoryLaunch(position, flatVelocity);
             elapsed = 0f;
+            ApplyTint();
             if (velocity.sqrMagnitude > 0.0001f) transform.rotation = Quaternion.LookRotation(velocity);
             Active = true;
             Deflected = false;
@@ -75,7 +85,7 @@ namespace Game2Week.Battle.Patterns
                 return false;
             }
             Move(deltaTime);
-            transform.Rotate(0f, 0f, spinSpeed * deltaTime, Space.Self);
+            transform.Rotate(0f, 0f, SpinFor(color) * deltaTime, Space.Self);
             var mover = context.PlayerMover;
             if (Parryable && mover && mover.Motor.CanParry &&
                 Vector3.Dot(before - context.Player.position, context.Player.forward) >= -0.15f &&
@@ -100,6 +110,29 @@ namespace Game2Week.Battle.Patterns
                 return false;
             }
             return false;
+        }
+
+        float SpinFor(AttackColor c) => c switch
+        {
+            AttackColor.Red => 0f,
+            AttackColor.Blue => spinSpeed * BlueSpinMultiplier,
+            _ => spinSpeed,
+        };
+
+        /// <summary>노랑은 프리팹 재질 그대로, 빨강·파랑은 색을 덮어쓴다 (풀에서 재사용돼도 매 발사마다 갱신).</summary>
+        void ApplyTint()
+        {
+            renderers ??= GetComponentsInChildren<Renderer>(true);
+            if (color == AttackColor.Yellow)
+            {
+                foreach (var r in renderers) if (r) r.SetPropertyBlock(null);
+                return;
+            }
+            tintBlock ??= new MaterialPropertyBlock();
+            var tint = color == AttackColor.Red ? RedTint : BlueTint;
+            tintBlock.SetColor(BaseColorId, tint);
+            tintBlock.SetColor(ColorId, tint);
+            foreach (var r in renderers) if (r) r.SetPropertyBlock(tintBlock);
         }
 
         protected virtual void Move(float deltaTime)
