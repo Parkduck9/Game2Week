@@ -14,7 +14,7 @@ namespace Game2Week.Tests
     {
         const float Timeout = 10f;
 
-        static IEnumerator WaitForScene(string name)
+        public static IEnumerator WaitForScene(string name)
         {
             float start = Time.realtimeSinceStartup;
             while (SceneManager.GetActiveScene().name != name || SceneLoader.IsLoading)
@@ -25,7 +25,18 @@ namespace Game2Week.Tests
             yield return null; // Start() 실행 대기
         }
 
-        static void Capture(string name) => SceneCapture.Save(name);
+        public static IEnumerator WaitForBattle(System.Action<BattleController> found)
+        {
+            float start = Time.realtimeSinceStartup;
+            BattleController controller = null;
+            while (controller == null || !controller.IsReady)
+            {
+                if (Time.realtimeSinceStartup - start > Timeout) Assert.Fail("Battle 준비 시간 초과");
+                controller = Object.FindAnyObjectByType<BattleController>();
+                yield return null;
+            }
+            found(controller);
+        }
 
         static T Find<T>() where T : Object
         {
@@ -39,21 +50,23 @@ namespace Game2Week.Tests
         {
             SceneManager.LoadScene(SceneNames.MainMenu);
             yield return WaitForScene(SceneNames.MainMenu);
-            Capture(SceneNames.MainMenu);
+            SceneCapture.Save(SceneNames.MainMenu);
 
             Find<MainMenuController>().Choose(MainMenuController.StartIndex);
             yield return WaitForScene(SceneNames.Battle);
-            Capture(SceneNames.Battle);
+            BattleController battle = null;
+            yield return WaitForBattle(c => battle = c);
 
-            Find<BattleFlowStub>().Finish(BattleOutcome.EnemySpared);
+            battle.Context.FinishBattle(BattleOutcome.EnemySpared);
             yield return WaitForScene(SceneNames.Result);
             Assert.AreEqual("전투 종료", Find<ResultController>().Title);
-            Capture(SceneNames.Result);
+            SceneCapture.Save(SceneNames.Result);
 
             Find<ResultController>().Choose(ResultController.RetryIndex);
             yield return WaitForScene(SceneNames.Battle);
+            yield return WaitForBattle(c => battle = c);
 
-            Find<BattleFlowStub>().Finish(BattleOutcome.PlayerDefeated);
+            battle.Context.FinishBattle(BattleOutcome.PlayerDefeated);
             yield return WaitForScene(SceneNames.Result);
             Assert.AreEqual("GAME OVER", Find<ResultController>().Title);
 

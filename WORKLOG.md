@@ -290,7 +290,39 @@
 - 임시 적 디자인(보라 로우폴리 덩어리 + 큰 눈 + 뿔), 보석 색(회복 초록 / 공격 주황 / 살림 분홍), 경기장 색(어두운 남색 바닥 + 밝은 벽).
 - 카메라: 탄막 턴 55° 내려다보기·FOV 40, 블렌드 0.6초.
 
+### 추가 (같은 날)
+- 커밋 `93c2e98` (M3 + 05).
+- GitHub 연결: 사용자가 만든 빈 저장소 https://github.com/Parkduck9/Game2Week 를 `origin`으로 추가하고 `main` push (커밋 5개). 이후 `git push`만 하면 됨.
+
+---
+
+## 2026-10-06 — 06 전투 흐름·UI (+ 08, 09 일부) + 서비스 흐름 계획
+
+### 한 일
+- 상태 10종 (`BattleStates.cs`): Intro → EnemyTurn → ActionMenu(공격/행동/자비) | ItemMenu(아이템/넘기기) → Fight/Act/Item/Mercy → Victory/Defeat.
+  - EnemyTurn: 주인공 리셋·보석 굴리기·턴 표시, 이동, 보석 먹기→보상 팝업, 적 접촉→ActionMenu, 시간 끝→ItemMenu, HP 0→Defeat.
+  - Fight는 **임시**로 바로 데미지 (07에서 타이밍 공격으로 교체).
+- `IBattleUi`/`IBattleWorld` 인터페이스 + `BattleContext` 확장(전투원·스테이지·보석·보상 설정·종료 콜백), `BattleTexts`(공통 문구).
+- View: `PlayerMover`(8방향 2.8m/s, 경계 제한, 통통), `BattleWorld`, `BattlePresentation`(상태→카메라 샷, 피격·종료 연출).
+- UI: `BattleUi`, `DialogueBox`(타자 효과), `StatusBar`, `TurnHud`, `PopupText`, `BarView` — Battle 씬에 에디터 스크립트로 배치.
+- `BattleController`가 조립 루트, 임시 `BattleFlowStub`·`BattleStageBootstrap` 삭제.
+- 테스트: EditMode 89 (흐름 테스트 11개 추가), PlayMode 3 — **실제 키보드 입력 테스트** 포함(↑로 적에게 닿기 → →,Z로 행동 → X로 취소).
+- 캡처 확인 후 수정: 메뉴에 탄막 턴 표시가 남음(EnemyTurn.Exit에서 HideAll), 하단 메뉴가 HP 줄과 겹침(메뉴 오른쪽으로).
+
+### 실수 → 규칙
+- MonoBehaviour 4개를 한 파일에 둠 → Unity는 파일 이름 = 클래스 이름이어야 씬에 붙음 → 파일 분리, CLAUDE.md 규칙 추가.
+- manifest testables 때문에 Input System 패키지 테스트가 같이 돎 → `-assemblyNames`로 우리 테스트만.
+
+### 사용자 요청 (서비스 수준) → 결정
+- 메인(새로 시작·이어하기·설정·종료) → 스테이지 선택(해금·최고기록) → ESC 일시정지 → 엔딩 → 메인, 진행·설정 저장, 스토어 설치·삭제(집에서).
+- Microsoft Store(MSIX), 최고기록 = 클리어 시간 + 결과 종류, 설정 = 음량·화면 모드/해상도·텍스트 속도, 삭제 시 세이브도 삭제.
+- `Plans/Service_Plan.html` 작성 (흐름, 세이브 구조, S1~S8, 집에서 할 일), 대시보드 링크, TODO 섹션.
+
+### Claude가 기본값으로 정한 것
+- 메뉴 이름 임시: 공격/행동/자비, 아이템/넘기기, 살펴보기, 살려주기. 하단 대사창 + 왼쪽 아래 HP 줄 + 위쪽 턴 표시 배치.
+- 탄막 턴마다 주인공은 시작 칸으로 돌아감.
+- 서비스 계획: 새로 시작은 진행만 초기화(설정 유지), 해금은 "클리어한 다음 하나까지"로 계산, 일시정지 메뉴에 설정 추가.
+
 ### 다음에 할 일
-- 06 전투 UI + BattleController: 상태 머신에 실제 상태 등록(Intro → 탄막 턴 → 메뉴 2종), 하단 대사창, 메뉴 2종, 상태줄,
-  카메라·EnemyView를 BattleEvents에 연결, BattleFlowStub·BattleStageBootstrap 정리.
-- (09 일부 선행 가능) 주인공 이동·적 접촉·보석 먹기.
+- 사용자에게 순서 확인: 서비스 흐름 S1~S5 먼저 vs 07(타이밍 공격)·09(탄막) 먼저.
+- 이번 06 작업 커밋 여부 확인.

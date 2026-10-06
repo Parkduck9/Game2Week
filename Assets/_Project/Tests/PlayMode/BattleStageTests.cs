@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Linq;
+using Game2Week.Battle;
 using Game2Week.Battle.View;
 using Game2Week.Core;
 using Game2Week.Flow;
@@ -10,51 +12,46 @@ using UnityEngine.TestTools;
 
 namespace Game2Week.Tests
 {
-    /// <summary>Battle 씬이 stage_001 데이터대로 경기장·주인공·적·보석을 만드는지, 카메라 샷별 화면 캡처.</summary>
+    /// <summary>Battle 씬이 stage_001대로 구성되는지 + 상태별 화면 캡처 (Logs/scene_battle_*.png).</summary>
     public class BattleStageTests
     {
         [UnityTest]
-        public IEnumerator Battle_BuildsArenaFromStage()
+        public IEnumerator Battle_BuildsStage_AndShowsEachPhase()
         {
             SceneManager.LoadScene(SceneNames.Battle);
-            float start = Time.realtimeSinceStartup;
-            BattleStageBootstrap boot = null;
-            while (boot == null || !boot.IsReady)
-            {
-                if (Time.realtimeSinceStartup - start > 10f) Assert.Fail("Battle 준비 시간 초과");
-                boot = Object.FindAnyObjectByType<BattleStageBootstrap>();
-                yield return null;
-            }
+            BattleController battle = null;
+            yield return SceneFlowTests.WaitForBattle(c => battle = c);
 
-            var spawner = boot.Spawner;
+            var spawner = battle.Spawner;
             var stage = new StageRepository(StageRepository.DefaultDirectory).LoadStage("stage_001").Stage;
-
             Assert.AreEqual(StageGeometry.ArenaSize(stage.grid), spawner.Arena.Size);
             Assert.AreEqual(stage.gems.Count, spawner.Gems.Count);
-            Assert.That(Vector3.Distance(spawner.Arena.CellToWorld(stage.playerStart), spawner.Player.position), Is.LessThan(0.01f));
             Assert.IsNotNull(spawner.Enemy, "적에 EnemyView가 있어야 함");
+            Assert.AreEqual(BattleStateId.Intro, battle.Context.CurrentState);
 
-            var clamped = spawner.Arena.ClampToArena(new Vector3(100f, 0f, -100f), 0.2f);
-            Assert.That(clamped.x, Is.LessThanOrEqualTo(spawner.Arena.Size.x * 0.5f));
-            Assert.That(clamped.z, Is.GreaterThanOrEqualTo(-spawner.Arena.Size.y * 0.5f));
+            yield return new WaitForSeconds(1.2f);
+            SceneCapture.Save("battle_1_Intro");
 
-            boot.ShowAllGemsForPreview = true;
-            boot.RefreshGems();
-
-            foreach (var shot in new[] { BattleShot.Overview, BattleShot.EnemyFocus, BattleShot.Intro })
-            {
-                boot.CameraDirector.Show(shot);
-                yield return new WaitForSeconds(1f); // 카메라 블렌드
-                SceneCapture.Save($"battle_{shot}");
-            }
-
-            boot.CameraDirector.Show(BattleShot.AttackCloseUp);
+            battle.Context.ChangeState(BattleStateId.EnemyTurn);
+            battle.World.ShowGems(spawner.Gems.Keys.ToList()); // 확인용: 모든 보석 표시
             yield return new WaitForSeconds(1f);
-            SceneCapture.Save("battle_AttackCloseUp");
-            spawner.Enemy.PlayHit();
-            Object.FindAnyObjectByType<BattleEffects>().PlayHit(spawner.Enemy.transform.position + Vector3.up * 0.6f);
-            yield return new WaitForSeconds(0.08f);
-            SceneCapture.Save("battle_AttackCloseUp_Hit");
+            Assert.That(Vector3.Distance(spawner.Arena.CellToWorld(stage.playerStart), spawner.Player.position), Is.LessThan(0.01f));
+            SceneCapture.Save("battle_2_EnemyTurn");
+
+            battle.Context.ChangeState(BattleStateId.ActionMenu);
+            yield return new WaitForSeconds(1f);
+            Assert.IsTrue(battle.Ui.IsMainMenuOpen);
+            SceneCapture.Save("battle_3_ActionMenu");
+
+            battle.Ui.ChooseMain(0); // 공격 (임시: 바로 데미지)
+            yield return new WaitForSeconds(0.1f);
+            SceneCapture.Save("battle_4_Fight");
+            Assert.Less(battle.Context.Enemy.CurrentHp, battle.Context.Enemy.MaxHp);
+
+            yield return new WaitForSeconds(0.9f);
+            battle.Context.ChangeState(BattleStateId.ItemMenu);
+            yield return new WaitForSeconds(0.8f);
+            SceneCapture.Save("battle_5_ItemMenu");
         }
     }
 }

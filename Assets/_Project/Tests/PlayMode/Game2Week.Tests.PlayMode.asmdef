@@ -4,6 +4,8 @@
     "references": [
         "Game2Week",
         "Unity.TextMeshPro",
+        "Unity.InputSystem",
+        "Unity.InputSystem.TestFramework",
         "UnityEngine.TestRunner"
     ],
     "includePlatforms": [],

@@ -45,13 +45,13 @@ namespace Game2Week.Tests
         public void ChangeState_ExitsPreviousThenEntersNext()
         {
             machine.Register(BattleStateId.Intro, new RecordingState("Intro", log));
-            machine.Register(BattleStateId.PlayerMenu, new RecordingState("Menu", log));
+            machine.Register(BattleStateId.ActionMenu, new RecordingState("Menu", log));
 
             machine.ChangeState(BattleStateId.Intro);
-            machine.ChangeState(BattleStateId.PlayerMenu);
+            machine.ChangeState(BattleStateId.ActionMenu);
 
             CollectionAssert.AreEqual(new[] { "Intro.Enter", "Intro.Exit", "Menu.Enter" }, log);
-            Assert.AreEqual(BattleStateId.PlayerMenu, machine.CurrentId);
+            Assert.AreEqual(BattleStateId.ActionMenu, machine.CurrentId);
         }
 
         [Test]
@@ -59,13 +59,13 @@ namespace Game2Week.Tests
         {
             var intro = new RecordingState("Intro", log);
             machine.Register(BattleStateId.Intro, intro);
-            machine.Register(BattleStateId.PlayerMenu, new RecordingState("Menu", log));
-            intro.OnEnter = () => machine.ChangeState(BattleStateId.PlayerMenu);
+            machine.Register(BattleStateId.ActionMenu, new RecordingState("Menu", log));
+            intro.OnEnter = () => machine.ChangeState(BattleStateId.ActionMenu);
 
             machine.ChangeState(BattleStateId.Intro);
 
             CollectionAssert.AreEqual(new[] { "Intro.Enter", "Intro.Exit", "Menu.Enter" }, log);
-            Assert.AreEqual(BattleStateId.PlayerMenu, machine.CurrentId);
+            Assert.AreEqual(BattleStateId.ActionMenu, machine.CurrentId);
         }
 
         [Test]

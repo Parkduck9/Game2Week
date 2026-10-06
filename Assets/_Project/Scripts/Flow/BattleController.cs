@@ -1,0 +1,86 @@
+using Game2Week.Battle;
+using Game2Week.Battle.UI;
+using Game2Week.Battle.View;
+using Game2Week.Core;
+using Game2Week.Data;
+using UnityEngine;
+
+namespace Game2Week.Flow
+{
+    /// <summary>
+    /// Battle 씬의 조립 루트: 스테이지로 경기장을 만들고, 전투 모델·상태 머신·UI·연출을 연결해 전투를 시작한다.
+    /// 전투가 끝나면 결과를 GameSession에 넘기고 Result 씬으로.
+    /// </summary>
+    public sealed class BattleController : MonoBehaviour
+    {
+        [SerializeField] GameSession session;
+        [SerializeField] InputReader input;
+        [SerializeField] GemRewardSettings gemRewards;
+        [SerializeField] StageSpawner spawner;
+        [SerializeField] BattleCameraDirector cameraDirector;
+        [SerializeField] BattleWorld world;
+        [SerializeField] BattlePresentation presentation;
+        [SerializeField] BattleUi ui;
+        [SerializeField] StatusBar statusBar;
+
+        BattleStateMachine machine;
+        bool finished;
+
+        public BattleContext Context { get; private set; }
+        public BattleUi Ui => ui;
+        public BattleWorld World => world;
+        public StageSpawner Spawner => spawner;
+        public BattleCameraDirector CameraDirector => cameraDirector;
+        public bool IsReady { get; private set; }
+
+        void Start()
+        {
+            // 에디터에서 Battle 씬을 바로 재생한 경우 1번 스테이지로
+            if (session.CurrentStage == null && !session.BeginStage(Mathf.Max(0, session.StageIndex)))
+            {
+                Debug.LogError("Battle: 불러올 스테이지가 없음");
+                return;
+            }
+
+            var stage = session.CurrentStage;
+            var enemyData = session.CurrentEnemy;
+            spawner.Spawn(stage, enemyData);
+            cameraDirector.Setup(spawner.Arena.Size, spawner.Arena.transform.position, spawner.Enemy ? spawner.Enemy.transform : null);
+            world.Init(spawner, stage);
+
+            var events = new BattleEvents();
+            var player = new PlayerCombatant(session.Player);
+            var enemy = new EnemyCombatant(enemyData);
+            var gems = new GemField(stage.gems, stage.gemRules.maxPerTurn);
+            machine = new BattleStateMachine();
+            Context = new BattleContext(machine, events, input, ui, world, stage, player, enemy, gems, gemRewards, Finish);
+            BattleStates.RegisterAll(machine, Context);
+
+            presentation.Bind(events, spawner.Enemy);
+            statusBar.Bind(events, player.Data.DisplayName, player.Data.Level, player.CurrentHp, player.MaxHp);
+            machine.StateChanged += (_, id) => events.RaiseStateChanged(id);
+
+            input.EnableUI();
+            IsReady = true;
+            machine.ChangeState(BattleStateId.Intro);
+        }
+
+        void Update()
+        {
+            if (IsReady && !finished) machine.Tick(Time.deltaTime);
+        }
+
+        void OnDestroy()
+        {
+            if (input) input.EnableUI();
+        }
+
+        void Finish(BattleOutcome outcome)
+        {
+            if (finished) return;
+            finished = true;
+            session.EndBattle(outcome);
+            SceneLoader.Load(SceneNames.Result);
+        }
+    }
+}

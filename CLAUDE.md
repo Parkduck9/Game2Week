@@ -26,7 +26,9 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 ## Git
 - PATH에 없음 → `$env:LOCALAPPDATA\GitHubDesktop\app-3.6.6\resources\app\git\cmd\git.exe` 사용 (GitHub Desktop 업데이트 시 `app-*` 버전 폴더 확인).
 - 커밋은 사용자가 요청할 때만. 커밋 전 컴파일·테스트 통과 확인, `git diff --cached --name-only`로 Library/Exports/Logs/csproj가 없는지 확인.
-- 커밋 작성자는 저장소 git 설정을 따름 (Duck9). push는 하지 않음 (요청 시에만).
+- 커밋 작성자는 저장소 git 설정을 따름 (Duck9).
+- 원격: `origin` = https://github.com/Parkduck9/Game2Week (main 추적). push는 사용자가 요청할 때만. 인증은 GitHub Desktop의 credential manager.
+- 여러 줄 커밋 메시지는 `-m` 대신 파일로 `-F` (PowerShell에서 `-m` 여러 줄이 조용히 실패한 적 있음).
 - `.gitignore`: Unity 생성 폴더, IDE 파일, `/Exports/`(GLB 중간본), `.claude/settings.local.json` 제외.
 
 ## Unity 배치모드 (CLI)
@@ -65,6 +67,10 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 - Unity 버전 **6000.3.25f1** (6.3 LTS) — 프로젝트는 Claude가 CLI로 현재 폴더에 생성
 - 한글 폰트 **Pretendard** (OFL) — `Art/Fonts/Pretendard-Regular SDF` (동적 아틀라스)가 TMP 기본 폰트
 - 타깃 플랫폼 **PC 전용** (URP 품질 레벨 PC 하나만)
+- **서비스 흐름 (2026-10-06):** 메인(새로 시작·이어하기·설정·종료) → 스테이지 선택(해금된 것만·최고기록) → 전투(ESC 일시정지: 계속·메인으로) → 결과 → 엔딩 → 메인. 진행·설정 저장.
+  - 배포: **Microsoft Store (MSIX)** — 회사에선 빌드·패키징 준비, 설치·삭제·제출은 사용자가 집에서
+  - 최고기록 = **클리어 시간 + 결과 종류**(처치/살려줌), 설정 = **음량(배경음/효과음)·화면 모드/해상도·텍스트 속도**
+  - **앱을 삭제하면 세이브도 삭제** (persistentDataPath, MSIX 기본 동작) — 계획: `Plans/Service_Plan.html`
 - 이미지 생성은 **Codex CLI** (`codex.exe`, ChatGPT OAuth 로그인됨) 사용 — 경로: `C:\Program Files\WindowsApps\OpenAI.Codex_*\app\resources\codex.exe`
 - 화면 비율 **16:9** — 기준 해상도 1920×1080 (Canvas Scaler 기준값)
 - **한글 사용** — 대사·UI 텍스트 한글, TMP 한글 폰트 에셋 필요 (원작 폰트 금지, 상업 이용 가능한 무료 폰트)
@@ -83,6 +89,9 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 - **로직과 표현 분리.** 전투 로직은 Transform·Animator·카메라를 모른다. `EnemyView`, `BattleCameraDirector` 등 View가 이벤트를 구독해 연출한다.
 - **데이터는 ScriptableObject.** 적·아이템·ACT·패턴은 에셋 추가만으로 늘릴 수 있어야 한다. 적 외형은 `EnemyData`의 View 프리팹으로 교체.
 - **UI는 이벤트를 구독해서 갱신.** 로직이 UI를 직접 조작하지 않는다.
+  - 예외: 플레이어 응답이 필요한 대사·메뉴는 상태가 `IBattleUi` 인터페이스로 요청 (구현 `BattleUi`), 3D 이동·접촉은 `IBattleWorld` (구현 `BattleWorld`). 테스트는 가짜 구현으로.
+- 화면에 나오는 공통 문구·메뉴 이름은 `BattleTexts` 한 곳에 (적별 문구는 EnemyData).
+- MonoBehaviour는 **파일 하나에 하나, 파일 이름 = 클래스 이름** (아니면 씬에서 Missing Script).
 - **입력은 `InputReader` 래퍼를 통해서만.**
 - **탄막 패턴은 `IAttackPattern` + 프리팹** 으로 교체/추가 가능하게.
 - **리소스는 SerializeField / 데이터 에셋으로 참조** → 모델·스프라이트만 바꿔 끼우면 교체 완료.
@@ -115,7 +124,7 @@ Assets/_Project/
 │  ├─ Flow/           씬별 컨트롤러 (MainMenu, Result, 임시 BattleFlowStub)
 │  ├─ Battle/
 │  │  ├─ States/      전투 상태 클래스
-│  │  ├─ UI/          메뉴, 대사창, HP바, 타이밍 게이지
+│  │  ├─ UI/          BattleUi(IBattleUi), DialogueBox, StatusBar, TurnHud, PopupText, BarView
 │  │  ├─ Model/       PlayerCombatant, EnemyCombatant, Inventory, GemField, GemRewards (순수 로직)
 │  │  ├─ View/        BattleArena, StageSpawner, EnemyView, GemView, BattleCameraDirector, BattleEffects (3D 연출)
 │  │  ├─ Player/      플레이어 마커 이동·피격
@@ -138,7 +147,8 @@ Assets/StreamingAssets/Stages/   stages.json(순서) + stage_XXX.json — 맵툴
 - 상태 전환은 `BattleContext.ChangeState(BattleStateId)`만 사용.
 - 순수 로직은 MonoBehaviour 밖 C# 클래스로 → EditMode 테스트 작성.
 - Unity C# 제약: `init` 접근자·`record` 사용 금지 (IsExternalInit 없음). 커밋 전에는 컴파일·테스트 통과 확인.
-- 테스트 실행: `Unity.exe -batchmode -projectPath . -runTests -testPlatform EditMode|PlayMode -testResults <xml> -logFile <log>` (`-quit` 붙이지 않음).
+- 테스트 실행: `Unity.exe -batchmode -projectPath . -runTests -testPlatform EditMode|PlayMode -assemblyNames Game2Week.Tests.EditMode|Game2Week.Tests.PlayMode -testResults <xml> -logFile <log>` (`-quit` 붙이지 않음, `-assemblyNames` 없으면 Input System 패키지 테스트가 섞임).
+- 키보드 입력 테스트는 `InputTestFixture` (manifest `testables`에 inputsystem) — `BattleInputTests` 참고.
 - 씬 사이 데이터는 `GameSession` 에셋으로 (싱글톤·static 상태 금지). 씬 이름은 `SceneNames` 상수만.
 - 화면 확인은 PlayMode 테스트의 `Capture()` 이미지로 — 배치모드 첫 렌더는 색이 깨지므로 두 번 렌더.
 - PowerShell 한 명령 안에 `"C:\Program Files\..."` 경로와 `Remove-Item`을 같이 쓰면 안전검사에 막힘 → `Join-Path $env:ProgramFiles` 사용, 삭제는 따로.

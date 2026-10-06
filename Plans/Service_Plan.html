@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>서비스 흐름 · 배포 계획</title>
+<style>
+  :root {
+    --bg: #f6f5f2; --surface: #ffffff; --text: #1b1b1b; --muted: #6b6b6b; --line: #e2e0da;
+    --accent: #3d6fb6; --accent-bg: #eaf1fb; --ok: #2f8a4c; --warn-bg: #fff6e6; --warn-line: #f0c77a; --warn-text: #8a5a00; --code-bg: #f1ece2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #101010; --surface: #191919; --text: #f0f0f0; --muted: #a0a0a0; --line: #2e2e2e;
+      --accent: #8fb3ff; --accent-bg: #18233a; --ok: #6cc98a; --warn-bg: #221b0f; --warn-line: #6a5420; --warn-text: #f0c77a; --code-bg: #232323;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #101010; --surface: #191919; --text: #f0f0f0; --muted: #a0a0a0; --line: #2e2e2e;
+    --accent: #8fb3ff; --accent-bg: #18233a; --ok: #6cc98a; --warn-bg: #221b0f; --warn-line: #6a5420; --warn-text: #f0c77a; --code-bg: #232323;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.65 "Pretendard", "Malgun Gothic", system-ui, sans-serif; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 16px 80px; }
+  h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.02em; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  h2 { font-size: 19px; margin: 36px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h2 .n { color: var(--accent); margin-right: 8px; }
+  h3 { font-size: 15.5px; margin: 16px 0 6px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin: 10px 0; }
+  .ok-card { border-color: var(--ok); }
+  .warn { background: var(--warn-bg); border-color: var(--warn-line); }
+  .warn h3 { color: var(--warn-text); margin-top: 0; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 10px; }
+  ul { padding-left: 20px; margin: 6px 0; } li { margin: 2px 0; }
+  code, pre { font-family: Consolas, "D2Coding", monospace; font-size: 13px; }
+  code { background: var(--code-bg); padding: 0 4px; border-radius: 3px; }
+  pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; line-height: 1.5; }
+  .muted { color: var(--muted); }
+  /* 흐름도 */
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .node { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; min-width: 120px; }
+  .node b { display: block; font-size: 14px; }
+  .node span { font-size: 12.5px; color: var(--muted); }
+  .node.new { border-color: var(--accent); background: var(--accent-bg); }
+  .arrow { color: var(--muted); font-size: 18px; }
+  .steps { display: grid; gap: 10px; }
+  .step { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; }
+  .step h3 { margin: 0 0 4px; }
+  .who { font-size: 12px; font-weight: 700; border-radius: 4px; padding: 0 6px; margin-left: 6px; vertical-align: 1px; }
+  .who.c { background: var(--accent-bg); color: var(--accent); }
+  .who.u { background: var(--warn-bg); color: var(--warn-text); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; }
+  .table-wrap { overflow-x: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>서비스 흐름 · Microsoft Store 배포 계획</h1>
+  <p class="sub">2026-10-06 · 목표: 메인 → 스테이지 선택 → 전투(일시정지) → 결과 → 엔딩 → 메인, 진행·설정 저장, Microsoft Store 설치·삭제까지</p>
+
+  <div class="card ok-card">
+    <h3 style="margin-top:0">✔ 확정된 결정</h3>
+    <ul>
+      <li><b>스토어: Microsoft Store</b> — MSIX 패키지. 회사에선 빌드·패키징 준비까지, <b>집에서</b> 로컬 설치(사이드로드)·삭제 확인 → 파트너 센터 제출</li>
+      <li><b>최고기록 = 클리어 시간 + 결과 종류</b> (처치 / 살려줌) — 스테이지별 가장 빠른 시간</li>
+      <li><b>설정: 음량(배경음/효과음) · 화면 모드·해상도 · 텍스트 속도</b></li>
+      <li><b>삭제하면 세이브도 사라짐</b> — 껐다 켜도 진행·설정은 남고, 앱을 제거하면 함께 지워짐 (스토어 앱 기본 동작)</li>
+    </ul>
+  </div>
+
+  <h2><span class="n">1</span>화면 흐름</h2>
+  <div class="flow">
+    <div class="node new"><b>메인</b><span>새로 시작 · 이어하기 · 설정 · 종료</span></div><span class="arrow">→</span>
+    <div class="node new"><b>스테이지 선택</b><span>해금된 것만 · 최고기록</span></div><span class="arrow">→</span>
+    <div class="node"><b>전투</b><span>ESC 일시정지: 계속 · 메인으로</span></div><span class="arrow">→</span>
+    <div class="node"><b>결과</b><span>다음 스테이지 · 다시 도전 · 스테이지 선택</span></div><span class="arrow">→</span>
+    <div class="node new"><b>엔딩</b><span>마지막 스테이지 클리어 후</span></div><span class="arrow">→</span>
+    <div class="node"><b>메인</b><span>진행·설정 그대로</span></div>
+  </div>
+  <div class="grid2" style="margin-top:12px">
+    <div class="card">
+      <h3 style="margin-top:0">메인 화면</h3>
+      <ul>
+        <li><b>새로 시작</b> — 세이브가 있으면 "진행이 지워져요" 확인 → 진행 초기화(설정은 유지) → 스테이지 선택</li>
+        <li><b>이어하기</b> — 세이브가 없으면 회색(선택 불가) → 스테이지 선택</li>
+        <li><b>설정</b> — 설정 화면 (메인·일시정지 어디서든 같은 화면)</li>
+        <li><b>종료</b></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">스테이지 선택</h3>
+      <ul>
+        <li>해금된 스테이지만 표시: 1번은 처음부터, N번을 클리어하면 N+1번 해금</li>
+        <li>각 줄: 번호 · 이름 · 최고기록(시간) · 결과 아이콘(처치/살려줌) · 미클리어 표시</li>
+        <li>취소키 → 메인</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">일시정지 (전투 중 ESC)</h3>
+      <ul>
+        <li>시간 정지 + 어두운 화면 + <b>계속 / 설정 / 메인으로</b></li>
+        <li>메인으로: "이번 전투 진행은 저장되지 않아요" 확인</li>
+        <li>일시정지 중 시간은 클리어 시간에 포함 안 됨</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">결과 · 엔딩</h3>
+      <ul>
+        <li>승리: 클리어 시간 표시, 신기록이면 "신기록!" → 저장</li>
+        <li>메뉴: 다음 스테이지(있으면) · 다시 도전 · 스테이지 선택</li>
+        <li>마지막 스테이지를 처음 클리어하면 <b>엔딩 화면</b>(임시 문구·크레딧) → 메인</li>
+        <li>패배: 다시 도전 · 스테이지 선택</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2><span class="n">2</span>저장 (세이브)</h2>
+  <div class="card">
+    <p><code>Application.persistentDataPath</code>에 JSON 두 개 — 진행(<code>save.json</code>)과 설정(<code>settings.json</code>)을 분리해서, 새로 시작해도 설정은 남게 합니다.</p>
+    <pre>save.json
+{
+  "version": 1,
+  "stages": [ { "id": "stage_001", "cleared": true, "bestTimeSeconds": 41.3, "bestOutcome": "EnemySpared" } ],
+  "endingSeen": false
+}
+settings.json
+{ "version": 1, "bgmVolume": 0.8, "sfxVolume": 0.8, "fullscreen": true, "resolution": "1920x1080", "textSpeed": "normal" }</pre>
+    <ul>
+      <li>쓰기: 임시 파일에 쓴 뒤 교체 (저장 도중 꺼져도 파일이 깨지지 않게) + 직전 파일 <code>.bak</code></li>
+      <li>읽기 실패(깨짐·버전 다름) → <code>.bak</code> 시도 → 그래도 안 되면 새로 시작 (로그 남김)</li>
+      <li>해금은 저장하지 않고 계산: "클리어한 스테이지 다음 하나까지" — 스테이지가 추가돼도 자연스럽게 열림</li>
+      <li><b>삭제 시 함께 제거</b>: MSIX 앱이 AppData에 쓰는 파일은 패키지 전용 폴더로 옮겨 저장되고, 앱을 제거하면 같이 지워짐 → 집에서 실제로 확인</li>
+    </ul>
+  </div>
+
+  <h2><span class="n">3</span>구현 단계</h2>
+  <div class="steps">
+    <div class="step"><h3>S1. 세이브·설정 저장소 <span class="who c">Claude</span></h3>
+      <p><code>SaveData</code>/<code>SettingsData</code>, 원자적 쓰기 + 백업, 해금 계산, 최고기록 갱신 규칙 + 테스트</p></div>
+    <div class="step"><h3>S2. 메인 화면 개편 + 설정 화면 <span class="who c">Claude</span></h3>
+      <p>새로 시작(덮어쓰기 확인) · 이어하기(세이브 없으면 비활성) · 설정 · 종료. 설정: 좌우키로 값 변경, 즉시 적용(해상도·전체화면), 음량은 오디오 믹서 연결만 준비</p></div>
+    <div class="step"><h3>S3. 스테이지 선택 <span class="who c">Claude</span></h3>
+      <p>해금된 스테이지 목록, 최고기록·결과 아이콘, 선택 → 전투</p></div>
+    <div class="step"><h3>S4. 일시정지 + 클리어 시간 <span class="who c">Claude</span></h3>
+      <p>Input에 Pause(ESC) 추가, 시간 정지, 계속/설정/메인으로. 전투 시간 측정(일시정지 제외)</p></div>
+    <div class="step"><h3>S5. 결과·엔딩 <span class="who c">Claude</span></h3>
+      <p>결과 화면에 시간·신기록, 다음 스테이지, 엔딩 씬(임시 문구) → 메인. 전체 흐름 PlayMode 테스트(진행이 저장되고 다시 켰을 때 남아 있는지)</p></div>
+    <div class="step"><h3>S6. 출시 준비 <span class="who c">Claude</span></h3>
+      <p>Player Settings(회사·제품 이름, 버전, 임시 아이콘), 배치모드 Windows 빌드 스크립트, MSIX 포장용 <code>AppxManifest.xml</code> 템플릿 + <code>Tools/package_msix.ps1</code>, 집에서 할 일 안내서(<code>Plans/Store_Guide</code>)</p></div>
+    <div class="step"><h3>S7. 집에서: 설치·삭제 확인 <span class="who u">사용자</span></h3>
+      <ul>
+        <li>Windows SDK 설치(<code>makeappx</code>, <code>signtool</code>), 개발자 모드 켜기</li>
+        <li>테스트 인증서로 서명 → 더블클릭 또는 <code>Add-AppxPackage</code>로 설치 → 실행·진행 저장 확인</li>
+        <li>설정 ▸ 앱에서 제거 → 세이브 폴더가 지워졌는지 확인 → 다시 설치하면 처음부터인지 확인</li>
+      </ul></div>
+    <div class="step"><h3>S8. 집에서: 스토어 제출 <span class="who u">사용자</span></h3>
+      <ul>
+        <li>파트너 센터 개발자 계정, 앱 이름 예약 → 예약된 게시자 정보로 매니페스트 갱신(Claude가 도움)</li>
+        <li>스토어 등록 정보(설명·스크린샷·연령 등급·개인정보 처리방침 URL) 작성 → 제출 → 심사</li>
+        <li>스토어에서 설치 · 삭제 확인</li>
+      </ul></div>
+  </div>
+
+  <h2><span class="n">4</span>알아 둘 것</h2>
+  <div class="card warn">
+    <h3>집에서 꼭 사용자가 해야 하는 것</h3>
+    <ul>
+      <li>파트너 센터 계정 가입·결제·앱 이름 예약, 인증서 신뢰 설정, 스토어 제출은 계정과 결제가 필요해서 직접 하셔야 해요.</li>
+      <li>스토어 심사에는 개인정보 처리방침 URL·연령 등급 설문이 필요해요 (세이브는 로컬만 쓰므로 수집 정보 없음으로 작성 가능).</li>
+      <li>게임 이름(지금 "타이틀 (가제)")과 아이콘은 제출 전에 정해야 해요 — IP 기획과 연결.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">기존 계획과의 순서</h3>
+    <p>S1~S5(서비스 흐름)는 전투 내용과 독립적이라 지금 바로 진행 가능. 07(타이밍 공격)·09(탄막 패턴)는 전투 재미 부분이라 병행하거나 뒤에. S6(출시 준비)은 게임 이름이 정해진 뒤가 좋아요.</p>
+  </div>
+</div>
+</body>
+</html>

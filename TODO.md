@@ -21,9 +21,22 @@
 - [x] M2 맵툴 1차 — `Tools ▸ Stage Editor`: 목록(추가·복제·삭제·순서), 크기, 격자 배치(시작점·적·보석), 드래그 이동, 속성, 실시간 검증(오류 칸 빨간 테두리), 저장(오류 있으면 막음), 되돌리기 + 로직 테스트
 - [ ] 맵툴 사용자 확인 — 직접 써 보고 불편한 점 피드백
 - [x] M3 게임 연결 — BattleArena.Build(가변 크기), StageSpawner(주인공·적·보석), GemField(턴마다 확률 등장)·GemRewards, GameSession 스테이지 번호(MainMenu→1번, 재도전→같은 스테이지)
-- [ ] 보석 먹기(접촉 판정)·보상 적용은 09 탄막 턴에서 연결
-- [ ] M4 스테이지 진행 — 결과 화면 "다음 스테이지", 마지막 스테이지 처리
+- [x] 보석 먹기(접촉 판정)·보상 적용 — 탄막 턴에서 연결 (06과 함께)
+- [ ] M4 스테이지 진행 — 결과 화면 "다음 스테이지", 마지막 스테이지 처리 (→ 서비스 흐름 S5와 합침)
 - [ ] M5 맵툴 2차 — 3D 미리보기, 바로 플레이, 일괄 배치
+
+## ▶ 다음: 서비스 흐름 · Microsoft Store 배포 (계획: `Plans/Service_Plan.html`)
+> 확정: Microsoft Store(MSIX) · 최고기록 = 클리어 시간 + 결과 종류 · 설정 = 음량·화면 모드/해상도·텍스트 속도 · 앱 삭제 시 세이브도 삭제
+- [x] 계획 작성 (화면 흐름, 세이브 구조, 구현 단계 S1~S8, 집에서 할 일)
+- [ ] S1 세이브·설정 저장소 — SaveData/SettingsData, 원자적 쓰기 + .bak, 해금 계산, 최고기록 규칙 + 테스트
+- [ ] S2 메인 화면 개편 — 새로 시작(덮어쓰기 확인) · 이어하기(세이브 없으면 비활성) · 설정 · 종료 + 설정 화면
+- [ ] S3 스테이지 선택 — 해금된 것만, 최고기록·결과 아이콘
+- [ ] S4 ESC 일시정지 — 계속 / 설정 / 메인으로, 클리어 시간 측정(일시정지 제외)
+- [ ] S5 결과·엔딩 — 시간·신기록, 다음 스테이지, 엔딩 씬 → 메인, 저장 유지 PlayMode 테스트
+- [ ] S6 출시 준비 — Player Settings, 빌드 스크립트, AppxManifest 템플릿, `Tools/package_msix.ps1`, 집에서 할 일 안내서
+- [ ] S7 (집, 사용자) 로컬 설치·삭제 확인 — 세이브가 삭제와 함께 사라지는지
+- [ ] S8 (집, 사용자) 파트너 센터 제출 → 스토어 설치·삭제
+- [ ] 게임 이름·아이콘 확정 (스토어 제출 전) `[결정 필요]`
 
 ## 🔧 바꿔야 할 것 (알려진 문제 · 정리 대상 · 확인 필요)
 > 발견하면 여기에 추가하고, 해결하면 체크 + WORKLOG에 기록한다.
@@ -31,8 +44,9 @@
 - [x] git — PATH엔 없지만 GitHub Desktop 내장 git 사용 (CLAUDE.md 참고). 첫 커밋 `dce8022`
 - [x] Pretendard 폰트 다운로드 (허락 받음, OFL 1.1 라이선스 파일 포함)
 - [x] 템플릿 `Assets/Scenes/SampleScene` + `Settings/SampleSceneProfile` 삭제, 빌드 목록 교체
-- [ ] 임시 `Flow/BattleFlowStub` (결과를 골라 끝내는 대역) — 06단계에서 BattleController로 교체 후 삭제, PlayMode 테스트도 함께 수정
-- [ ] 임시 `Flow/BattleStageBootstrap` — 06단계 BattleController로 합치기
+- [x] 임시 `BattleFlowStub` / `BattleStageBootstrap` 삭제 → `BattleController`로 교체, PlayMode 테스트 수정
+- [ ] 공격(FIGHT)은 임시로 바로 데미지 (`BattleFormulas.TempFightDamage` = 공격력×배율−방어, 최소 1) — 07 타이밍 공격으로 교체
+- [ ] 테스트 실행 시 Input System 패키지 테스트가 섞임 (manifest testables) → 항상 `-assemblyNames Game2Week.Tests.*`로 실행
 - [ ] 보석 보상 수치 임시 (`GemRewardSettings`: 회복 5, 다음 공격 ×1.5, 살려주기 +1) — 데미지 공식과 함께 확정
 - [ ] 타이틀 "타이틀 (가제)" — IP 기획 때 교체
 - [ ] 씬 전환 연출(페이드) 없음 — 필요하면 SceneLoader에 추가
@@ -77,7 +91,7 @@
 - [x] InputReader (ScriptableObject) — UI 맵: Navigate(한 칸씩)/Submit/Cancel, Player 맵: Move, 맵 전환 API
 - [x] 어셈블리 정의 `Game2Week` + EditMode 테스트 14개 통과 (상태 머신, 입력 방향)
 - [x] InputReader 에셋 생성 + GameControls 연결 (`_Project/Input/InputReader.asset`)
-- [ ] BattleController (조립 루트: 상태 등록·Update 연결) — 첫 상태들 만들 때 (04~06단계)
+- [x] BattleController (조립 루트: 스폰·상태 등록·UI·연출 연결·종료 처리)
 
 ## 03. 데이터 (ScriptableObject)
 - [x] PlayerData — 이름, LV, MaxHP, ATK, DEF, 시작 아이템
@@ -100,38 +114,40 @@
 - [x] EnemyView — 임시 로우폴리 적(보라색 덩어리+눈+뿔, `EnemyView_TestBlob`) + 코드 애니메이션 (대기 출렁임 / 피격 흰색 번쩍+흔들림 / 공격 점프 / 처치 축소 / 살려줌 떠오름)
 - [x] 카메라 샷 4종 (Intro / Overview 탄막 턴 / EnemyFocus 메뉴 / AttackCloseUp) — Cinemachine 0.6초 블렌드, 경기장 크기에 맞춰 거리 계산
 - [x] 임시 이펙트 `BattleEffects` — 피격·보석 파티클, 카메라 흔들림(진폭 0.06m)
-- [ ] BattleCameraDirector를 전투 상태 이벤트에 연결 (06 BattleController에서)
+- [x] 카메라·적 애니메이션·이펙트를 전투 이벤트에 연결 (`BattlePresentation`: 상태→샷, 피격→번쩍+파티클, 종료→처치/살려줌 연출)
 - [ ] 피격 파티클 위치를 적 표면/카메라 쪽으로 (07 FIGHT 연출 때)
 - [x] 전투 박스 배치 방식 → **3D 경기장** (사용자 결정 B)
 - [x] 경기장은 스테이지 크기로 생성, 카메라 거리도 크기에 맞춤
 
 ## 06. 전투 UI 기본
-- [ ] BattleBox — 크기 트윈 변경, 대사창/탄막 영역 겸용
-- [ ] TypewriterText — 글자 단위 출력, 확인키 스킵/다음
-- [ ] 상태 줄 — 이름 · LV · HP바 · HP 숫자
-- [ ] 메뉴 2종 — 닿음: FIGHT/ACT/MERCY, 못 닿음: ITEM/넘기기 (명칭은 임시, IP 기획 시 교체)
-- [ ] 대사창 — 화면 하단 UI (경기장이 3D라 박스 안 대사 대신)
-- [ ] 서브 메뉴 리스트 — 상하 이동, 취소키 뒤로
+- [x] ~~BattleBox~~ → 3D 경기장으로 대체
+- [x] 대사창 `DialogueBox` — 화면 하단, 글자 단위 출력, 확인키: 전부 표시 → 닫기
+- [x] 상태 줄 `StatusBar` — 이름 · LV · HP 막대 · HP 숫자 (이벤트 구독)
+- [x] 메뉴 2종 — 닿음: 공격/행동/자비, 못 닿음: 아이템/넘기기 (가로 메뉴, 명칭은 `BattleTexts`에 임시)
+- [x] 목록 메뉴 — 대사창 안 세로 목록, 상하 이동, 취소키 뒤로
+- [x] 탄막 턴 표시 `TurnHud` (적 대사 + 안내 + 남은 시간 막대), 팝업 `PopupText` (보석 보상)
+- [x] 상태 흐름 10종 등록 (`BattleStates`) + 가짜 UI/World로 흐름 테스트 11개, 실제 키보드 입력 PlayMode 테스트
 
 ## 07. FIGHT — Timing Attack
 - [ ] 타겟 게이지 UI + 이동 커서
 - [ ] 정확도 계산 (중앙 거리 → 0~1), 놓치면 MISS
 - [ ] 데미지 공식 `[결정 필요: 공식/수치]`
 - [ ] 공격 연출 — 카메라 클로즈업 + 3D 타격 이펙트 + 적 Hit 애니메이션 + 데미지 숫자(월드 스페이스)
-- [ ] 적 HP 0 → Victory
+- [x] 적 HP 0 → Victory (임시 공격으로 동작)
 
 ## 08. ACT / ITEM / MERCY
-- [ ] ACT — Check (ATK/DEF + 설명)
-- [ ] ACT — 대화형 행동 1~2개, 조건 충족 시 살려주기 가능 표시
-- [ ] ITEM — 인벤토리, 회복, 소모, 빈 목록 처리
-- [ ] MERCY — Spare `[결정 필요: Flee 포함 여부]`
+- [x] ACT — 살펴보기(적 Check 문구)
+- [x] ACT — 적 데이터의 행동 목록, 살려주기 진행도 +N, 가능해지면 "이제 살려 줄 수 있을 것 같다"
+- [x] ITEM — 인벤토리, 회복, 소모, 빈 목록 처리 (못 닿았을 때 메뉴에서)
+- [x] MERCY — 살려주기 (가능하면 노란색, 아니면 "아직..." 후 탄막 턴)
+- [ ] Flee(도망치기) 포함 여부 `[결정 필요]`
 
 ## 09. 적 턴 — 플레이어 마커 & 탄막
 - [ ] 적 대사 말풍선 (적 모델 위 월드 스페이스 UI) → 박스 리사이즈
-- [ ] 주인공 3D 이동 — 바닥 평면 8방향, 경기장 경계 제한, 비스듬한 고정 카메라 (점프·대시 없음)
-- [ ] 적 접촉 판정 → 탄막 턴 즉시 종료 → FIGHT/ACT/MERCY 메뉴
-- [ ] 시간 종료(못 닿음) → ITEM/넘기기 메뉴
-- [ ] 보석 동작 `[결정 필요: 맵툴 계획 Q1]`
+- [x] 주인공 3D 이동 `PlayerMover` — 바닥 8방향 2.8m/s, 경기장 경계 제한, 이동 시 통통 튐 (점프·대시 없음)
+- [x] 적 접촉 판정 → 탄막 턴 즉시 종료 → 공격/행동/자비 메뉴
+- [x] 시간 종료(못 닿음) → 아이템/넘기기 메뉴
+- [x] 보석 — 턴마다 확률 등장, 닿으면 먹고 보상 팝업
 - [ ] 피격 — HP 감소, 무적 시간 + 깜빡임, HP 0 → Defeat
 - [ ] IAttackPattern + PatternRunner (프리팹으로 교체) `[핵심]`
 - [ ] Bullet 기본 클래스 — 접촉 데미지, 이동은 하위 클래스, 풀링 고려, 충돌 판정 방식 통일
@@ -139,7 +155,7 @@
 - [ ] 패턴 종료 → 탄 정리 → 박스 복귀 → 플레이어 턴
 
 ## 10. 승리 / 패배
-- [ ] Victory — 처치(Death 애니메이션) / 살려줌(Spare 애니메이션) 구분 → Result
+- [x] Victory — 처치(축소) / 살려줌(떠오름) 연출 + 적 문구 → Result
 - [ ] Defeat — 플레이어 마커 파괴 연출(임시) → GAME OVER
 - [ ] 다시하기 / 메인 / 종료 동작 확인
 
