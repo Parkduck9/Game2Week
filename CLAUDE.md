@@ -66,6 +66,13 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 - 후속 사용자 지정: 적 접촉 후 메뉴 유지, 캐릭터 뒤 허리 카메라+마우스 회전/록온, 노랑 우클릭 쳐내기/Shift 회피/점프, 이후 Ctrl 빨강 정지 자세 필수·파랑 이동, 접근할수록 커지는 경고음, 플레이어 위치 랜덤 조준, 8종 그래프 궤적+발사 간격/속도 제작 툴. 최신 기준은 설계 MD 0절.
 - 쳐내기는 오른손으로 왼쪽에서 오는 탄을 오른쪽 어깨 뒤로, 오른쪽 탄을 왼쪽 어깨 뒤로 흘린다. 입력 방향으로 이동을 계속한다. 적에게 단순 반사하는 방식이나 강제 뒤 밀림이 아니다. 점프는 후속 답변으로 포함이 확정됐고, 록온 가운데 버튼/점프 Space는 기본안이다.
 
+### 병렬 작업 (2026-10-06, 사용자 결정)
+- 3단계(Pattern Editor) = **Codex**, 4단계(빨강·파랑) = **Claude**. 기준: `Plans/Parallel_Work_Plan.md` (파일 담당표·worktree·합치기 규칙).
+- 각자 worktree 폴더(`..\Game2Week-codex`, `..\Game2Week-claude`)에서 작업하고 **담당 밖 파일은 고치지 않는다.** 배치모드도 자기 폴더에서만.
+- 병렬 기간에는 TODO·WORKLOG·CLAUDE·설계 MD를 고치지 않고 `Plans/Parallel/<이름>_Log.md`에 기록 → 합칠 때 main에서 반영.
+- 연결 지점(`ITrajectory`, `AttackColor`, `IHitRule`, `ThreatPoint`, `PatternContext`)은 공용 — 바꿔야 하면 사용자에게 먼저 알린다.
+- 계획 MD → HTML: `Tools/render_plan.mjs <md>`. `node`는 PATH에 없음 → `C:\Program Files\Adobe\Adobe Creative Cloud Experience\libs\node.exe` (v20) 사용.
+
 ## 확정된 결정 (사용자 승인됨)
 - Unity 6 · 3D(URP) · **New Input System** · Cinemachine(카메라 연출)
 - 조작: 방향키 / 확인 Z·Enter / 취소 X·Shift

@@ -7,6 +7,7 @@ namespace Game2Week.Battle.Patterns
     public sealed class YellowTrainingPattern : MonoBehaviour, IAttackPattern, IThreatSource
     {
         [SerializeField] Bullet bulletPrefab;
+        [SerializeField] AttackColor attackColor = AttackColor.Yellow;
         [SerializeField] Material warningMaterial;
         [SerializeField, Min(0.1f)] float interval = 1.4f;
         [SerializeField, Min(0.1f)] float warningDuration = 0.75f;
@@ -70,7 +71,9 @@ namespace Game2Week.Battle.Patterns
                 var dir = target - origin; dir.y = 0f;
                 if (dir.sqrMagnitude > 0.0001f)
                 {
-                    GetBullet().Launch(origin + dir.normalized * 0.45f, dir.normalized * speed);
+                    var bullet = GetBullet();
+                    bullet.Color = attackColor;
+                    bullet.Launch(origin + dir.normalized * 0.45f, dir.normalized * speed);
                     if (context.EnemyView) context.EnemyView.PlayAttack();
                 }
                 timeToShot = Mathf.Max(interval, warningDuration + 0.1f);
@@ -91,11 +94,11 @@ namespace Game2Week.Battle.Patterns
             if (warning) warning.enabled = false;
             context = null;
         }
-        public void CollectThreats(List<Vector3> positions)
+        public void CollectThreats(List<ThreatPoint> threats)
         {
             if (context == null) return;
-            if (warningActive) positions.Add(origin);
-            foreach (var b in bullets) if (b.Active && !b.Deflected) positions.Add(b.transform.position);
+            if (warningActive) threats.Add(new ThreatPoint(origin, attackColor));
+            foreach (var b in bullets) if (b.Active && !b.Deflected) threats.Add(new ThreatPoint(b.transform.position, b.Color));
         }
     }
 }

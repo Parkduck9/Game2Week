@@ -12,7 +12,7 @@ namespace Game2Week.Battle.View
         [SerializeField] AudioClip warningClip;
         [SerializeField, Min(.1f)] float hearingRange = 7f;
         [SerializeField, Range(0f,1f)] float maximumVolume = .12f;
-        readonly List<Vector3> threats = new();
+        readonly List<ThreatPoint> threats = new();
         readonly AudioSource[] voices = new AudioSource[3];
         PatternRunner runner;
         PlayerMover player;
@@ -57,16 +57,16 @@ namespace Game2Week.Battle.View
             }
             threats.Clear();
             if (runner.Current is IThreatSource sourceOfThreats) sourceOfThreats.CollectThreats(threats);
-            threats.Sort((a,b)=>(a-player.transform.position).sqrMagnitude.CompareTo((b-player.transform.position).sqrMagnitude));
+            threats.Sort((a,b)=>(a.Position-player.transform.position).sqrMagnitude.CompareTo((b.Position-player.transform.position).sqrMagnitude));
             ActiveVoices = VisibleIndicators = 0;
             var cam = Camera.main;
             for (int i = 0; i < voices.Length; i++)
             {
-                bool active = i < threats.Count && Vector3.Distance(threats[i],player.transform.position) < hearingRange;
+                bool active = i < threats.Count && Vector3.Distance(threats[i].Position,player.transform.position) < hearingRange;
                 var audio = voices[i];
                 TMP_Text indicator = i < indicators.Length ? indicators[i] : null;
                 if (!active) { audio.Stop(); if (indicator) indicator.gameObject.SetActive(false); continue; }
-                var position = threats[i];
+                var position = threats[i].Position;
                 audio.transform.position = position;
                 audio.volume = ThreatFeedbackModel.Volume(Vector3.Distance(position,player.transform.position),hearingRange,maximumVolume,volume?.Invoke() ?? 1f);
                 if (!audio.isPlaying) { audio.UnPause(); if (!audio.isPlaying) audio.Play(); }
@@ -81,7 +81,7 @@ namespace Game2Week.Battle.View
                 indicator.rectTransform.anchoredPosition = Vector2.zero;
                 var dir = edge-Vector2.one*.5f;
                 string arrow = Mathf.Abs(dir.x)>Mathf.Abs(dir.y) ? (dir.x>0f ? "▶" : "◀") : (dir.y>0f ? "▲" : "▼");
-                indicator.text = arrow + " 노랑";
+                indicator.text = arrow + " " + BattleTexts.AttackColorName(threats[i].Color);
                 VisibleIndicators++;
             }
         }

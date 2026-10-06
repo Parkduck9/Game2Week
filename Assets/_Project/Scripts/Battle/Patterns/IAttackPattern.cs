@@ -20,9 +20,11 @@ namespace Game2Week.Battle.Patterns
     public sealed class PatternContext
     {
         readonly Action<int> reportHit;
+        readonly IHitRule hitRule;
 
-        public PatternContext(BattleArena arena, Transform enemy, EnemyView enemyView, Transform player, float playerRadius, int damagePerHit, Action<int> reportHit, PlayerMover playerMover = null)
+        public PatternContext(BattleArena arena, Transform enemy, EnemyView enemyView, Transform player, float playerRadius, int damagePerHit, Action<int> reportHit, PlayerMover playerMover = null, IHitRule hitRule = null)
         {
+            this.hitRule = hitRule;
             Arena = arena;
             Enemy = enemy;
             EnemyView = enemyView;
@@ -46,6 +48,9 @@ namespace Game2Week.Battle.Patterns
 
         /// <summary>탄이 주인공에게 닿았을 때 호출 (무적 시간 처리는 받는 쪽에서)</summary>
         public void ReportHit() => reportHit?.Invoke(DamagePerHit);
+
+        /// <summary>몸과 겹친 color 탄이 실제로 피해를 주는지 (색 규칙, 없으면 항상 true)</summary>
+        public bool ShouldHit(AttackColor color) => hitRule == null || hitRule.ShouldHit(color);
 
         /// <summary>경기장 바깥으로 margin 이상 나갔는지 (탄 회수용)</summary>
         public bool IsOutside(Vector3 world, float margin)

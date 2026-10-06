@@ -24,6 +24,13 @@ namespace Game2Week.Battle
         public const string Miss = "MISS";
         public const string GaugeHint = "가운데에서 Z!";
 
+        public static string AttackColorName(Patterns.AttackColor color) => color switch
+        {
+            Patterns.AttackColor.Red => "빨강",
+            Patterns.AttackColor.Blue => "파랑",
+            _ => "노랑",
+        };
+
         public static string FightResult(string enemyName, int damage) =>
             damage > 0 ? $"* {enemyName}에게 {damage}의 피해를 주었다!" : "* 빗나갔다!";
     }

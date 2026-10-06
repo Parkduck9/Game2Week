@@ -658,3 +658,30 @@
 ### 다음에 할 일
 - 3단계 Unity Pattern Editor: 총 8종 궤적과 속도/발사 간격 그래프, 런타임과 같은 평가 경로, 3D 미리보기·시드/시간 스크럽·에셋 저장/맵툴 연결 구현 및 검증.
 - 이후 빨강 Ctrl 정지 자세·파랑 실제 이동 판정, 8개 맵 누적/간격 밸런스. 단계마다 MD·HTML·TODO·WORKLOG 갱신.
+
+---
+
+## 2026-10-06 — Claude: 병렬 작업 계획 + 0단계 연결 지점
+
+### 사용자 요청
+- 3단계부터 Claude와 Codex가 나눠서 작업. 겹치는 파일이 없도록 계획을 다시 세움. 담당은 처음 제안에서 바꿔 **Codex = 3단계 Pattern Editor, Claude = 4단계 빨강·파랑**.
+
+### 한 일
+- 직전에 쌓인 작업 커밋·푸시: `660e80a` (1·2단계 액션, 맵 8개, 키보드 포커스, 빈 목록 수정). 커밋 전 EditMode 125 재확인, 동적 폰트 에셋은 되돌림.
+- 0단계 연결 지점 (3·4단계가 같은 파일을 고치지 않도록):
+  - `ITrajectory` + `TrajectoryLaunch`: 발사 기준값 + 경과 시간 → 위치 (상태 없음, 게임·미리보기 공용).
+  - `Bullet.Launch(position, velocity, trajectory)`, `Bullet.Color`(AttackColor), `Bullet.Parryable` = 노랑만.
+  - `IHitRule` + `PatternContext.ShouldHit(color)`: 규칙이 없으면 항상 피해 (현재 동작 유지).
+  - `IThreatSource.CollectThreats(List<ThreatPoint>)`: 위치 + 색. 화면 밖 표시 문구는 `BattleTexts.AttackColorName`.
+  - `YellowTrainingPattern`에 `attackColor` 필드 (기본 노랑).
+- `BulletContractTests` 3개 추가. EditMode 128/128, PlayMode 16/16 (`Logs/phase0_*.xml`).
+- `Plans/Parallel_Work_Plan.md`(+HTML): 파일 담당표, worktree 폴더, 커밋·합치기 규칙, 단계별 완료 기준, Codex 지시문.
+- `Tools/render_plan.mjs`: 범용 계획 MD → HTML. TodoList.html에 링크, CLAUDE.md에 병렬 규칙, TODO 갱신.
+
+### 결정
+- 병렬 기간에는 TODO·WORKLOG·CLAUDE·설계 MD를 main에서 합칠 때만 갱신, 각자 `Plans/Parallel/<이름>_Log.md`에 기록.
+- 빨강·파랑 맵 연결과 색 조합 규칙은 5단계 (두 단계 합친 뒤).
+
+### 다음에 할 일
+- 사용자: 계획 확인 → 0단계 커밋 요청 → worktree 두 개 생성(Claude가 해도 됨) → Codex에 계획 7절 지시문 전달.
+- Claude: `Game2Week-claude`(브랜치 `phase4-color-rules`)에서 4단계 시작.

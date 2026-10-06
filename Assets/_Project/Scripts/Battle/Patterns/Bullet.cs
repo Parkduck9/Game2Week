@@ -4,26 +4,38 @@ namespace Game2Week.Battle.Patterns
 {
     /// <summary>
     /// 탄 기본: 바닥 평면 위를 직선으로 날아가고, 주인공에게 닿으면 알린다 (물리 엔진 없이 거리 판정).
-    /// 다른 움직임이 필요하면 상속해서 Move를 바꾼다.
+    /// 다른 움직임은 Launch에 ITrajectory를 넘기거나, 상속해서 Move를 바꾼다.
+    /// 쳐내기는 노랑만, 겹쳤을 때 피해 여부는 PatternContext.ShouldHit(색 규칙)이 정한다.
     /// </summary>
     public class Bullet : MonoBehaviour
     {
         [SerializeField, Min(0.02f)] float radius = 0.14f;
         [SerializeField] float spinSpeed = 360f;
         [SerializeField] bool parryable;
+        [SerializeField] AttackColor color = AttackColor.Yellow;
 
         Vector3 velocity;
+        ITrajectory trajectory;
+        TrajectoryLaunch launch;
+        float elapsed;
 
         public float Radius => radius;
         public bool Active { get; private set; }
         public bool Deflected { get; private set; }
+        /// <summary>대응 규칙 색. 프리팹 기본값, 패턴이 발사 전에 바꿀 수 있다.</summary>
+        public AttackColor Color { get => color; set => color = value; }
+        public bool Parryable => parryable && color == AttackColor.Yellow;
         Vector3 deflectStart, deflectShoulder, deflectEnd;
         float deflectTime;
 
-        public void Launch(Vector3 position, Vector3 flatVelocity)
+        /// <param name="trajectory">null이면 flatVelocity로 직진 (또는 하위 클래스의 Move)</param>
+        public void Launch(Vector3 position, Vector3 flatVelocity, ITrajectory trajectory = null)
         {
             transform.position = position;
             velocity = flatVelocity;
+            this.trajectory = trajectory;
+            launch = new TrajectoryLaunch(position, flatVelocity);
+            elapsed = 0f;
             if (velocity.sqrMagnitude > 0.0001f) transform.rotation = Quaternion.LookRotation(velocity);
             Active = true;
             Deflected = false;
@@ -65,7 +77,7 @@ namespace Game2Week.Battle.Patterns
             Move(deltaTime);
             transform.Rotate(0f, 0f, spinSpeed * deltaTime, Space.Self);
             var mover = context.PlayerMover;
-            if (parryable && mover && mover.Motor.CanParry &&
+            if (Parryable && mover && mover.Motor.CanParry &&
                 Vector3.Dot(before - context.Player.position, context.Player.forward) >= -0.15f &&
                 AttackGeometry.SweptBody(before, transform.position, playerFrom, playerTo,
                     mover.ParryReach + radius, -radius, context.PlayerBodyHeight + radius))
@@ -81,7 +93,7 @@ namespace Game2Week.Battle.Patterns
             }
             bool hit = AttackGeometry.SweptBody(before, transform.position, playerFrom, playerTo,
                 radius + context.PlayerRadius, -radius, context.PlayerBodyHeight + radius);
-            if (hit) return true;
+            if (hit && context.ShouldHit(color)) return true;
             if (context.IsOutside(transform.position, 0.5f))
             {
                 Deactivate();
@@ -90,7 +102,16 @@ namespace Game2Week.Battle.Patterns
             return false;
         }
 
-        protected virtual void Move(float deltaTime) => transform.position += velocity * deltaTime;
+        protected virtual void Move(float deltaTime)
+        {
+            if (trajectory == null)
+            {
+                transform.position += velocity * deltaTime;
+                return;
+            }
+            elapsed += deltaTime;
+            transform.position = trajectory.Evaluate(launch, elapsed);
+        }
         protected virtual void OnLaunch(Vector3 position, Vector3 launchVelocity) { }
     }
 }
