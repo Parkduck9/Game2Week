@@ -36,6 +36,7 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 - **사용자가 에디터로 프로젝트를 열어 둔 상태에서는 배치모드 실행 불가** (프로젝트 잠금) → 먼저 확인.
 - 패턴: `-batchmode -projectPath <경로> -executeMethod <Class.Method> -logFile <로그>` (+ 끝나면 `-quit` 또는 `EditorApplication.Exit`).
 - PowerShell 5.1의 `Set-Content -Encoding utf8`은 BOM을 붙임 → Unity YAML 파일은 `[IO.File]::WriteAllText` + BOM 없는 UTF8로 쓴다.
+- 반대로 **한글이 든 `.ps1` 스크립트는 UTF-8 BOM으로 저장** (PowerShell 5.1은 BOM 없으면 ANSI로 읽어 한글이 깨짐 — MSIX 표시 이름까지 깨질 수 있음).
 - Unity 설정 파일을 정규식으로 고칠 땐 범위를 좁힌다 (들여쓰기만으로 매칭하면 다른 블록까지 바뀜). 원본은 템플릿 tgz에서 복구 가능.
 - `AssetDatabase.ImportPackage`는 배치모드에서 비동기 → `.unitypackage`는 `-importPackage <경로> -quit`로 따로 실행.
 - 임시 에디터 스크립트는 `Assets/Editor/`에 두고 실행 후 폴더째 삭제.

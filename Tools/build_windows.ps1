@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Unity를 배치모드로 실행해 Windows 64비트 빌드를 만든다 → Builds/Windows
 .EXAMPLE

@@ -373,3 +373,21 @@
 ### 다음에 할 일
 - S6: 여기서 빌드 + MSIX 포장(서명 없이) 검증, 집에서 할 일 안내서(`Plans/Store_Guide.html`).
 - 그다음 07 타이밍 공격 / 09 탄막 패턴.
+---
+
+## 2026-10-06 — S6 빌드·MSIX 포장 검증
+
+### 한 일
+- `Tools/build_windows.ps1 -Version 0.1.0` → Builds/Windows (104MB, 97초, Mono x64).
+- `Tools/package_msix.ps1 -Version 0.1.0.0 -NoSign` → `Builds/Msix/Game2Week.Dev_0.1.0.0_x64.msix` (40.8MB). makeappx가 매니페스트 검증 통과, `_DoNotShip` 폴더 제외 확인.
+- 빌드된 exe를 배치모드로 15초 실행 → 로그에 오류 없음.
+- 집에서 할 일 안내서 `Plans/Store_Guide.html` (준비 → 빌드·포장 → 인증서 신뢰·설치 → 체크리스트 → 삭제 후 세이브 삭제 확인 → 스토어 제출 → 문제 해결), 대시보드 링크.
+
+### 문제 → 해결
+- `.ps1`을 BOM 없는 UTF-8로 저장 → PowerShell 5.1이 한글을 깨뜨림 (출력·MSIX 표시 이름) → BOM 붙여 다시 저장, 규칙 추가.
+
+### 여기서 안 한 것 (보안 설정이라 사용자가 집에서)
+- 테스트 인증서 생성·신뢰(LocalMachine\TrustedPeople), 실제 설치/삭제, 파트너 센터 제출.
+
+### 다음에 할 일
+- 07 타이밍 공격 / 09 탄막 패턴 — 착수 전 결정: 데미지 공식·수치, 탄막 패턴 모양.

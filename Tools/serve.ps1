@@ -1,4 +1,4 @@
-# 프로젝트 루트를 http://localhost:<Port>/ 로 서비스하는 최소 정적 서버 (미리보기용)
+﻿# 프로젝트 루트를 http://localhost:<Port>/ 로 서비스하는 최소 정적 서버 (미리보기용)
 param([int]$Port = 8790)
 if ($env:PORT) { $Port = [int]$env:PORT }  # 미리보기 도구가 autoPort로 포트를 넘겨줄 때
 
