@@ -1,0 +1,22 @@
+{
+    "name": "Game2Week.Tests.PlayMode",
+    "rootNamespace": "Game2Week.Tests",
+    "references": [
+        "Game2Week",
+        "Unity.TextMeshPro",
+        "UnityEngine.TestRunner"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

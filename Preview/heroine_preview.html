@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>주인공 모델 미리보기</title>
+<style>
+  :root {
+    --bg: #eceae6; --panel: #ffffff; --text: #1d1d1d; --muted: #6a6a6a;
+    --line: #dcd9d3; --accent: #3d6fb6; --btn: #f4f2ee;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #151515; --panel: #1e1e1e; --text: #eeeeee; --muted: #9a9a9a;
+      --line: #333333; --accent: #8fb3ff; --btn: #2a2a2a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #151515; --panel: #1e1e1e; --text: #eeeeee; --muted: #9a9a9a;
+    --line: #333333; --accent: #8fb3ff; --btn: #2a2a2a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 14px/1.5 "Pretendard", "Malgun Gothic", system-ui, sans-serif;
+    display: flex; flex-direction: column;
+  }
+  header { padding: 12px 16px; border-bottom: 1px solid var(--line); display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  header h1 { font-size: 17px; margin: 0; }
+  header span { color: var(--muted); font-size: 13px; }
+  main { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 12px; padding: 12px 16px; min-height: 0; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+  .panel h2 { font-size: 13px; margin: 0; padding: 8px 12px; border-bottom: 1px solid var(--line); color: var(--muted); font-weight: 600; }
+  .ref { flex: 1; display: flex; align-items: center; justify-content: center; padding: 8px; min-height: 0; }
+  .ref img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px; }
+  #view { flex: 1; position: relative; min-height: 360px; }
+  #view canvas { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 12px; border-top: 1px solid var(--line); align-items: center; }
+  button { font: inherit; font-size: 13px; background: var(--btn); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+  button.on { border-color: var(--accent); color: var(--accent); }
+  .stat { margin-left: auto; color: var(--muted); font-size: 12px; }
+  @media (max-width: 800px) {
+    main { grid-template-columns: 1fr; }
+    .ref { max-height: 40vh; }
+  }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<header>
+  <h1>주인공 (가칭) — 로우폴리 모델 v1</h1>
+  <span>2.5등신 · 양갈래 노란 머리 · 노란 눈 · 후드티 + 청바지 · 선 자세 (리깅 전)</span>
+</header>
+<main>
+  <section class="panel">
+    <h2>레퍼런스 (Codex 생성 3면도)</h2>
+    <div class="ref"><img src="../Reference/heroine_turnaround.png" alt="주인공 3면도 레퍼런스: 정면, 측면, 후면"></div>
+  </section>
+  <section class="panel">
+    <h2>3D 모델 — 드래그로 회전, 휠로 확대</h2>
+    <div id="view"></div>
+    <div class="bar">
+      <button data-view="front" class="on">정면</button>
+      <button data-view="side">측면</button>
+      <button data-view="back">후면</button>
+      <button data-view="three">3/4</button>
+      <button id="wire">와이어프레임</button>
+      <button id="spin">자동 회전</button>
+      <button id="export">GLB 내보내기</button>
+      <span class="stat" id="stat"></span>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+
+// ---------- 팔레트 (레퍼런스에서 추출) ----------
+const COLORS = {
+  skin: '#ffe4d6', hair: '#f6d466', tie: '#5f8bcf',
+  hoodie: '#a3c4ee', hoodieDark: '#8eb2e2',
+  jeans: '#5f86c0', jeansDark: '#4f74ab',
+  shoe: '#f3f4f6', sole: '#d6d9df', lace: '#c9ccd3',
+  eyeDark: '#3b2a22', iris: '#f5c63a', irisDeep: '#d9971c', white: '#ffffff',
+  blush: '#f3b2a8', mouth: '#7a4038',
+};
+const materials = {};
+function mat(name) {
+  if (!materials[name]) {
+    materials[name] = new THREE.MeshStandardMaterial({
+      name, color: COLORS[name], roughness: 0.9, metalness: 0, flatShading: true,
+      side: name === 'hair' ? THREE.DoubleSide : THREE.FrontSide,
+    });
+  }
+  return materials[name];
+}
+
+// ---------- 지오메트리 헬퍼 ----------
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+
+function hash(x, y, z) {
+  const s = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453;
+  return s - Math.floor(s);
+}
+// 같은 위치의 정점은 같은 오프셋을 받으므로 이음매가 벌어지지 않는다
+function jitter(geo, amount) {
+  const p = geo.attributes.position;
+  const v = new THREE.Vector3();
+  for (let i = 0; i < p.count; i++) {
+    v.fromBufferAttribute(p, i);
+    const kx = Math.round(v.x * 1e4), ky = Math.round(v.y * 1e4), kz = Math.round(v.z * 1e4);
+    p.setXYZ(i,
+      v.x + (hash(kx, ky, kz) - 0.5) * amount,
+      v.y + (hash(ky, kz, kx) - 0.5) * amount,
+      v.z + (hash(kz, kx, ky) - 0.5) * amount);
+  }
+  return geo;
+}
+
+// 곡선을 따라 반지름이 변하는 튜브 (팔, 다리, 머리카락)
+// side를 주면 단면의 ellipse[1] 축이 그 방향을 따른다 (납작한 머리카락 덩어리용)
+function tube(points, radiusFn, { segments = 10, radial = 7, ellipse = [1, 1], side = null } = {}) {
+  const curve = new THREE.CatmullRomCurve3(points);
+  const frames = curve.computeFrenetFrames(segments, false);
+  const pos = [], idx = [];
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments, P = curve.getPointAt(t), r = radiusFn(t);
+    let N = frames.normals[i], B = frames.binormals[i];
+    if (side) {
+      const T = frames.tangents[i];
+      B = side.clone().addScaledVector(T, -side.dot(T)).normalize();
+      N = B.clone().cross(T);
+    }
+    for (let j = 0; j < radial; j++) {
+      const a = j / radial * Math.PI * 2, c = Math.cos(a) * ellipse[0] * r, s = Math.sin(a) * ellipse[1] * r;
+      pos.push(P.x + N.x * c + B.x * s, P.y + N.y * c + B.y * s, P.z + N.z * c + B.z * s);
+    }
+  }
+  for (let i = 0; i < segments; i++) {
+    for (let j = 0; j < radial; j++) {
+      const a = i * radial + j, b = i * radial + (j + 1) % radial;
+      const c = (i + 1) * radial + j, d = (i + 1) * radial + (j + 1) % radial;
+      idx.push(a, b, c, b, d, c);
+    }
+  }
+  const start = pos.length / 3, P0 = curve.getPointAt(0);
+  pos.push(P0.x, P0.y, P0.z);
+  const end = start + 1, P1 = curve.getPointAt(1);
+  pos.push(P1.x, P1.y, P1.z);
+  for (let j = 0; j < radial; j++) {
+    const jn = (j + 1) % radial;
+    idx.push(start, jn, j);
+    idx.push(end, segments * radial + j, segments * radial + jn);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.setIndex(idx);
+  return geo;
+}
+
+const ellipseGeo = (rx, ry, seg = 12) => new THREE.CircleGeometry(1, seg).scale(rx, ry, 1);
+
+let triangleCount = 0;
+function part(name, geo, matName, parent, position) {
+  const flat = geo.index ? geo.toNonIndexed() : geo;
+  flat.computeVertexNormals();
+  triangleCount += flat.attributes.position.count / 3;
+  const mesh = new THREE.Mesh(flat, mat(matName));
+  mesh.name = name;
+  mesh.castShadow = true;
+  if (position) mesh.position.copy(position);
+  parent.add(mesh);
+  return mesh;
+}
+
+// ---------- 캐릭터 (키 ≈ 1.0, +Z 방향을 바라봄) ----------
+const character = new THREE.Group();
+character.name = 'Heroine';
+
+// --- 머리 ---
+const head = new THREE.Group();
+head.name = 'Head';
+head.position.set(0, 0.765, 0);
+character.add(head);
+
+const FACE = { rx: 0.165, ry: 0.16, rz: 0.157 };
+const jaw = y => (y < -0.07 ? 1 - 0.35 * Math.min(1, (-y - 0.07) / 0.09) : 1);
+{
+  const g = new THREE.SphereGeometry(1, 20, 16).scale(FACE.rx, FACE.ry, FACE.rz);
+  const p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) p.setX(i, p.getX(i) * jaw(p.getY(i)));
+  part('Face', g, 'skin', head);
+}
+function faceZ(x, y) {
+  const xx = x / jaw(y);
+  const k = 1 - (xx / FACE.rx) ** 2 - (y / FACE.ry) ** 2;
+  return k > 0 ? FACE.rz * Math.sqrt(k) : 0;
+}
+// 얼굴 곡면에 붙이는 평면 파츠 (눈, 눈썹, 입, 볼터치)
+function decal(name, geo, cx, cy, layer, matName) {
+  geo.translate(cx, cy, 0);
+  const p = geo.attributes.position;
+  for (let i = 0; i < p.count; i++) p.setZ(i, faceZ(p.getX(i), p.getY(i)) + 0.0035 + layer * 0.0012);
+  return part(name, geo, matName, head);
+}
+
+for (const s of [-1, 1]) {
+  const side = s < 0 ? 'R' : 'L';
+  const ex = 0.068 * s, ey = -0.075;
+  decal(`Eye_${side}_Base`, ellipseGeo(0.037, 0.043), ex, ey, 0, 'eyeDark');
+  decal(`Eye_${side}_Iris`, ellipseGeo(0.031, 0.036), ex, ey - 0.005, 1, 'iris');
+  decal(`Eye_${side}_IrisDeep`, ellipseGeo(0.022, 0.025), ex, ey - 0.009, 2, 'irisDeep');
+  decal(`Eye_${side}_Pupil`, ellipseGeo(0.010, 0.014), ex, ey - 0.007, 3, 'eyeDark');
+  decal(`Eye_${side}_Shine`, ellipseGeo(0.009, 0.011, 8), ex - 0.011, ey + 0.011, 4, 'white');
+  decal(`Eye_${side}_Shine2`, ellipseGeo(0.004, 0.005, 6), ex + 0.011, ey - 0.02, 4, 'white');
+  decal(`Eye_${side}_Lash`, new THREE.RingGeometry(0.037, 0.046, 12, 1, Math.PI * 0.06, Math.PI * 0.88).scale(1, 1.1, 1), ex, ey - 0.001, 1, 'eyeDark');
+
+  // 걱정스러운 눈썹: 안쪽 끝이 더 높다
+  const brow = new THREE.Shape([
+    new THREE.Vector2(0.036 * s, -0.016), new THREE.Vector2(0.098 * s, -0.029),
+    new THREE.Vector2(0.098 * s, -0.035), new THREE.Vector2(0.036 * s, -0.023),
+  ]);
+  decal(`Brow_${side}`, new THREE.ShapeGeometry(brow), 0, 0, 0, 'eyeDark');
+  decal(`Blush_${side}`, ellipseGeo(0.024, 0.012, 10), 0.105 * s, -0.113, 0, 'blush');
+
+  // 귀
+  part(`Ear_${side}`, new THREE.SphereGeometry(1, 6, 5).scale(0.016, 0.03, 0.024), 'skin', head, V(0.162 * s, -0.045, -0.01));
+}
+// 작은 시무룩한 입
+decal('Mouth', new THREE.RingGeometry(0.011, 0.0155, 6, 1, Math.PI * 0.22, Math.PI * 0.56), 0, -0.14, 0, 'mouth');
+
+// --- 머리카락 ---
+{
+  const top = new THREE.SphereGeometry(0.185, 14, 9, 0, Math.PI * 2, 0, Math.PI * 0.56).scale(1.04, 1, 1.03).translate(0, 0.02, -0.012);
+  part('Hair_Top', jitter(top, 0.008), 'hair', head);
+  const back = new THREE.SphereGeometry(0.19, 14, 9, Math.PI * 1.05, Math.PI * 0.9, Math.PI * 0.45, Math.PI * 0.42).scale(1.03, 1, 1.04).translate(0, 0.015, -0.015);
+  part('Hair_Back', jitter(back, 0.008), 'hair', head);
+}
+const hairZ = (x, y) => -0.012 + 1.03 * Math.sqrt(Math.max(0, 0.185 ** 2 - (x / 1.04) ** 2 - (y - 0.02) ** 2));
+// 앞머리: [x, 끝 높이] — 가로로 넓고 납작한 덩어리
+const bangs = [[-0.125, -0.05], [-0.07, -0.025], [-0.018, -0.04], [0.035, -0.022], [0.088, -0.03], [0.13, -0.055]];
+bangs.forEach(([x, yEnd], i) => {
+  const g = tube([
+    V(x * 0.8, 0.13, hairZ(x * 0.8, 0.13) - 0.006),
+    V(x, 0.04, hairZ(x, 0.04) + 0.004),
+    V(x * 1.06, yEnd, faceZ(x * 1.06, yEnd) + 0.01),
+  ], t => 0.034 * (1 - t) + 0.005, { segments: 6, radial: 6, ellipse: [0.45, 1.5], side: V(1, 0, 0) });
+  part(`Hair_Bang_${i}`, jitter(g, 0.004), 'hair', head);
+});
+for (const s of [-1, 1]) {
+  const side = s < 0 ? 'R' : 'L';
+  // 옆머리
+  const lock = tube([V(0.15 * s, 0.06, 0.07), V(0.168 * s, -0.03, 0.075), V(0.163 * s, -0.12, 0.065), V(0.155 * s, -0.155, 0.06)],
+    t => 0.028 * (1 - t) + 0.005, { segments: 7, radial: 6, ellipse: [1.3, 0.6], side: V(1, 0, 0) });
+  part(`Hair_SideLock_${side}`, jitter(lock, 0.004), 'hair', head);
+
+  // 양갈래
+  const tail = tube([
+    V(0.15 * s, 0.10, -0.085), V(0.22 * s, 0.085, -0.10), V(0.28 * s, 0.0, -0.10),
+    V(0.295 * s, -0.12, -0.09), V(0.28 * s, -0.22, -0.08), V(0.305 * s, -0.28, -0.07),
+  ], t => (0.028 + 0.05 * Math.sin(Math.PI * Math.pow(t, 0.8))) * (1 - 0.85 * t * t * t), { segments: 14, radial: 7, ellipse: [1, 0.8], side: V(0, 0, 1) });
+  part(`Hair_Tail_${side}`, jitter(tail, 0.007), 'hair', head);
+
+  const tie = new THREE.TorusGeometry(0.03, 0.013, 5, 8).rotateY(Math.PI / 2);
+  part(`Hair_Tie_${side}`, tie, 'tie', head, V(0.168 * s, 0.098, -0.087));
+}
+
+// --- 몸통 (후드티) ---
+const lathe = (pts, seg = 8) => new THREE.LatheGeometry(pts.map(([r, y]) => new THREE.Vector2(r, y)), seg, Math.PI / 8);
+part('Hoodie_Body', lathe([[0, 0.325], [0.118, 0.325], [0.124, 0.36], [0.118, 0.42], [0.122, 0.47], [0.112, 0.515], [0.085, 0.548], [0.045, 0.565], [0, 0.57]]).scale(1, 1, 0.78), 'hoodie', character);
+part('Hoodie_Hem', lathe([[0.112, 0.298], [0.126, 0.304], [0.128, 0.33], [0.12, 0.336]]).scale(1, 1, 0.8), 'hoodieDark', character);
+part('Hoodie_Collar', new THREE.TorusGeometry(0.055, 0.03, 6, 10).rotateX(Math.PI / 2).scale(1.05, 1, 0.85), 'hoodie', character, V(0, 0.567, -0.005));
+part('Hoodie_Hood', new THREE.SphereGeometry(1, 8, 6).scale(0.095, 0.075, 0.05), 'hoodie', character, V(0, 0.53, -0.085));
+{
+  const pocket = new THREE.Shape([
+    new THREE.Vector2(-0.066, 0.345), new THREE.Vector2(0.066, 0.345),
+    new THREE.Vector2(0.05, 0.415), new THREE.Vector2(-0.05, 0.415),
+  ]);
+  const g = new THREE.ExtrudeGeometry(pocket, { depth: 0.009, bevelEnabled: false }).translate(0, 0, 0.083);
+  part('Hoodie_Pocket', g, 'hoodieDark', character);
+}
+part('Neck', new THREE.CylinderGeometry(0.034, 0.038, 0.08, 7), 'skin', character, V(0, 0.6, 0));
+
+// --- 팔 ---
+for (const s of [-1, 1]) {
+  const side = s < 0 ? 'R' : 'L';
+  part(`Shoulder_${side}`, new THREE.SphereGeometry(0.05, 8, 6), 'hoodie', character, V(0.095 * s, 0.505, 0));
+  const sleeve = tube([V(0.085 * s, 0.52, 0), V(0.14 * s, 0.49, 0), V(0.20 * s, 0.44, 0.005), V(0.245 * s, 0.405, 0.01)],
+    t => 0.042 + 0.012 * Math.sin(Math.PI * t) - 0.008 * t, { segments: 8, radial: 8 });
+  part(`Sleeve_${side}`, sleeve, 'hoodie', character);
+  part(`Cuff_${side}`, tube([V(0.238 * s, 0.409, 0.01), V(0.268 * s, 0.39, 0.012)], () => 0.031, { segments: 1, radial: 8 }), 'hoodieDark', character);
+  const hand = part(`Hand_${side}`, new THREE.SphereGeometry(1, 7, 5).scale(0.034, 0.016, 0.026), 'skin', character, V(0.293 * s, 0.372, 0.012));
+  hand.rotation.z = -0.66 * s;
+  part(`Thumb_${side}`, new THREE.SphereGeometry(1, 5, 4).scale(0.009, 0.013, 0.009), 'skin', character, V(0.279 * s, 0.375, 0.032));
+}
+
+// --- 다리 (청바지) ---
+part('Jeans_Hip', new THREE.SphereGeometry(1, 10, 6).scale(0.115, 0.06, 0.085), 'jeans', character, V(0, 0.33, 0));
+for (const s of [-1, 1]) {
+  const side = s < 0 ? 'R' : 'L';
+  part(`Leg_${side}`, tube([V(0.058 * s, 0.34, 0), V(0.062 * s, 0.2, 0), V(0.066 * s, 0.07, 0)], t => 0.047 - 0.004 * t, { segments: 6, radial: 8 }), 'jeans', character);
+  part(`Jeans_Cuff_${side}`, tube([V(0.066 * s, 0.098, 0), V(0.066 * s, 0.066, 0)], () => 0.05, { segments: 1, radial: 8 }), 'jeansDark', character);
+
+  // --- 신발 ---
+  const shoe = new THREE.Group();
+  shoe.name = `Shoe_${side}`;
+  shoe.position.set(0.068 * s, 0, 0.015);
+  character.add(shoe);
+  part(`Shoe_${side}_Sole`, new THREE.BoxGeometry(0.092, 0.02, 0.15), 'sole', shoe, V(0, 0.01, 0));
+  part(`Shoe_${side}_Upper`, new THREE.SphereGeometry(1, 10, 5, 0, Math.PI * 2, 0, Math.PI / 2).scale(0.045, 0.07, 0.076), 'shoe', shoe, V(0, 0.02, 0));
+  for (let k = 0; k < 2; k++) {
+    const lace = part(`Shoe_${side}_Lace${k}`, new THREE.BoxGeometry(0.03, 0.005, 0.009), 'lace', shoe, V(0, 0.072 - k * 0.012, 0.03 + k * 0.016));
+    lace.rotation.x = -0.6;
+  }
+}
+
+// ---------- 씬 ----------
+const view = document.getElementById('view');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+view.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.add(character);
+scene.add(new THREE.HemisphereLight(0xffffff, 0xe2d9cf, 2.1));
+const key = new THREE.DirectionalLight(0xffffff, 1.5);
+key.position.set(1.2, 2.5, 2.2);
+key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024);
+Object.assign(key.shadow.camera, { left: -0.8, right: 0.8, top: 1.4, bottom: -0.2, near: 0.1, far: 6 });
+scene.add(key);
+const rim = new THREE.DirectionalLight(0xffffff, 0.6);
+rim.position.set(-1.5, 1.5, -2);
+scene.add(rim);
+const ground = new THREE.Mesh(new THREE.CircleGeometry(0.6, 32).rotateX(-Math.PI / 2), new THREE.ShadowMaterial({ opacity: 0.18 }));
+ground.receiveShadow = true;
+scene.add(ground);
+
+const camera = new THREE.PerspectiveCamera(28, 1, 0.05, 20);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0.5, 0);
+controls.enableDamping = true;
+controls.autoRotateSpeed = 2.5;
+
+const DIST = 2.6;
+const VIEWS = {
+  front: V(0, 0.5, DIST), side: V(DIST, 0.5, 0), back: V(0, 0.5, -DIST),
+  three: V(DIST * 0.7, 0.75, DIST * 0.7),
+};
+function setView(name) {
+  camera.position.copy(VIEWS[name]);
+  controls.target.set(0, 0.5, 0);
+  controls.update();
+  document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === name));
+}
+document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+setView('front');
+
+document.getElementById('wire').addEventListener('click', e => {
+  const on = e.currentTarget.classList.toggle('on');
+  Object.values(materials).forEach(m => { m.wireframe = on; });
+});
+document.getElementById('spin').addEventListener('click', e => {
+  controls.autoRotate = e.currentTarget.classList.toggle('on');
+});
+const GLB_NAME = 'heroine_v1.glb';
+const exportGlb = () => new Promise((resolve, reject) => new GLTFExporter().parse(character, resolve, reject, { binary: true }));
+// 로컬 서버(Tools/serve.ps1)로 열었으면 Exports/에 바로 저장, 아니면 브라우저 다운로드
+document.getElementById('export').addEventListener('click', async () => {
+  try {
+    const glb = await exportGlb();
+    if (location.protocol.startsWith('http')) {
+      const r = await fetch(`/save?name=${GLB_NAME}`, { method: 'POST', body: glb });
+      if (!r.ok) throw new Error(`서버 저장 실패 (${r.status})`);
+      alert(`Exports/${GLB_NAME} 에 저장했어요.`);
+    } else {
+      const url = URL.createObjectURL(new Blob([glb], { type: 'model/gltf-binary' }));
+      Object.assign(document.createElement('a'), { href: url, download: GLB_NAME }).click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+  } catch (err) {
+    alert('내보내기 실패: ' + err.message);
+  }
+});
+document.getElementById('stat').textContent = `삼각형 ${triangleCount.toLocaleString()}개 · 파츠 ${character.getObjectsByProperty('isMesh', true).length}개`;
+
+function resize() {
+  const w = view.clientWidth, h = view.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(view);
+resize();
+
+renderer.setAnimationLoop(() => {
+  controls.update();
+  renderer.render(scene, camera);
+});
+// 디버그용: 콘솔에서 카메라 조작
+window.__heroine = { character, setView, camera, controls, exportGlb };
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d92192bb88169e40b9570b24835e705, type: 3}
+  m_Name: Player_Heroine
+  m_EditorClassIdentifier: Game2Week::Game2Week.Data.PlayerData
+  displayName: "\uC8FC\uC778\uACF5"
+  level: 1
+  maxHp: 20
+  attack: 10
+  defense: 0
+  startingItems:
+  - {fileID: 11400000, guid: 1395d821c36168445a83bee514be7dd5, type: 2}
+  - {fileID: 11400000, guid: f8022ea7d89a3794e81cfacfe4f217bb, type: 2}
+  - {fileID: 11400000, guid: f8022ea7d89a3794e81cfacfe4f217bb, type: 2}
