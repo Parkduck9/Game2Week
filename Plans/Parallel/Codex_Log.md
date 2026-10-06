@@ -79,7 +79,24 @@
 - 최종 외형 보정: 얼굴 장식 삼각형을 세분화해 면 겹침을 없앴고 정지 자세의 손을 가슴 앞으로 모았다. 실제 팔 골격 회전을 추가 검사한 PlayMode 22/22 통과 (Logs/phase8_playmode.xml), 정면/측면/후면과 맵 3D 확인 이미지를 Reference/*_v2.png 및 stage_editor_m5.png에 보관.
 
 ### 다음에 할 일
-- 8단계 ProductInfo·정적 폰트·스토어 자원/문구·빌드 검증 진행. 통합 시 2절의 두 애니메이션 연결을 적용한다.
+- Codex 7·8단계 구현 및 검증을 마쳤다. 통합 담당자가 2절의 피격 Bind·쓰러짐 호출을 연결하고, 최종 통합 폴더에서 맵툴 바로 플레이 대화상자/복귀 직접 조작 및 스토어 캡처를 확인한다. main 병합·푸시는 하지 않았다.
+
+### 2026-10-06 — 8단계 출시 준비
+
+**한 일**
+- ProductInfo.asset에 회사/제품/버전/표시 이름/설명/패키지 ID/게시자를 모았다. 사전 로드로 UiTexts의 제목을 제공하며, 빌드가 PlayerSettings를 적용하고 Builds/product_info.json을 내보낸다. MSIX는 이 JSON을 기본값으로 읽고 명령행 재지정을 허용한다. 회사 DefaultCompany·제품 Game2Week·버전 0.1.0 유지.
+- 기존 Regular·Bold 폰트 GUID를 유지해 정적 SDF로 전환: KS X 1001 한글 2,350자·ASCII·기호, 현재 코드/데이터/JSON의 한글 531자 포함. 두 굵기 각각 2,459자·4096 아틀라스 2페이지. 한글 누락 없음. 선택 기호 ✖만 원본 폰트 미지원이며 현재 게임 문구에는 없다. 검사 기록 Logs/font_coverage_Pretendard-*.txt.
+- imagegen으로 원본 레퍼런스를 참고한 제목 글자 없는 아이콘/홍보 일러스트 2종 생성. Reference/store에 원본, 아이콘 300/150/71/44, 와이드 310×150, 대표 1920×1080 및 실제 PlayMode 캡처 5장. Tools/msix/Images의 패키지 로고에 연결하고 재현용 크기 변환 스크립트 제공. 생성 일러스트와 실제 캡처를 README에서 구분.
+- Plans/Store_Listing.md·HTML에 한국어 짧은/긴 소개·특징 5개·검색어·고유 요소 점검 기록. 이름 {게임 이름} 유지. Store_Guide.html에 이름 확정 시 ProductInfo/파트너 센터 값/세이브 이전을 설정하는 위치와 실제 캡처 경로 추가.
+- 배치 빌드 숨김 실행, 프로젝트 안 출력 경로 검증, 실제 빌드 버전의 패키지 전달을 보강. 자동 생성된 담당 밖 설정/카탈로그는 복원했다. 씬·맵 JSON·Claude 문서/코드 미변경.
+
+**검증**
+- 전체 EditMode 163/163 (Logs/phase8_editmode.xml), 게임 PlayMode 22/22 (Logs/phase8_playmode.xml). 패키지 자체 Windows 입력 테스트는 별도 전체 실행에서 2개 통과·2개 기존 Ignore였으며, 프로젝트 테스트는 모두 통과.
+- Tools/build_windows.ps1: Windows x64 v0.1.0 성공, 167MB·79초 (Logs/build_windows.log). ProductInfo 기반 JSON과 사전 로드 확인.
+- Tools/package_msix.ps1 -NoSign: makeappx 검증 및 포장 성공. Builds/Msix/Game2Week.Dev_0.1.0.0_x64.msix (54,854,978바이트). 매니페스트 제품 ID/게시자/버전/표시 이름과 커스텀 로고 확인. 미서명 개발 ID이므로 등록용 ID 확정 후 재포장한다.
+- Builds/Windows/Game2Week.exe 15초 실행 생존, 게임 예외/오류 없음 (Logs/phase8_player.log). 종료 시 D3D12 리소스 해제 경고 1줄 기록. 이번 검사에서 시작한 게임만 종료, Claude Unity는 건드리지 않았다.
+- 정적 폰트는 PlayMode·빌드 전후 SHA256 동일. 폰트 에셋 각 약 68MB는 한글 전체를 포함한 정적 텍스처 비용이다.
+- 스토어 게시/패키지 설치/인증서 등록은 하지 않았다. 피격/쓰러짐 자동 호출은 2절의 통합 요청으로 남는다.
 
 ### 2026-10-06 — 3단계 Pattern Editor (브랜치 `phase3-pattern-editor` → main `020df2f`)
 
@@ -120,3 +137,5 @@
 | 2026-10-06 | Codex | 패턴 에디터 | 수식/일정/에셋 테스트·전투 회귀·기록 ✓ | 8 |
 | 2026-10-06 | Codex | 캐릭터 | v2 면/손/머리 보강·19골격·10클립·GLB·Animator·회귀 검증 | 24 |
 | 2026-10-06 | Codex | 맵툴 | M5 3D 미리보기·바로 플레이·영역/대칭·검증 | 12 |
+| 2026-10-06 | Codex | 출시 | ProductInfo·세이브 경로 보호·정적 한글 폰트·누락 검사 | 8 |
+| 2026-10-06 | Codex | 출시 | 스토어 이미지/문구·패키지 로고·Windows/MSIX·회귀·기록 | 12 |

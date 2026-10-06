@@ -3,7 +3,7 @@ namespace Game2Week.UI
     /// <summary>메뉴·안내 화면의 공통 문구 (전투 문구는 BattleTexts). IP·현지화 때 여기만 바꾼다.</summary>
     public static class UiTexts
     {
-        public const string GameTitle = "타이틀 (가제)";
+        public static string GameTitle => Core.ProductInfo.Title;
         public const string ControlsHint = "방향키 이동 · Z / Enter 확인 · X / Shift 취소 · ESC 일시정지";
 
         public static readonly string[] MainMenu = { "새로 시작", "이어하기", "설정", "종료" };

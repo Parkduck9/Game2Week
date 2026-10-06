@@ -18,7 +18,7 @@
 param(
     [string]$BuildDir = "Builds/Windows",
     [string]$OutDir = "Builds/Msix",
-    [Parameter(Mandatory)][string]$Version,              # 반드시 a.b.c.d (스토어는 마지막 자리 0)
+    [string]$Version = "",                              # 생략하면 빌드 제품 설정 사용
     [string]$Name = "Game2Week.Dev",                      # 스토어: 파트너 센터 Package/Identity/Name
     [string]$Publisher = "CN=Game2Week Dev",              # 스토어: 파트너 센터 Package/Identity/Publisher
     [string]$PublisherDisplayName = "Game2Week",
@@ -34,6 +34,14 @@ $ErrorActionPreference = "Stop"
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 Set-Location $root
 
+$productPath = Join-Path $root "Builds/product_info.json"
+if (-not (Test-Path -LiteralPath $productPath)) { throw "제품 설정이 없습니다. 먼저 새 Windows 빌드를 실행하세요." }
+$product = Get-Content -LiteralPath $productPath -Raw -Encoding UTF8 | ConvertFrom-Json
+$productDefaults = @{ Name=$product.packageIdentity; Publisher=$product.packagePublisher; PublisherDisplayName=$product.publisherDisplayName; DisplayName=$product.displayName; Description=$product.description }
+foreach ($setting in $productDefaults.Keys) {
+    if (-not $PSBoundParameters.ContainsKey($setting)) { Set-Variable -Name $setting -Value $productDefaults[$setting] }
+}
+if (-not $Version) { $productVersion=[version]$product.version; $Version="{0}.{1}.{2}.0" -f $productVersion.Major,$productVersion.Minor,$productVersion.Build }
 if ($Version -notmatch '^\d+\.\d+\.\d+\.\d+$') { throw "Version은 a.b.c.d 형식이어야 해요: $Version" }
 
 # ---------- 도구 찾기 ----------
@@ -52,7 +60,9 @@ if (-not $exe) { throw "$BuildDir 에 게임 exe가 없어요. 먼저 Unity 빌�
 
 # ---------- 스테이징 ----------
 $staging = Join-Path $OutDir "staging"
-if (Test-Path $staging) { Remove-Item $staging -Recurse -Force }
+$resolvedStaging = [IO.Path]::GetFullPath((Join-Path $root $staging))
+if (-not $resolvedStaging.StartsWith($root + [IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)) { throw "스테이징 경로는 프로젝트 폴더 안이어야 합니다." }
+if (Test-Path -LiteralPath $resolvedStaging) { Remove-Item -LiteralPath $resolvedStaging -Recurse -Force }
 New-Item -ItemType Directory -Force $staging | Out-Null
 Get-ChildItem $BuildDir | Where-Object { $_.Name -notlike "*_DoNotShip" -and $_.Name -notlike "*_BackUpThisFolder*" } |
     Copy-Item -Destination $staging -Recurse -Force

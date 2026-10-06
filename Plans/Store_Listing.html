@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>스토어 소개 초안 — {게임 이름}</title>
+<style>
+:root{--bg:#f7f7f4;--panel:#fff;--text:#1f2328;--muted:#5d6670;--line:#dcdfe3;--accent:#c7901a;--code:#f0efe9}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16181c;--panel:#1e2127;--text:#e6e8eb;--muted:#9aa3ad;--line:#333842;--accent:#f0c040;--code:#272b33}}
+:root[data-theme="dark"]{--bg:#16181c;--panel:#1e2127;--text:#e6e8eb;--muted:#9aa3ad;--line:#333842;--accent:#f0c040;--code:#272b33}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.65 "Pretendard","Malgun Gothic",system-ui,sans-serif}
+main{max-width:1040px;margin:0 auto;padding:28px 16px 64px}h1{font-size:26px;margin:0 0 6px}
+h2{font-size:20px;margin:36px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--accent)}h3{font-size:16px;margin:22px 0 8px}
+nav{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 8px}nav a{font-size:13px;padding:3px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);text-decoration:none}
+a{color:var(--accent)}code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em;word-break:break-all}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto}pre code{padding:0;word-break:normal;white-space:pre}
+.table{overflow-x:auto;margin:10px 0}table{border-collapse:collapse;width:100%;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}th{background:var(--code);font-weight:600}
+ul,ol{padding-left:22px}.src{color:var(--muted);font-size:13px}
+</style></head><body><main>
+<h1>스토어 소개 초안 — {게임 이름}</h1><div class="src">원본: Store_Listing.md · node Tools/render_plan.mjs 로 생성</div>
+<nav><a href="#s3">짧은 소개</a><a href="#s6">긴 설명</a><a href="#s13">주요 특징</a><a href="#s20">검색어</a><a href="#s23">이미지 자료</a><a href="#s29">이름 확정 시 바꿀 곳</a><a href="#s32">점검 기록</a></nav>
+<h2 id="s3">짧은 소개</h2><p>색과 궤적을 읽고, 피하고, 쳐내며 적에게 다가가는 3D 액션 전투. 행동을 선택하는 순간과 직접 움직이는 순간을 함께 즐겨 보세요.</p><h2 id="s6">긴 설명</h2><p>{게임 이름}은 행동 메뉴와 직접 조작하는 회피 전투가 이어지는 게임입니다. 캐릭터 뒤에서 경기장을 살피고, 적이 보내는 공격을 넘어서 가까이 다가가세요. 적에게 닿으면 공격과 행동을 선택할 수 있습니다.</p><p>빨간 공격은 정지 자세, 노란 공격은 회피·쳐내기, 파란 공격은 이동으로 대응합니다. 점프와 회피를 섞어 공간을 확보하고, 오른손으로 노란 공격을 어깨 뒤로 흘려보내세요. 공격의 방향과 높이, 곡선 궤적이 바뀔 때마다 다른 대응이 필요합니다.</p><p>노란 양갈래의 로우폴리 주인공과 함께 여러 스테이지에 도전하세요. 전투에서 내린 선택은 결과와 다음 진행에 이어집니다.</p><h2 id="s13">주요 특징</h2><ul><li>캐릭터 뒤에서 조작하는 3D 이동·회피·점프 전투</li><li>빨강·노랑·파랑의 색에 따라 달라지는 대응</li><li>타이밍에 맞춰 공격을 흘리는 좌우 쳐내기</li><li>직선·사인파·나선 등 다양한 궤적의 공격</li><li>적에게 접근한 뒤 선택하는 공격·행동 메뉴</li></ul><h2 id="s20">검색어</h2><p>3D 액션, 회피, 쳐내기, 패턴, 턴제, 로우폴리, 싱글 플레이, 한국어</p><h2 id="s23">이미지 자료</h2><ul><li><code>Reference/store/icon_*.png</code>: 생성 일러스트를 지정 크기로 변환한 앱 아이콘.</li><li><code>Reference/store/hero_1920x1080.png</code>: 이미지 생성으로 제작한 홍보 일러스트. 실제 게임 화면으로 표시하지 않는다.</li><li><code>Reference/store/screenshot_*.png</code>: 실제 Unity PlayMode 캡처. 제목 화면·스테이지 선택·점프·회피·정지 자세 5장. 제출 전 최종 통합 빌드에서 갱신한다.</li><li><code>Tools/msix/Images/</code>: 패키지 매니페스트가 사용하는 로고 사본.</li></ul><h2 id="s29">이름 확정 시 바꿀 곳</h2><p>제품 설정은 <code>Assets/_Project/Data/ProductInfo.asset</code>에 모았다. <code>displayName</code>, <code>description</code>, <code>publisherDisplayName</code>을 확정하고 스토어 예약 이름을 맞춘다. <code>packageIdentity</code>와 <code>packagePublisher</code>는 파트너 센터 제품 ID 값으로 지정한다. 빌드가 내보내는 <code>Builds/product_info.json</code>을 MSIX 스크립트가 읽는다. 회사 <code>DefaultCompany</code>와 제품 <code>Game2Week</code>는 현재 세이브 경로이므로 세이브 이전을 설계하기 전까지 유지한다.</p><h2 id="s32">점검 기록</h2><p>2026-10-06: 이름은 자리표시자이며 이미지에 제목 글자를 넣지 않았다. 문구와 생성 이미지에 Undertale 이름·캐릭터·빨간 하트·고유 UI를 사용하지 않았다. 공격 표시는 다이아몬드이며 캐릭터와 적은 프로젝트 레퍼런스를 사용했다. 스토어 등록·외부 게시·인증서 설치는 이 작업에 포함하지 않았다.</p>
+</main></body></html>

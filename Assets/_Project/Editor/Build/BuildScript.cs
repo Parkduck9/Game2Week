@@ -23,14 +23,24 @@ namespace Game2Week.EditorTools.Build
 
         static void Build(bool exitWhenDone)
         {
+            var product=AssetDatabase.LoadAssetAtPath<Game2Week.Core.ProductInfo>("Assets/_Project/Data/ProductInfo.asset");
+            if(product)
+            {
+                // 회사 이름을 바꾸면 기존 세이브 경로가 달라지므로 이름 확정 전에는 유지한다.
+                if(product.companyName!="DefaultCompany"||product.productName!="Game2Week")throw new InvalidOperationException("회사/제품 이름 변경은 세이브 이전 계획을 확인한 뒤 적용하세요.");
+                PlayerSettings.companyName=product.companyName;PlayerSettings.productName=product.productName;PlayerSettings.bundleVersion=product.version;
+            }
             var version = ArgumentValue("-buildVersion");
             if (!string.IsNullOrEmpty(version)) PlayerSettings.bundleVersion = version;
 
             var scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray();
             if (scenes.Length == 0) throw new InvalidOperationException("빌드 목록에 씬이 없음");
 
-            if (Directory.Exists(OutputDirectory)) Directory.Delete(OutputDirectory, true);
-            var exe = Path.Combine(OutputDirectory, PlayerSettings.productName + ".exe");
+            var outputPath=Path.GetFullPath(Path.Combine(Application.dataPath,"..",OutputDirectory));
+            var projectPath=Path.GetFullPath(Path.Combine(Application.dataPath,".."))+Path.DirectorySeparatorChar;
+            if(!outputPath.StartsWith(projectPath,StringComparison.OrdinalIgnoreCase))throw new InvalidOperationException("빌드 출력은 프로젝트 폴더 안이어야 합니다.");
+            if (Directory.Exists(outputPath)) Directory.Delete(outputPath, true);
+            var exe = Path.Combine(outputPath, PlayerSettings.productName + ".exe");
 
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {
@@ -41,6 +51,12 @@ namespace Game2Week.EditorTools.Build
             });
 
             var summary = report.summary;
+            if(product&&summary.result==BuildResult.Succeeded)
+            {
+                var exported=UnityEngine.Object.Instantiate(product);exported.version=PlayerSettings.bundleVersion;
+                File.WriteAllText(Path.Combine(projectPath,"Builds/product_info.json"),JsonUtility.ToJson(exported,true),new System.Text.UTF8Encoding(false));
+                UnityEngine.Object.DestroyImmediate(exported);
+            }
             Debug.Log($"[Build] {summary.result} · {summary.totalSize / (1024 * 1024)}MB · {summary.totalTime.TotalSeconds:0}s · {exe} · v{PlayerSettings.bundleVersion}");
             if (exitWhenDone) EditorApplication.Exit(summary.result == BuildResult.Succeeded ? 0 : 1);
         }
