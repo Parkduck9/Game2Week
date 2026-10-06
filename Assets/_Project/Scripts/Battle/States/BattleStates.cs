@@ -38,6 +38,7 @@ namespace Game2Week.Battle
             Context.Ui.HideAll();
             var line = Context.Enemy.NextEnemyTurnLine();
             Context.Ui.ShowTurnHud(string.IsNullOrEmpty(line) ? BattleTexts.TurnHint : $"{Context.Enemy.Data.DisplayName}: \"{line}\"   ·   {BattleTexts.TurnHint}");
+            Context.World.BeginPattern(Context.NextPattern(), BattleFormulas.BulletDamage(Context.Enemy.Data.Attack, Context.Player.Data.Defense));
             Context.Input?.EnablePlayer();
         }
 
@@ -55,6 +56,13 @@ namespace Game2Week.Battle
                 Context.RaisePlayerHp();
             }
 
+            int hit = Context.World.ConsumePlayerDamage();
+            if (hit > 0)
+            {
+                Context.Events.RaisePlayerDamaged(Context.Player.TakeDamage(hit));
+                Context.RaisePlayerHp();
+            }
+
             if (Context.Player.IsDefeated) Context.ChangeState(BattleStateId.Defeat);
             else if (Context.World.IsPlayerTouchingEnemy()) Context.ChangeState(BattleStateId.ActionMenu);
             else if (elapsed >= duration) Context.ChangeState(BattleStateId.ItemMenu);
@@ -62,6 +70,7 @@ namespace Game2Week.Battle
 
         public override void Exit()
         {
+            Context.World.EndPattern();
             Context.Gems.EndTurn();
             Context.World.ShowGems(System.Array.Empty<string>());
             Context.Ui.HideAll(); // 탄막 턴 표시(남은 시간 막대) 정리
@@ -103,18 +112,27 @@ namespace Game2Week.Battle
         }
     }
 
-    /// <summary>공격 — 임시: 타이밍 게이지 없이 바로 데미지 (07단계에서 교체)</summary>
+    /// <summary>공격 — 타이밍 게이지: 누른 위치의 정확도로 데미지 (놓치면 MISS)</summary>
     public sealed class FightState : BattleStateBase
     {
         public FightState(BattleContext context) : base(context) { }
 
         public override void Enter()
         {
+            Context.Ui.ShowTimingGauge(OnGaugeFinished);
+        }
+
+        void OnGaugeFinished(float? accuracy)
+        {
             var enemy = Context.Enemy;
-            int damage = BattleFormulas.TempFightDamage(Context.Player.Data.Attack, Context.Player.ConsumeAttackMultiplier(), enemy.Data.Defense);
+            var player = Context.Player;
+            // 보석 공격 강화는 놓쳐도 소모된다 (한 번의 공격 기회에 쓰인 것)
+            float boost = player.ConsumeAttackMultiplier();
+            int damage = BattleFormulas.FightDamage(player.Data.Attack, accuracy, boost, enemy.Data.Defense);
             int applied = enemy.TakeDamage(damage);
             Context.Events.RaiseEnemyDamaged(applied);
             Context.RaiseEnemyHp();
+            Context.Ui.ShowPopup(applied > 0 ? $"-{applied}" : BattleTexts.Miss);
             Context.Ui.ShowDialogue(BattleTexts.FightResult(enemy.Data.DisplayName, applied),
                 () => Context.ChangeState(enemy.IsDefeated ? BattleStateId.Victory : BattleStateId.EnemyTurn));
         }

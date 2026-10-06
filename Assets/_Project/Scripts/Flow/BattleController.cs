@@ -23,6 +23,7 @@ namespace Game2Week.Flow
         [SerializeField] BattleUi ui;
         [SerializeField] StatusBar statusBar;
         [SerializeField] PauseMenu pauseMenu;
+        [SerializeField] EnemyHealthBar enemyHealthBar;
 
         BattleStateMachine machine;
         bool finished;
@@ -58,11 +59,12 @@ namespace Game2Week.Flow
             var enemy = new EnemyCombatant(enemyData);
             var gems = new GemField(stage.gems, stage.gemRules.maxPerTurn);
             machine = new BattleStateMachine();
-            Context = new BattleContext(machine, events, input, ui, world, stage, player, enemy, gems, gemRewards, Finish);
+            Context = new BattleContext(machine, events, input, ui, world, stage, player, enemy, gems, gemRewards, Finish, StagePatternSource(stage));
             BattleStates.RegisterAll(machine, Context);
 
             presentation.Bind(events, spawner.Enemy);
             statusBar.Bind(events, player.Data.DisplayName, player.Data.Level, player.CurrentHp, player.MaxHp);
+            if (enemyHealthBar) enemyHealthBar.Bind(events, enemyData.DisplayName, enemy.CurrentHp, enemy.MaxHp);
             machine.StateChanged += (_, id) => events.RaiseStateChanged(id);
             ui.Dialogue.SpeedMultiplier = () => Save.TextSpeeds.Multiplier(session.Save.Settings.textSpeed);
 
@@ -81,6 +83,18 @@ namespace Game2Week.Flow
         void OnDestroy()
         {
             if (input) input.EnableUI();
+        }
+
+        /// <summary>스테이지가 패턴을 지정했으면 그 목록을 순서대로, 아니면 null (적 데이터 순서 사용)</summary>
+        System.Func<AttackPatternData> StagePatternSource(Stages.StageDefinition stage)
+        {
+            var list = new System.Collections.Generic.List<AttackPatternData>();
+            if (session.Catalog)
+                foreach (var name in stage.enemyTurn.patterns)
+                    if (session.Catalog.FindPattern(name) is { } p) list.Add(p);
+            if (list.Count == 0) return null;
+            int next = 0;
+            return () => list[next++ % list.Count];
         }
 
         void Finish(BattleOutcome outcome)

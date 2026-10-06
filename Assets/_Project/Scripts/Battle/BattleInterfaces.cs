@@ -22,6 +22,9 @@ namespace Game2Week.Battle
         /// <summary>대사창 안 세로 목록 (행동·아이템 목록). 취소키면 onCancel.</summary>
         void ShowListMenu(IReadOnlyList<string> items, Action<int> onSelected, Action onCancel);
 
+        /// <summary>타이밍 게이지를 띄우고, 끝나면 정확도(0~1, 놓치면 null)를 돌려준다.</summary>
+        void ShowTimingGauge(Action<float?> onFinished);
+
         void ShowTurnHud(string hint);
         void UpdateTurnHud(float remainingRatio);
 
@@ -49,5 +52,14 @@ namespace Game2Week.Battle
 
         /// <summary>보석을 먹는 연출 + 숨기기.</summary>
         void CollectGem(string gemId);
+
+        /// <summary>탄막 패턴 시작. 탄 한 발 데미지를 함께 준다. pattern이 null이면 탄막 없음.</summary>
+        void BeginPattern(Data.AttackPatternData pattern, int damagePerHit);
+
+        /// <summary>지난 호출 이후 주인공이 맞은 데미지 합 (무적 시간 중엔 안 맞음).</summary>
+        int ConsumePlayerDamage();
+
+        /// <summary>탄막 정리 (남은 탄 제거).</summary>
+        void EndPattern();
     }
 }

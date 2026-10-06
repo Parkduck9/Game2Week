@@ -21,6 +21,8 @@ namespace Game2Week.Battle
         public const string NowSpareable = "* 이제 살려 줄 수 있을 것 같다.";
         public const string PlayerDefeated = "* 눈앞이 캄캄해졌다...";
         public const string DefaultFlavor = "* 적이 이쪽을 노려본다.";
+        public const string Miss = "MISS";
+        public const string GaugeHint = "가운데에서 Z!";
 
         public static string FightResult(string enemyName, int damage) =>
             damage > 0 ? $"* {enemyName}에게 {damage}의 피해를 주었다!" : "* 빗나갔다!";

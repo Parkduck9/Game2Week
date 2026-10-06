@@ -22,6 +22,15 @@ namespace Game2Week.Battle.View
 
         public float Radius => radius;
 
+        Renderer[] renderers;
+
+        /// <summary>무적 시간 깜빡임 (보였다 안 보였다)</summary>
+        public void SetVisible(bool visible)
+        {
+            renderers ??= GetComponentsInChildren<Renderer>(true);
+            foreach (var r in renderers) r.enabled = visible;
+        }
+
         public void Init(BattleArena battleArena)
         {
             arena = battleArena;

@@ -5,10 +5,15 @@ namespace Game2Week.Battle
     public static class BattleFormulas
     {
         /// <summary>
-        /// 임시 공격 데미지 (07단계 타이밍 공격 + 데미지 공식 확정 전까지).
-        /// 공격력 × 배율 − 방어력, 최소 1.
+        /// 공격 데미지 = 공격력 × 정확도 배율 × 보석 배율 − 방어력 (최소 1). 놓치면(accuracy null) 0.
         /// </summary>
-        public static int TempFightDamage(int attack, float multiplier, int defense) =>
-            Math.Max(1, (int)Math.Round(attack * multiplier) - defense);
+        public static int FightDamage(int attack, float? accuracy, float boostMultiplier, int defense)
+        {
+            if (accuracy is not { } a) return 0;
+            return Math.Max(1, (int)Math.Round(attack * TimingGauge.Multiplier(a) * boostMultiplier) - defense);
+        }
+
+        /// <summary>탄 한 발 데미지 = 적 공격력 − 주인공 방어력 (최소 1).</summary>
+        public static int BulletDamage(int enemyAttack, int playerDefense) => Math.Max(1, enemyAttack - playerDefense);
     }
 }

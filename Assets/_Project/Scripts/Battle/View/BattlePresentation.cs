@@ -50,7 +50,11 @@ namespace Game2Week.Battle.View
         {
             if (amount <= 0 || !enemy) return;
             enemy.PlayHit();
-            effects.PlayHit(enemy.transform.position + Vector3.up * 0.6f);
+            // 적 몸 안에 묻히지 않게 카메라 쪽 표면에서 터뜨린다
+            var pos = enemy.transform.position + Vector3.up * 0.6f;
+            var cam = Camera.main;
+            if (cam) pos += (cam.transform.position - pos).normalized * 0.6f;
+            effects.PlayHit(pos);
         }
 
         void OnPlayerDamaged(int amount) => cameraDirector.Shake(0.6f);

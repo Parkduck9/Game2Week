@@ -15,12 +15,14 @@ namespace Game2Week.Battle.UI
         [SerializeField] MenuNavigator listMenu;
         [SerializeField] TurnHud turnHud;
         [SerializeField] PopupText popup;
+        [SerializeField] TimingGaugeView timingGauge;
 
         Action<int> mainSelected;
         Action<int> listSelected;
         Action listCancelled;
 
         public DialogueBox Dialogue => dialogue;
+        public TimingGaugeView TimingGauge => timingGauge;
         public bool IsMainMenuOpen => mainMenu.gameObject.activeSelf;
         public bool IsListMenuOpen => listMenu.gameObject.activeSelf;
 
@@ -63,6 +65,13 @@ namespace Game2Week.Battle.UI
             listMenu.SetItems(items);
         }
 
+        public void ShowTimingGauge(Action<float?> onFinished)
+        {
+            HideMenus();
+            dialogue.ShowStatic(string.Empty);
+            timingGauge.Show(onFinished);
+        }
+
         public void ShowTurnHud(string hint) => turnHud.Show(hint);
 
         public void UpdateTurnHud(float remainingRatio) => turnHud.SetRemaining(remainingRatio);
@@ -74,6 +83,7 @@ namespace Game2Week.Battle.UI
             HideMenus();
             dialogue.Hide();
             turnHud.Hide();
+            if (timingGauge) timingGauge.Hide();
         }
 
         /// <summary>테스트용: 확인키 대신 메뉴 고르기</summary>

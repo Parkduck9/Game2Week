@@ -25,8 +25,10 @@ namespace Game2Week.Battle
             EnemyCombatant enemy,
             GemField gems,
             GemRewardSettings gemRewards,
-            Action<BattleOutcome> finish)
+            Action<BattleOutcome> finish,
+            Func<AttackPatternData> nextPattern = null)
         {
+            NextPattern = nextPattern ?? enemy.NextPattern;
             this.stateMachine = stateMachine;
             Events = events;
             Input = input;
@@ -50,6 +52,9 @@ namespace Game2Week.Battle
         public EnemyCombatant Enemy { get; }
         public GemField Gems { get; }
         public GemRewardSettings RewardSettings { get; }
+
+        /// <summary>다음 탄막 턴에 쓸 패턴 (스테이지 지정 패턴 → 없으면 적 데이터 순서)</summary>
+        public Func<AttackPatternData> NextPattern { get; }
 
         public BattleStateId? CurrentState => stateMachine.CurrentId;
 

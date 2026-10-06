@@ -12,7 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02178c6dab15cd6468e439a991232290, type: 3}
   m_Name: Pattern_Test
   m_EditorClassIdentifier: Game2Week::Game2Week.Data.AttackPatternData
-  displayName: "\uD14C\uC2A4\uD2B8 \uD328\uD134"
-  patternPrefab: {fileID: 0}
-  duration: 6
-  boxSize: {x: 1.6, y: 1.6}
+  displayName: "\uBC29\uC0AC\uD615 \uACB0\uC815\uD0C4"
+  patternPrefab: {fileID: 7792178705697064497, guid: b260eb9353004ee4680367ad5f5ae251, type: 3}

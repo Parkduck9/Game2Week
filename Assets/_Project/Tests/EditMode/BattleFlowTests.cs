@@ -26,6 +26,17 @@ namespace Game2Week.Tests
             public Action ListCancelled;
             public string Popup;
             public bool HudVisible;
+            public Action<float?> GaugeFinished;
+
+            public void ShowTimingGauge(Action<float?> onFinished) => GaugeFinished = onFinished;
+
+            /// <summary>게이지에서 누른 정확도 (null = 놓침)</summary>
+            public void CompleteGauge(float? accuracy)
+            {
+                var a = GaugeFinished;
+                GaugeFinished = null;
+                a(accuracy);
+            }
 
             public void ShowDialogue(string text, Action onClosed) { Dialogue = text; CloseDialogueAction = onClosed; MainItems = ListItems = null; }
             public void ShowBoxText(string text) => BoxText = text;
@@ -62,6 +73,27 @@ namespace Game2Week.Tests
             public string TouchedGem(IReadOnlyList<string> visible) => visible.Contains(GemUnderPlayer) ? GemUnderPlayer : null;
             public void ShowGems(IReadOnlyList<string> gemIds) => ShownGems = gemIds.ToList();
             public void CollectGem(string gemId) => Collected.Add(gemId);
+
+            public AttackPatternData Pattern;
+            public int DamagePerHit;
+            public int PendingDamage;
+            public bool PatternRunning;
+
+            public void BeginPattern(AttackPatternData pattern, int damagePerHit)
+            {
+                Pattern = pattern;
+                DamagePerHit = damagePerHit;
+                PatternRunning = true;
+            }
+
+            public int ConsumePlayerDamage()
+            {
+                int d = PendingDamage;
+                PendingDamage = 0;
+                return d;
+            }
+
+            public void EndPattern() => PatternRunning = false;
         }
 
         readonly List<Object> created = new();
@@ -186,14 +218,17 @@ namespace Game2Week.Tests
             StartEnemyTurn();
             world.Touching = true;
             machine.Tick(0.1f);
-            ui.ChooseMain(0); // 공격 10 → 적 HP 15 → 5
+            ui.ChooseMain(0);
+            ui.CompleteGauge(0f); // 게이지 끝자락: 공격 10 × 0.5 = 5 → 적 HP 15 → 10
 
-            Assert.AreEqual(5, context.Enemy.CurrentHp);
+            Assert.AreEqual(10, context.Enemy.CurrentHp);
+            Assert.AreEqual("-5", ui.Popup);
             ui.CloseDialogue();
             Assert.AreEqual(BattleStateId.EnemyTurn, machine.CurrentId);
 
             machine.Tick(0.1f); // 아직 닿아 있음 → 메뉴
             ui.ChooseMain(0);
+            ui.CompleteGauge(1f); // 정중앙: 10 × 2 = 20
             ui.CloseDialogue();
             Assert.AreEqual(BattleStateId.Victory, machine.CurrentId);
             ui.CloseDialogue();
@@ -282,10 +317,81 @@ namespace Game2Week.Tests
         }
 
         [Test]
-        public void TempFightDamage_HasMinimumOne()
+        public void FightMiss_DealsNoDamage_ButUsesUpGemBoost()
         {
-            Assert.AreEqual(1, BattleFormulas.TempFightDamage(1, 1f, 50));
-            Assert.AreEqual(15, BattleFormulas.TempFightDamage(10, 1.5f, 0));
+            StartEnemyTurn();
+            context.Player.GrantAttackBoost(1.5f);
+            world.Touching = true;
+            machine.Tick(0.1f);
+            ui.ChooseMain(0);
+            ui.CompleteGauge(null);
+
+            Assert.AreEqual(15, context.Enemy.CurrentHp);
+            Assert.AreEqual(BattleTexts.Miss, ui.Popup);
+            Assert.AreEqual(1f, context.Player.NextAttackMultiplier);
+        }
+
+        [Test]
+        public void EnemyTurn_StartsPattern_AndBulletHitsDamagePlayer()
+        {
+            StartEnemyTurn();
+            Assert.IsTrue(world.PatternRunning);
+            Assert.AreEqual(4, world.DamagePerHit, "적 공격 4 − 주인공 방어 0");
+
+            world.PendingDamage = 4;
+            machine.Tick(0.1f);
+            Assert.AreEqual(16, context.Player.CurrentHp);
+
+            world.Touching = true;
+            machine.Tick(0.1f);
+            Assert.IsFalse(world.PatternRunning, "턴이 끝나면 탄막 정리");
+        }
+
+        [Test]
+        public void Formulas()
+        {
+            Assert.AreEqual(0, BattleFormulas.FightDamage(10, null, 1f, 0), "놓치면 0");
+            Assert.AreEqual(5, BattleFormulas.FightDamage(10, 0f, 1f, 0));
+            Assert.AreEqual(20, BattleFormulas.FightDamage(10, 1f, 1f, 0));
+            Assert.AreEqual(30, BattleFormulas.FightDamage(10, 1f, 1.5f, 0), "보석 강화 ×1.5");
+            Assert.AreEqual(1, BattleFormulas.FightDamage(1, 0f, 1f, 50), "맞히면 최소 1");
+            Assert.AreEqual(1, BattleFormulas.BulletDamage(2, 10));
+            Assert.AreEqual(4, BattleFormulas.BulletDamage(4, 0));
+        }
+
+        [Test]
+        public void TimingGauge_AccuracyAndMiss()
+        {
+            var gauge = new TimingGauge(1f);
+            gauge.Advance(0.5f);
+            gauge.Press();
+            Assert.AreEqual(1f, gauge.Accuracy.Value, 0.001f, "정중앙");
+
+            var late = new TimingGauge(1f);
+            late.Advance(0.9f);
+            late.Press();
+            Assert.AreEqual(0.2f, late.Accuracy.Value, 0.001f);
+
+            var missed = new TimingGauge(1f);
+            missed.Advance(1.2f);
+            Assert.IsTrue(missed.IsFinished);
+            Assert.IsNull(missed.Accuracy);
+            missed.Press();
+            Assert.IsNull(missed.Accuracy, "끝난 뒤 누르면 무시");
+
+            Assert.AreEqual(0.5f, TimingGauge.Multiplier(0f));
+            Assert.AreEqual(2f, TimingGauge.Multiplier(1f));
+        }
+
+        [Test]
+        public void RadialBurst_DirectionsAreEvenAndRotate()
+        {
+            var dirs = Game2Week.Battle.Patterns.RadialBurstPattern.Directions(4, 0f);
+            Assert.AreEqual(4, dirs.Length);
+            Assert.That(Vector3.Distance(dirs[0], Vector3.forward), Is.LessThan(0.001f));
+            Assert.That(Vector3.Distance(dirs[1], Vector3.right), Is.LessThan(0.001f));
+            var rotated = Game2Week.Battle.Patterns.RadialBurstPattern.Directions(4, 90f);
+            Assert.That(Vector3.Distance(rotated[0], Vector3.right), Is.LessThan(0.001f));
         }
     }
 }

@@ -46,7 +46,9 @@
 - [x] Pretendard 폰트 다운로드 (허락 받음, OFL 1.1 라이선스 파일 포함)
 - [x] 템플릿 `Assets/Scenes/SampleScene` + `Settings/SampleSceneProfile` 삭제, 빌드 목록 교체
 - [x] 임시 `BattleFlowStub` / `BattleStageBootstrap` 삭제 → `BattleController`로 교체, PlayMode 테스트 수정
-- [ ] 공격(FIGHT)은 임시로 바로 데미지 (`BattleFormulas.TempFightDamage` = 공격력×배율−방어, 최소 1) — 07 타이밍 공격으로 교체
+- [x] 임시 공격 → 07 타이밍 공격으로 교체
+- [ ] 클로즈업에서 피격 파티클(큐브)이 화면에 비해 큼 — 크기·위치 다듬기
+- [ ] 적 대사 말풍선(월드 스페이스) 아직 없음 — 지금은 탄막 턴 상단 표시줄에 적 대사
 - [ ] 테스트 실행 시 Input System 패키지 테스트가 섞임 (manifest testables) → 항상 `-assemblyNames Game2Week.Tests.*`로 실행
 - [ ] `Pretendard-Regular SDF.asset`(동적 폰트)이 플레이·테스트 때마다 글자가 추가돼 git 변경으로 잡힘 — 출시 전 정적 아틀라스(KS X 1001 + 영문)로 굽거나 커밋 전 되돌리기 `[결정 필요]`
 - [ ] 음량 설정은 저장만 됨 — 사운드가 생기면 AudioMixer에 연결
@@ -133,10 +135,10 @@
 - [x] 상태 흐름 10종 등록 (`BattleStates`) + 가짜 UI/World로 흐름 테스트 11개, 실제 키보드 입력 PlayMode 테스트
 
 ## 07. FIGHT — Timing Attack
-- [ ] 타겟 게이지 UI + 이동 커서
-- [ ] 정확도 계산 (중앙 거리 → 0~1), 놓치면 MISS
-- [ ] 데미지 공식 `[결정 필요: 공식/수치]`
-- [ ] 공격 연출 — 카메라 클로즈업 + 3D 타격 이펙트 + 적 Hit 애니메이션 + 데미지 숫자(월드 스페이스)
+- [x] 타겟 게이지 UI `TimingGaugeView` + 이동 커서 (1.3초에 왼→오, 구간 색: 보통/좋음/완벽)
+- [x] 정확도 계산 `TimingGauge` (중앙 거리 → 0~1), 끝까지 안 누르면 MISS
+- [x] 데미지 공식 (사용자 결정) = 공격력 × 정확도 배율(×0.5~×2.0) × 보석 강화 − 방어력, 최소 1, MISS 0
+- [x] 공격 연출 — 클로즈업 + 카메라 쪽 피격 파티클 + 적 번쩍 + 데미지 숫자 팝업 + 적 HP 막대(`EnemyHealthBar`)
 - [x] 적 HP 0 → Victory (임시 공격으로 동작)
 
 ## 08. ACT / ITEM / MERCY
@@ -152,11 +154,11 @@
 - [x] 적 접촉 판정 → 탄막 턴 즉시 종료 → 공격/행동/자비 메뉴
 - [x] 시간 종료(못 닿음) → 아이템/넘기기 메뉴
 - [x] 보석 — 턴마다 확률 등장, 닿으면 먹고 보상 팝업
-- [ ] 피격 — HP 감소, 무적 시간 + 깜빡임, HP 0 → Defeat
-- [ ] IAttackPattern + PatternRunner (프리팹으로 교체) `[핵심]`
-- [ ] Bullet 기본 클래스 — 접촉 데미지, 이동은 하위 클래스, 풀링 고려, 충돌 판정 방식 통일
-- [ ] 테스트 패턴 1종 `[결정 필요: 패턴 모양]`
-- [ ] 패턴 종료 → 탄 정리 → 박스 복귀 → 플레이어 턴
+- [x] 피격 — 탄 한 발 = 적 공격 − 주인공 방어(최소 1), 무적 1초 + 깜빡임, HP 0 → Defeat
+- [x] `IAttackPattern` + `PatternContext` + `PatternRunner` (패턴 = 프리팹 + AttackPatternData 에셋) `[핵심]`
+- [x] `Bullet` 기본 클래스 — 바닥 평면 직선 이동(하위 클래스에서 Move 교체), 거리 판정(물리 X), 경기장 밖이면 회수, 패턴별 풀링
+- [x] 테스트 패턴 `RadialBurstPattern` (사용자 결정: 방사형 결정탄) — 1.1초마다 10발, 물결마다 13° 회전, 청록/보라 번갈아, 첫 발 0.7초 여유
+- [x] 턴 종료 → 탄 정리 → 다음 상태 / 스테이지가 패턴을 지정하면 그 순서, 아니면 적 데이터 순서
 
 ## 10. 승리 / 패배
 - [x] Victory — 처치(축소) / 살려줌(떠오름) 연출 + 적 문구 → Result
