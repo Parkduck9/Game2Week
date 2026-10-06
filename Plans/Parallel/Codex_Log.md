@@ -42,6 +42,7 @@
    - 동시 상한·공유 예산. 예산이 모자라면 묶음 전체를 미룬다 (한 프레임에 몰아 쏘지 않음).
    - `ColorCombinationRules`로 빨강·파랑이 동시에 살아 있지 않게, 바뀔 때 `SwitchGraceSeconds` 비우기.
    - `End()`에서 하위 패턴·예고·예약·탄 모두 정리.
+   - **`IThreatSource`도 구현**해 살아 있는 하위 패턴들의 `CollectThreats`를 모아 준다. 경고음·화면 밖 표시(`ThreatFeedbackView`)와 Claude의 측정 봇이 `PatternRunner.Current`를 `IThreatSource`로 읽기 때문 — 빠지면 경고가 사라진다.
 4. **8개 맵 연결** (기본안 — 바꾸면 이유 기록):
 
    | 맵 | 새로 배우는 패턴 | 누적 | 기준 간격 | 동시 상한 |
