@@ -1,53 +1,72 @@
 # Claude 작업 문서 — 할 일 · 한 일
 
-최종 갱신: 2026-10-06 · 지금 할 일: **5단계 — 자동 플레이 측정 도구 · 색 처음 등장 안내**
+최종 갱신: 2026-10-06 · 지금 할 일: **5 → 6 → 7 → 8단계를 순서대로 한 번에** (Codex도 같은 시간에 자기 몫 진행)
 
-> Claude는 이 문서의 "지금 할 일"부터 진행하고, 끝나면 "한 일"과 "작업량"을 추가한다.
+> Claude는 "1. 할 일"을 위에서부터 진행하고, 단계마다 "3. 한 일"과 "작업량"을 추가한다.
 > 짝 문서: Codex 쪽은 `Plans/Parallel/Codex_Log.md`. 전체 규칙은 `CLAUDE.md`와 `Plans/Parallel_Work_Plan.md`.
 
-## 0. 작성 규칙
+## 0. 작성·작업 규칙
 
 - 기록·주석·커밋 메시지·사용자 답변은 **한국어**로 쓴다. 코드 식별자만 영어.
-- 작업 폴더는 `C:\Unity\Game2Week\Game2Week-claude`. Unity 배치모드·테스트는 이 폴더로만.
-- 담당 파일만 고친다. 공용 연결 지점을 바꿔야 하면 사용자에게 먼저 알린다.
+- 작업 폴더 `C:\Unity\Game2Week\Game2Week-claude`, 브랜치 `phase5-measure` 하나로 5~8단계 진행. Unity 배치모드·테스트는 이 폴더로만.
+- 담당 파일만 고친다 (Codex 문서 0절의 "Claude 담당" 목록이 기준). 공용 연결 지점을 바꿔야 하면 사용자에게 먼저 알린다.
 - 병렬 기간에는 TODO·WORKLOG·설계 MD·Work_Effort를 고치지 않고 이 문서에 기록 → main에 합칠 때 반영 (Codex 문서도 함께).
-- 커밋·push·합치기는 사용자 요청 시. 커밋 전 폰트 에셋·ProjectSettings 자동 변경 되돌리기.
+- 커밋: 단계가 끝나고 전체 테스트가 통과하면 자기 브랜치에 커밋 (사용자 "한 번에 작업" 요청). push·main 합치기는 사용자 요청 시. 커밋 전 폰트 에셋·ProjectSettings 자동 변경 되돌리기.
 - HTML: `node Tools/render_plan.mjs Plans/Parallel/Claude_Log.md`.
 
-## 1. 지금 할 일 — 5단계 (브랜치 `phase5-measure`)
+## 1. 할 일 (순서대로)
 
-### 만들 것
+### 5단계 — 자동 플레이 측정 도구 · 색 처음 등장 안내
 1. **자동 플레이 측정 도구** (PlayMode 테스트 형태의 봇):
-   - 8개 맵을 각각 정해진 턴 수만큼 자동으로 플레이한다.
+   - 8개 맵을 정해진 턴 수만큼 자동으로 플레이한다.
    - 봇은 적에게 접근하면서 대응한다: 노랑은 가까우면 쳐내기·회피, 빨강은 Ctrl 정지 자세, 파랑은 계속 이동.
-   - 기록할 것: 맵별 피격 수, 적 접근 성공률·소요 시간, 회피·쳐내기·자세 사용, 색 통과 수, 턴 수.
+   - 기록할 것: 맵별 피격 수, 적 접근 성공률·소요 시간, 회피·쳐내기·자세 사용, 색 통과 수, 턴 수. `BattleFeedback` 구독으로 센다.
    - 결과는 `Logs/balance_report.json`에 쓴다. `Tools/render_balance_report.mjs`가 그걸 읽어 `Plans/Balance_Report.html`(맵별 표·막대)을 만든다.
-   - 자동 테스트 통과만으로 재미나 밸런스를 확정하지 않는다. 사용자 플레이 확인의 근거 자료로 쓴다.
+   - 자동 측정만으로 재미나 밸런스를 확정하지 않는다. 사용자 플레이 확인의 근거 자료로 쓴다.
 2. **색 처음 등장 안내**:
    - 한 전투에서 빨강·파랑이 처음 나오는 순간 상단 안내를 잠깐 바꾼다 ("빨강 = Ctrl로 멈추기" / "파랑 = 계속 움직이기").
-   - 색은 `ThreatPoint`에서 읽는다. 문구는 `BattleTexts`에 둔다.
-3. **테스트**: 안내 표시(처음 한 번만), 측정 도구가 8개 맵 리포트를 만드는지.
+   - 색은 `ThreatPoint`에서 읽고, 문구는 `BattleTexts`에 둔다.
+3. 테스트: 안내는 처음 한 번만 나오는지, 측정 도구가 8개 맵 리포트를 만드는지.
+4. Codex 5단계(맵 1→8종 연결)가 합쳐진 뒤 측정을 다시 돌린다. 조정할 수치는 Codex 문서 "요청"에 적는다 (데이터는 Codex 담당).
 
-### 5단계 담당 파일
-| 구분 | 경로 |
-|---|---|
-| 새로 만듦 | `Tests/PlayMode/Balance*` (측정 봇), `Tools/render_balance_report.mjs`, `Plans/Balance_Report.html`, 색 안내 View (`Scripts/Battle/UI/`) |
-| 기존 | 플레이어·입력·카메라·`BattleWorld`·`BattleController`·전투 UI·`Scenes/Battle.unity`·`BattleTexts`·`ThreatFeedbackView` |
-| 수정 금지 | 패턴 쪽·맵·맵툴·ContentCatalog (Codex), 공용 연결 지점 |
+### 6단계 — 소리 · 씬 전환
+1. **AudioMixer** (`Art/Audio/GameMixer`): BGM·SFX 그룹. 설정 음량(배경음/효과음)을 dB로 바꿔 연결 (`SettingsModel`·`SettingsPanel`·`BattleAudio`).
+2. **BattleAudio 확장**: `BattleFeedback`(회피·점프·착지·쳐내기·자세·피격·색 통과·발사·예고)과 `BattleEvents` 구독, 클립 비어 있으면 무음. `ThreatFeedbackView` 경고음도 믹서 SFX 그룹으로.
+3. **BGM 재생기**: 씬별 BGM 슬롯 (메인·스테이지 선택·전투·결과·엔딩), 씬 전환 때 교차 페이드. 클립은 비워 두고 연결 지점만 (소리 출처는 사용자 결정).
+4. **메뉴 효과음** 연결 지점: `MenuNavigator`(이동·확인·취소), `ConfirmPopup`.
+5. **AudioListener 정리**: 씬마다 하나 (PlayMode 경고 제거).
+6. **씬 전환 페이드**: `SceneLoader`에 검은 화면 페이드 (일시정지·timeScale 0에서도 동작, 테스트에서 끌 수 있게).
+7. 테스트: 음량 → 믹서 dB 변환, 리스너 1개, 페이드 후 씬 전환 완료, 기존 흐름 회귀.
 
-### 합친 뒤
-- 측정 리포트로 맵별 수치 조정을 정리해 Codex 문서 "요청"에 적는다 (데이터 에셋은 Codex 담당).
-- 사용자 플레이 확인을 받은 뒤 6단계 N-0 연결 지점을 main에 만든다: `BattleAudio`·이펙트 훅 이벤트 목록.
+### 7단계 — 주인공 v2 · 리깅 · 애니메이션
+1. `Preview/heroine_preview.html` 모델 v2: 손(쳐내기용 오른손), 측면 눈·볼 뜸 수정, 머리 결 보강. 레퍼런스는 덮어쓰지 않고 `_v2`.
+2. 리깅 (three.js SkinnedMesh → GLB): 몸통·머리·양팔·양다리·양갈래 뼈.
+3. 애니메이션 클립: 대기·달리기·회피·점프/착지·쳐내기(오른손 왼→오, 오→왼)·정지 자세·피격·쓰러짐.
+4. Unity: `Art/Characters/Heroine/heroine_v2.glb` 임포트 → Animator Controller → `PlayerActionView`가 모터 상태로 구동 (임시 손 큐·원판은 대체 또는 보조로 남김).
+5. 테스트: 상태별 Animator 상태 전환, 기존 쳐내기·자세 테스트 회귀, 화면 캡처.
 
-## 2. 이후 할 일
+### 8단계 — 출시 준비 (이름은 사용자 결정 전 → 한 곳에 모아 두기)
+1. `ProductInfo` (회사·게임 이름·버전) 한 곳에서 PlayerSettings·MSIX 매니페스트·타이틀 문구가 읽도록. 지금은 자리표시자.
+2. 정적 폰트 아틀라스 (KS X 1001 한글 + 영문·숫자·기호) — 동적 폰트가 매번 git 변경으로 잡히는 문제 해결.
+3. Codex 스토어 이미지(`Reference/store/`)를 MSIX 로고·타일에 연결.
+4. 빌드·MSIX 재검증 (`Tools/build_windows.ps1`, `Tools/package_msix.ps1`), 빌드 실행 오류 없음.
+5. 이름이 정해지면 `ProductInfo`만 바꾸면 되도록 안내를 `Plans/Store_Guide.html`에 추가.
 
-| 단계 | 먼저 (main, N-0) | Claude 할 일 |
-|---|---|---|
-| 6 연출·사운드 | `BattleAudio`·이펙트 훅 이벤트 목록 확정 | AudioMixer + 음량 설정 연결, BGM·메뉴/전투 효과음 연결 지점, AudioListener 정리, 씬 전환 페이드 |
-| 7 캐릭터·툴 | 애니메이션 상태 이름 목록 (`PlayerActionView` ↔ Animator) | 주인공 v2 + 리깅 + 애니메이션 (쳐내기 오른손 두 방향·회피·점프·정지 자세) |
-| 8 출시 준비 | 사용자 결정: 회사·게임 이름, 아이콘 방향 | 이름 반영 (PlayerSettings·MSIX·UI 문구), 정적 폰트 아틀라스, 빌드·MSIX 재검증 |
+### 합칠 때 (사용자 요청 시)
+- 두 브랜치를 main에 합친다 (먼저 끝난 쪽부터, 나중 쪽은 main을 받아 전체 테스트) → 두 문서 내용을 TODO·WORKLOG·설계 MD·Work_Effort에 반영.
+
+## 2. 요청 (Claude → Codex/사용자)
+- 사용자 결정 필요: 회사·게임 이름 (8단계), 소리 출처 (6단계 클립), 3D 모델 출처 (7단계는 지금처럼 three.js 코드 모델로 진행).
 
 ## 3. 한 일
+
+### 2026-10-06 — 6-0 연결 지점 (main)
+- `BattleFeedback`: 월드 사건 알림 창구 — 회피·점프·착지·쳐내기(쪽 방향)·정지 자세 완성·피격·색 통과(같은 색 0.25초에 한 번)·발사·예고. `BattleWorld.Feedback`, `PatternContext.Feedback`.
+  - 주인공 쪽 Raise 연결 완료: `PlayerMover`(회피·점프·착지·자세·쳐내기), `BattleWorld`(실제 피격), `PlayerHitRule`(색 통과). 발사·예고 Raise는 Codex 6단계.
+- `BattleEvents.EnemySpoke`: 탄막 턴 시작 때 적 대사 (말풍선용).
+- `BattleFxRig` + 프리팹 `Prefabs/Battle/Fx/BattleFxRig.prefab`: Battle 씬의 `BattleController.fxRigPrefab`에 연결 → 만들어서 `Bind(events, feedback, spawner)`. Codex가 이 프리팹 아래에 이펙트를 붙이면 씬을 안 고쳐도 됨.
+- `FeedbackContractTests` (PlayMode): FxRig 연결, 적 대사·회피·점프·착지 알림.
+- 7·8단계는 서로 겹치는 파일이 없어 연결 지점이 필요 없음 (Codex 7단계는 기존 `GameSession.BeginStage` 등 공개 API만 사용).
 
 ### 2026-10-06 — 5-0 연결 지점 (main)
 - `ColorCombinationRules`: 빨강·파랑 동시 위험 금지 (`CanOverlap`, `IsAllowed`), 전환 유예 `SwitchGraceSeconds` 0.6초.
@@ -72,7 +91,7 @@
   - 탄 색 입히기 + 회전 차이 (빨강은 멈춤, 파랑은 2배 빠르게).
   - 정지 자세: 몸을 낮추고 손을 가슴 앞에, 발밑 원판이 연빨강 → 빨강.
   - HUD에 정지 자세 표시, 화면 밖 경고를 색별 글자색으로.
-- 시험 패턴 `ColorTest/Pattern_RedTest`·`Pattern_BlueTest` (맵 미연결).
+- 시험 패턴 `ColorTest/Pattern_RedTest`·`Pattern_BlueTest`.
 
 **검증**
 - EditMode 135/135: `ColorRuleTests` 7개 추가.
@@ -80,11 +99,10 @@
   - Ctrl+W를 누르면 멈춰 있고 빨강만 통과한다.
   - 이동 중이면 파랑이 통과하고, 벽에 막혀 입력만 하면 맞는다.
   - 빨강 패턴을 돌렸을 때 자세면 HP가 그대로이고, 자세가 없으면 HP가 줄어든다.
-- 화면 캡처로 원판·HUD·빨강 탄을 확인했다.
 
 **남은 것**
 - 기존 `YellowTrainingPattern` 예고선은 노랑 고정이다 (새 Graph 패턴은 색별 예고선).
-- 손·자세 표현은 리깅 전 임시 큐 (7단계).
+- 손·자세 표현은 리깅 전 임시 큐 (7단계에서 대체).
 
 ### 2026-10-06 — 병렬 준비
 - 병렬 작업 계획 (`Plans/Parallel_Work_Plan.md`): 파일 담당표·worktree·합치기 규칙·5~8단계 분할.
@@ -101,4 +119,5 @@
 | 날짜 | 누가 | 단계 | 작업 | 사람 기준(시간) |
 |---|---|---|---|---:|
 | 2026-10-06 | Claude | 액션 4단계 | Ctrl 정지 자세 입력·이동 모델, 실제 속도, 빨강/파랑 색 규칙 + 주입, 색 표시·HUD, 시험 패턴, EditMode 7·PlayMode 3 ✓ | 16 |
-| 2026-10-06 | Claude | 병렬 준비 | 3단계 통합 테스트·합치기, 5-0 연결 지점(색 조합 규칙·전투 기록) + 테스트, 할 일 문서 정리 | 4 |
+| 2026-10-06 | Claude | 병렬 준비 | 3단계 통합 테스트·합치기, 5-0 연결 지점(색 조합 규칙·전투 기록) + 테스트, 할 일 문서 정리 ✓ | 4 |
+| 2026-10-06 | Claude | 병렬 준비 | 6-0 연결 지점(BattleFeedback·EnemySpoke·BattleFxRig 씬 연결) + 테스트, 5~8단계 지시 작성 ✓ | 5 |

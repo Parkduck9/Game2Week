@@ -38,6 +38,7 @@ namespace Game2Week.Battle
             Context.Ui.HideAll();
             var line = Context.Enemy.NextEnemyTurnLine();
             Context.Ui.ShowTurnHud(string.IsNullOrEmpty(line) ? BattleTexts.TurnHint : $"{Context.Enemy.Data.DisplayName}: \"{line}\"   ·   {BattleTexts.TurnHint}");
+            if (!string.IsNullOrEmpty(line)) Context.Events.RaiseEnemySpoke(line);
             Context.World.BeginPattern(Context.NextPattern(), BattleFormulas.BulletDamage(Context.Enemy.Data.Attack, Context.Player.Data.Defense));
             Context.Input?.EnablePlayer();
         }

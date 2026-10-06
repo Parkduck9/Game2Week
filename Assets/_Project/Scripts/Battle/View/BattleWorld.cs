@@ -27,10 +27,13 @@ namespace Game2Week.Battle.View
         PlayerMover player;
         PlayerHitRule hitRule;
         readonly EncounterMemory encounterMemory = new();
+        readonly BattleFeedback feedback = new();
         float invulnerableLeft;
         int pendingDamage;
 
         public PlayerMover Player => player;
+        /// <summary>월드 사건 알림 (이펙트·소리가 구독)</summary>
+        public BattleFeedback Feedback => feedback;
         public PlayerHitRule HitRule => hitRule;
         public EncounterMemory EncounterMemory => encounterMemory;
         public PatternRunner Patterns => patternRunner;
@@ -45,8 +48,8 @@ namespace Game2Week.Battle.View
             spawner = stageSpawner;
             stage = stageDefinition;
             if (!spawner.Player.TryGetComponent(out player)) player = spawner.Player.gameObject.AddComponent<PlayerMover>();
-            player.Init(spawner.Arena, actionSettings);
-            hitRule = new PlayerHitRule(player);
+            player.Init(spawner.Arena, actionSettings, feedback);
+            hitRule = new PlayerHitRule(player, feedback);
         }
 
         public void ResetPlayer()
@@ -105,7 +108,7 @@ namespace Game2Week.Battle.View
             pendingDamage = 0;
             var enemy = spawner.Enemy;
             var context = new PatternContext(spawner.Arena, enemy ? enemy.transform : spawner.Arena.transform, enemy,
-                player.transform, player.Radius, damagePerHit, OnPlayerHit, player, hitRule, encounterMemory);
+                player.transform, player.Radius, damagePerHit, OnPlayerHit, player, hitRule, encounterMemory, feedback);
             hitRule.ResetCounts();
             patternRunner.Begin(pattern, context, spawner.Arena.transform);
         }
@@ -132,6 +135,7 @@ namespace Game2Week.Battle.View
             if (IsInvulnerable) return;
             pendingDamage += damage;
             invulnerableLeft = invulnerableSeconds;
+            feedback.RaisePlayerHit(player.transform.position);
         }
 
         void Update()

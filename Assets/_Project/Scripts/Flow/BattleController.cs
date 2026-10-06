@@ -26,6 +26,8 @@ namespace Game2Week.Flow
         [SerializeField] EnemyHealthBar enemyHealthBar;
         [Tooltip("효과음 연결 지점 (선택)")]
         [SerializeField] BattleAudio audioHooks;
+        [Tooltip("전투 이펙트 묶음 프리팹 (선택) — BattleFeedback·BattleEvents를 구독")]
+        [SerializeField] BattleFxRig fxRigPrefab;
 
         BattleStateMachine machine;
         bool finished;
@@ -39,6 +41,7 @@ namespace Game2Week.Flow
         public BattleWorld World => world;
         public StageSpawner Spawner => spawner;
         public BattleCameraDirector CameraDirector => cameraDirector;
+        public BattleFxRig FxRig { get; private set; }
         public bool IsReady { get; private set; }
 
         void Start()
@@ -68,6 +71,11 @@ namespace Game2Week.Flow
 
             presentation.Bind(events, spawner.Enemy, world.Player);
             if (audioHooks) audioHooks.Bind(events, () => session.Save.Settings.sfxVolume);
+            if (fxRigPrefab)
+            {
+                FxRig = Instantiate(fxRigPrefab, transform);
+                FxRig.Bind(events, world.Feedback, spawner);
+            }
             statusBar.Bind(events, player.Data.DisplayName, player.Data.Level, player.CurrentHp, player.MaxHp);
             if (enemyHealthBar) enemyHealthBar.Bind(events, enemyData.DisplayName, enemy.CurrentHp, enemy.MaxHp);
             machine.StateChanged += (_, id) => events.RaiseStateChanged(id);

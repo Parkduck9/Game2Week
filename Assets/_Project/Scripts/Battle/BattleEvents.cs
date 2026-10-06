@@ -17,6 +17,10 @@ namespace Game2Week.Battle
         public event Action<int> EnemyDamaged;
         public event Action<int> PlayerDamaged;
         public event Action<BattleOutcome> BattleEnded;
+        /// <summary>탄막 턴 시작 때 적이 한 대사 (말풍선용, 없으면 호출 안 함)</summary>
+        public event Action<string> EnemySpoke;
+
+        public void RaiseEnemySpoke(string line) => EnemySpoke?.Invoke(line);
 
         public void RaiseStateChanged(BattleStateId id) => StateChanged?.Invoke(id);
 

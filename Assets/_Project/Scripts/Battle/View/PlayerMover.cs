@@ -13,6 +13,7 @@ namespace Game2Week.Battle.View
         BattleArena arena;
         PlayerActionSettings settings;
         PlayerActionView actionView;
+        BattleFeedback feedback;
         float groundY;
         bool ownsSettings;
         Vector3 modelBase;
@@ -37,9 +38,10 @@ namespace Game2Week.Battle.View
             foreach (var r in renderers) if (r) r.enabled = visible;
         }
 
-        public void Init(BattleArena battleArena, PlayerActionSettings actionSettings = null)
+        public void Init(BattleArena battleArena, PlayerActionSettings actionSettings = null, BattleFeedback battleFeedback = null)
         {
             arena = battleArena;
+            feedback = battleFeedback;
             settings = actionSettings;
             if (!settings) { settings = ScriptableObject.CreateInstance<PlayerActionSettings>(); ownsSettings = true; }
             Motor = new PlayerMotorModel(settings);
@@ -63,11 +65,20 @@ namespace Game2Week.Battle.View
         public void Move(Vector2 worldInput, float dt, Vector3? facing = null)
         {
             PreviousPosition = transform.position;
+            bool wasDodging = Motor.Dodging, wasAirborne = Motor.Airborne, wasBraced = Motor.BraceReady;
             Motor.Tick(worldInput, dt);
             var delta = Motor.Displacement;
             var next = transform.position + new Vector3(delta.x, 0f, delta.y);
             next.y = groundY + Motor.Height;
             transform.position = arena ? arena.ClampToArena(next, radius) : next;
+            if (feedback != null)
+            {
+                var feet = transform.position; feet.y = groundY;
+                if (!wasDodging && Motor.Dodging) feedback.RaisePlayerDodged(feet);
+                if (!wasAirborne && Motor.Airborne) feedback.RaisePlayerJumped(feet);
+                if (wasAirborne && !Motor.Airborne) feedback.RaisePlayerLanded(feet);
+                if (!wasBraced && Motor.BraceReady) feedback.RaisePlayerBraced(feet);
+            }
             var moved = transform.position - PreviousPosition; moved.y = 0f;
             GroundSpeed = dt > 0f ? moved.magnitude / dt : 0f;
             if (Motor.Bracing && facing == null) return; // 자세 중에는 방향 유지
@@ -79,7 +90,9 @@ namespace Game2Week.Battle.View
         public void OnParrySuccess(Vector3 incoming)
         {
             ParrySuccesses++;
-            actionView.PlayDeflection(Vector3.Dot(incoming - transform.position, transform.right) > 0f ? -1f : 1f);
+            float side = Vector3.Dot(incoming - transform.position, transform.right) > 0f ? -1f : 1f;
+            actionView.PlayDeflection(side);
+            feedback?.RaisePlayerParried(incoming, side);
         }
         public void StopActions()
         {

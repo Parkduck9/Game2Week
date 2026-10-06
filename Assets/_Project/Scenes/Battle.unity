@@ -2368,6 +2368,7 @@ MonoBehaviour:
   pauseMenu: {fileID: 1510877486}
   enemyHealthBar: {fileID: 928164381}
   audioHooks: {fileID: 917652221}
+  fxRigPrefab: {fileID: 3795936231390389352, guid: 15f711f6f59c61b4ab8bd3313d7faa9e, type: 3}
 --- !u!4 &621243358
 Transform:
   m_ObjectHideFlags: 0

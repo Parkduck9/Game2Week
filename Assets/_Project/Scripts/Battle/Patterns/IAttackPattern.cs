@@ -22,10 +22,11 @@ namespace Game2Week.Battle.Patterns
         readonly Action<int> reportHit;
         readonly IHitRule hitRule;
 
-        public PatternContext(BattleArena arena, Transform enemy, EnemyView enemyView, Transform player, float playerRadius, int damagePerHit, Action<int> reportHit, PlayerMover playerMover = null, IHitRule hitRule = null, EncounterMemory memory = null)
+        public PatternContext(BattleArena arena, Transform enemy, EnemyView enemyView, Transform player, float playerRadius, int damagePerHit, Action<int> reportHit, PlayerMover playerMover = null, IHitRule hitRule = null, EncounterMemory memory = null, BattleFeedback feedback = null)
         {
             this.hitRule = hitRule;
             Memory = memory ?? new EncounterMemory();
+            Feedback = feedback ?? new BattleFeedback();
             Arena = arena;
             Enemy = enemy;
             EnemyView = enemyView;
@@ -46,6 +47,8 @@ namespace Game2Week.Battle.Patterns
         public PlayerMover PlayerMover { get; }
         /// <summary>전투 동안 유지되는 패턴 기록 (턴 간 소개 여부·셔플 백). 없으면 이 턴 전용으로 새로 만든다.</summary>
         public EncounterMemory Memory { get; }
+        /// <summary>연출 알림 — 패턴은 발사(RaiseBulletFired)·예고(RaiseWarningStarted)를 알린다. 없으면 아무도 안 듣는 빈 창구.</summary>
+        public BattleFeedback Feedback { get; }
         public Vector3 PreviousPlayerPosition => PlayerMover ? PlayerMover.PreviousPosition : Player.position;
         public float PlayerBodyHeight => PlayerMover ? PlayerMover.BodyHeight : 0.85f;
 

@@ -737,3 +737,24 @@
 ### 다음에 할 일
 - 사용자: Codex에게 "`Plans/Parallel/Codex_Log.md`의 지금 할 일부터 진행" 전달.
 - Claude: `Game2Week-claude`(`phase5-measure`)에서 측정 도구·색 안내.
+---
+
+## 2026-10-06 — Claude: 6-0 연결 지점 + 5~8단계 한 번에 진행 지시
+
+### 사용자 요청
+- 남은 단계를 Codex 절반·Claude 절반으로 한 번에 작업하고 나중에 합치기. 각자 할 일 문서에 Codex가 바로 작업할 수 있게 작성.
+
+### 한 일
+- 6-0 연결 지점 (main): `BattleFeedback`(회피·점프·착지·쳐내기·자세·피격·색 통과·발사·예고 알림, `BattleWorld.Feedback`·`PatternContext.Feedback`), `BattleEvents.EnemySpoke`, `BattleFxRig` + 프리팹을 Battle 씬 `BattleController.fxRigPrefab`에 연결. 주인공 쪽 Raise 연결 완료. `FeedbackContractTests`. EditMode 152/152, PlayMode 21/21.
+- 7·8단계는 두 쪽 파일이 겹치지 않아 연결 지점 불필요 (Codex 7단계는 `GameSession.BeginStage` 등 공개 API만 사용).
+- `Codex_Log.md`: 5(패턴 누적·8개 맵) → 6(전투 이펙트·말풍선) → 7(맵툴 M5) → 8(스토어 이미지·문구) 지시, 단계별 담당 파일, 공용·Claude 담당 금지 목록, 막히면 "요청"에 적고 계속.
+- `Claude_Log.md`: 5(측정 도구·색 안내) → 6(믹서·소리·BGM·페이드) → 7(주인공 v2·리깅·애니메이션) → 8(ProductInfo·정적 폰트·빌드 재검증).
+
+### 결정
+- 사용자 "한 번에 작업" 요청 → 각자 단계가 끝나고 전체 테스트가 통과하면 **자기 브랜치에 커밋** (push·main 합치기는 사용자 요청 시).
+- 브랜치는 그대로: Codex `phase5-director`, Claude `phase5-measure` (5~8단계 계속).
+
+### 다음에 할 일
+- 사용자: Codex에게 "`Plans/Parallel/Codex_Log.md`의 할 일을 5단계부터 8단계까지 순서대로" 전달.
+- Claude: `Game2Week-claude`에서 5단계부터.
+- 둘 다 끝나면 main에 합치기 → 전체 테스트 → 문서 반영.
