@@ -21,5 +21,6 @@ EditorBuildSettings:
     path: Assets/_Project/Scenes/Ending.unity
     guid: e421cbf0552ca9b469cc81baca57e9ed
   m_configObjects:
+    com.unity.input.settings: {fileID: 11400000, guid: 8bbafb48312caad4db0a6c12f7364111, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 1abe2d705be48e147a039dc43b346191, type: 3}
   m_UseUCBPForAssetBundles: 0

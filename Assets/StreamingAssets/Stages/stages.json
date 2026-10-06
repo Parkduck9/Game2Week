@@ -2,11 +2,17 @@
     "schemaVersion": 1,
     "stages": [
         "stage_001",
-        "stage_002"
+        "stage_002",
+        "stage_003",
+        "stage_004",
+        "stage_005",
+        "stage_006",
+        "stage_007",
+        "stage_008"
     ],
     "_tool": {
         "generatedBy": "StageEditor",
         "toolVersion": 1,
-        "checksum": "sha256:5ab1154e26cb3e053bd65e357a9031ed564cc6c9a2037e493c688bb04efd0e4d"
+        "checksum": "sha256:95c917f4c79d72223430d9cb1e30bee63bf605a4a74322eea7ea53ba68d70d8a"
     }
 }

@@ -21,7 +21,7 @@ namespace Game2Week.Battle.Patterns
     {
         readonly Action<int> reportHit;
 
-        public PatternContext(BattleArena arena, Transform enemy, EnemyView enemyView, Transform player, float playerRadius, int damagePerHit, Action<int> reportHit)
+        public PatternContext(BattleArena arena, Transform enemy, EnemyView enemyView, Transform player, float playerRadius, int damagePerHit, Action<int> reportHit, PlayerMover playerMover = null)
         {
             Arena = arena;
             Enemy = enemy;
@@ -30,6 +30,7 @@ namespace Game2Week.Battle.Patterns
             PlayerRadius = playerRadius;
             DamagePerHit = damagePerHit;
             this.reportHit = reportHit;
+            PlayerMover = playerMover;
         }
 
         public BattleArena Arena { get; }
@@ -39,6 +40,9 @@ namespace Game2Week.Battle.Patterns
         public Transform Player { get; }
         public float PlayerRadius { get; }
         public int DamagePerHit { get; }
+        public PlayerMover PlayerMover { get; }
+        public Vector3 PreviousPlayerPosition => PlayerMover ? PlayerMover.PreviousPosition : Player.position;
+        public float PlayerBodyHeight => PlayerMover ? PlayerMover.BodyHeight : 0.85f;
 
         /// <summary>탄이 주인공에게 닿았을 때 호출 (무적 시간 처리는 받는 쪽에서)</summary>
         public void ReportHit() => reportHit?.Invoke(DamagePerHit);

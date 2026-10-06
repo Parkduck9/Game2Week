@@ -32,6 +32,13 @@ namespace Game2Week.Core
 
         /// <summary>탄막 턴 이동 입력 (Player 맵이 켜져 있을 때만 값이 들어온다).</summary>
         public Vector2 Move => move != null && move.enabled ? Vector2.ClampMagnitude(move.ReadValue<Vector2>(), 1f) : Vector2.zero;
+        public Vector2 Look => look != null && look.enabled ? look.ReadValue<Vector2>() : Vector2.zero;
+        public bool ConsumeDodge() => Consume(ref dodgePending);
+        public bool ConsumeJump() => Consume(ref jumpPending);
+        public bool ConsumeParry() => Consume(ref parryPending);
+        public bool ConsumeLockOn() => Consume(ref lockPending);
+        public void ClearPlayerCommands() { dodgePending = jumpPending = parryPending = lockPending = false; }
+        bool Consume(ref bool pending) { bool value = CurrentMode == Mode.Player && pending; pending = false; return value; }
 
         public Mode CurrentMode { get; private set; }
 
@@ -43,6 +50,8 @@ namespace Game2Week.Core
         InputAction cancel;
         InputAction move;
         InputAction pause;
+        InputAction look, dodge, jump, parry, lockOn;
+        bool dodgePending, jumpPending, parryPending, lockPending;
         Vector2Int lastNavigate;
 
         void OnEnable()
@@ -57,6 +66,15 @@ namespace Game2Week.Core
             cancel = uiMap.FindAction("Cancel", throwIfNotFound: true);
             move = playerMap.FindAction("Move", throwIfNotFound: true);
             pause = systemMap.FindAction("Pause", throwIfNotFound: true);
+            look = playerMap.FindAction("Look");
+            dodge = playerMap.FindAction("Dodge");
+            jump = playerMap.FindAction("Jump");
+            parry = playerMap.FindAction("Parry");
+            lockOn = playerMap.FindAction("LockOn");
+            if (dodge != null) dodge.performed += OnDodge;
+            if (jump != null) jump.performed += OnJump;
+            if (parry != null) parry.performed += OnParry;
+            if (lockOn != null) lockOn.performed += OnLockOn;
 
             navigate.performed += OnNavigate;
             navigate.canceled += OnNavigate;
@@ -74,11 +92,16 @@ namespace Game2Week.Core
             submit.performed -= OnSubmit;
             cancel.performed -= OnCancel;
             pause.performed -= OnPause;
+            if (dodge != null) dodge.performed -= OnDodge;
+            if (jump != null) jump.performed -= OnJump;
+            if (parry != null) parry.performed -= OnParry;
+            if (lockOn != null) lockOn.performed -= OnLockOn;
             DisableAll();
         }
 
         public void EnableUI()
         {
+            ClearPlayerCommands();
             playerMap?.Disable();
             uiMap?.Enable();
             systemMap?.Enable();
@@ -88,6 +111,7 @@ namespace Game2Week.Core
 
         public void EnablePlayer()
         {
+            ClearPlayerCommands();
             uiMap?.Disable();
             playerMap?.Enable();
             systemMap?.Enable();
@@ -103,6 +127,7 @@ namespace Game2Week.Core
 
         public void DisableAll()
         {
+            ClearPlayerCommands();
             uiMap?.Disable();
             playerMap?.Disable();
             systemMap?.Disable();
@@ -132,5 +157,9 @@ namespace Game2Week.Core
         void OnCancel(InputAction.CallbackContext _) => Cancel?.Invoke();
 
         void OnPause(InputAction.CallbackContext _) => Pause?.Invoke();
+        void OnDodge(InputAction.CallbackContext _) { if (CurrentMode == Mode.Player) dodgePending = true; }
+        void OnJump(InputAction.CallbackContext _) { if (CurrentMode == Mode.Player) jumpPending = true; }
+        void OnParry(InputAction.CallbackContext _) { if (CurrentMode == Mode.Player) parryPending = true; }
+        void OnLockOn(InputAction.CallbackContext _) { if (CurrentMode == Mode.Player) lockPending = true; }
     }
 }

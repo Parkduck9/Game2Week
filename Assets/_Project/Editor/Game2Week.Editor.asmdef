@@ -2,7 +2,10 @@
     "name": "Game2Week.Editor",
     "rootNamespace": "Game2Week.EditorTools",
     "references": [
-        "Game2Week"
+        "Game2Week",
+        "Unity.InputSystem",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [
         "Editor"

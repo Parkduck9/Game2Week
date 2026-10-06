@@ -33,6 +33,7 @@ namespace Game2Week.Core
         [NonSerialized] bool settingsApplied;
 
         /// <summary>테스트용: 스테이지 폴더를 바꿀 때만 사용</summary>
+        [field: NonSerialized]
         public string StageDirectoryOverride { get; set; }
 
         public PlayerData Player => player;
@@ -59,7 +60,8 @@ namespace Game2Week.Core
             }
         }
 
-        StageRepository Repository => new(StageDirectoryOverride ?? StageRepository.DefaultDirectory);
+        StageRepository Repository => new(string.IsNullOrWhiteSpace(StageDirectoryOverride)
+            ? StageRepository.DefaultDirectory : StageDirectoryOverride);
 
         /// <summary>진행 순서대로 스테이지 id (stages.json)</summary>
         public IReadOnlyList<string> StageIds => Repository.LoadIndex().stages;

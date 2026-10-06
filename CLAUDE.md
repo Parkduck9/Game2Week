@@ -10,6 +10,7 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 3. 작업을 끝내면 `TODO.md` 체크 + `WORKLOG.md`에 기록 (무엇을 했고, 무엇을 결정했고, 다음은 무엇인지).
 4. 문제·정리 대상·확인할 것을 발견하면 `TODO.md`의 "🔧 바꿔야 할 것"에 추가. 결정이 필요한 항목엔 `[결정 필요]` 태그.
 5. WORKLOG 각 기록의 마지막은 항상 `### 다음에 할 일` (대시보드가 마지막 블록을 읽음).
+6. **사용자 요청: 작업한 내용은 MD와 관련 HTML에도 반영한다.** TODO·WORKLOG의 상태를 갱신하고 관련 설계 문서를 실제 구현에 맞춘다. `TodoList.html`은 MD를 읽으므로 체크리스트를 중복 작성하지 않되 새 계획 링크는 추가한다. 액션 설계는 `Plans/Action_Balance_Plan.md`를 수정한 뒤 `node Tools/render_action_plan.mjs`로 HTML을 재생성한다. 제안·미구현·검증 완료를 구분한다.
 
 ## 문서 역할
 | 파일 | 용도 | 누가 갱신 |
@@ -52,11 +53,18 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 - **턴 구조 (원작과 다름):** 전투 시작 → 탄막 턴 → 결과에 따라 메뉴 → 다시 탄막 턴 …
   - 탄막 턴 동안 주인공이 경기장을 뛰어다니며 피하고 **적에게 닿으면** 즉시 턴 종료 → **FIGHT / ACT / MERCY** 메뉴.
   - **닿지 못하고** 탄막 턴이 끝나면 → **ITEM / 넘기기** 메뉴.
-- 탄막 턴 조작: **주인공 3D 모델**이 **바닥 평면 8방향** 이동 (점프·대시 없음), **비스듬한 고정 카메라**.
+- 현재 구현 조작: 주인공이 **카메라 기준 이동·Shift 회피·Space 점프·우클릭 쳐내기**, 캐릭터 뒤 허리 추적 카메라와 마우스 회전/휠 클릭 록온. 1·2단계 구현과 기존 흐름 검증 완료: 노랑 직선/사인파/측면 교대, 거리 경고음·화면 밖 표시. 최신 상세는 액션 설계 MD 1절의 실제 적용 상태를 따른다.
 - 경기장은 **스테이지 데이터(JSON)** 로 크기·배치가 정해지고, JSON은 **맵툴로만** 편집 (계획: `Plans/MapTool_Plan.html`).
 - Tasks.md 5번의 "구조만" → 테스트 패턴 1종으로 **실제 피격까지** 구현.
 - Tasks.md 9번 ChatGPT 이미지는 2D 리소스(UI·텍스처·아이콘)용. 3D 모델 출처는 미정.
 - **독자 IP** — 세계관/캐릭터는 미정, 정해질 때까지 임시 이름 사용.
+
+### 최신 사용자 요청: 패턴 누적 · 3D 액션 회피 (2026-10-06)
+- 사용자는 단계마다 패턴을 하나씩 늘리고 발사 간격을 줄이며, 탑다운 느낌에서 3D 액션처럼 피하는 전투로 바꾸길 요청했다.
+- 먼저 MD·HTML로 설계한 뒤 구현 방법을 함께 검토한다. 설계: `Plans/Action_Balance_Plan.md` / `.html`.
+- 허리 추적 카메라·회피·점프·노랑 쳐내기는 구현했다. 이전 "점프·대시 없음" 설명은 최신 구현을 제한하지 않는다. 실제 적용 수치와 완료 여부는 액션 설계 MD 1절을 따른다.
+- 후속 사용자 지정: 적 접촉 후 메뉴 유지, 캐릭터 뒤 허리 카메라+마우스 회전/록온, 노랑 우클릭 쳐내기/Shift 회피/점프, 이후 Ctrl 빨강 정지 자세 필수·파랑 이동, 접근할수록 커지는 경고음, 플레이어 위치 랜덤 조준, 8종 그래프 궤적+발사 간격/속도 제작 툴. 최신 기준은 설계 MD 0절.
+- 쳐내기는 오른손으로 왼쪽에서 오는 탄을 오른쪽 어깨 뒤로, 오른쪽 탄을 왼쪽 어깨 뒤로 흘린다. 입력 방향으로 이동을 계속한다. 적에게 단순 반사하는 방식이나 강제 뒤 밀림이 아니다. 점프는 후속 답변으로 포함이 확정됐고, 록온 가운데 버튼/점프 Space는 기본안이다.
 
 ## 확정된 결정 (사용자 승인됨)
 - Unity 6 · 3D(URP) · **New Input System** · Cinemachine(카메라 연출)
@@ -105,7 +113,7 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 - **Undertale의 고유 요소 사용 금지** — 캐릭터, 이름(지명·인물), 대사, 스프라이트, 음악·효과음, 폰트(Determination 등), 빨간 하트 SOUL 디자인을 그대로 쓰지 않는다. 장르적 메커니즘(턴제 + 탄막 회피 + 타이밍 공격 + 비전투 해결)만 참고.
 - 코드 클래스명에 원작 고유 용어를 박지 않는다 (예: `Soul` 대신 `PlayerMarker`, `Mercy` 대신 `SpareAction`처럼 중립적으로).
 - 오버월드·필드 탐험은 만들지 않는다 — 스테이지 = 전투 경기장.
-- 탄막 회피에 점프·대시·높이 이동을 넣지 않는다 — 바닥 평면 8방향만 (사용자 결정).
+- 최신 액션 구현과 후속 작업은 `Plans/Action_Balance_Plan.md`의 실제 적용 상태를 따른다. 빨강/파랑·8종 제작 툴·맵별 누적은 해당 단계 검증 전 완료로 기록하지 않는다.
 - 스테이지 JSON을 손으로 고치지 않는다 — 맵툴로만 (Claude도 마찬가지, 툴/코드로 생성).
 - `Tasks.md`를 수정하지 않는다.
 - 싱글톤 남발, `FindObjectOfType`/`GameObject.Find` 로 참조 잡기 금지 → BattleContext/인스펙터 주입 사용.
@@ -151,6 +159,8 @@ Assets/StreamingAssets/Stages/   stages.json(순서) + stage_XXX.json — 맵툴
 - Unity C# 제약: `init` 접근자·`record` 사용 금지 (IsExternalInit 없음). 커밋 전에는 컴파일·테스트 통과 확인.
 - 테스트 실행: `Unity.exe -batchmode -projectPath . -runTests -testPlatform EditMode|PlayMode -assemblyNames Game2Week.Tests.EditMode|Game2Week.Tests.PlayMode -testResults <xml> -logFile <log>` (`-quit` 붙이지 않음, `-assemblyNames` 없으면 Input System 패키지 테스트가 섞임).
 - 키보드 입력 테스트는 `InputTestFixture` (manifest `testables`에 inputsystem) — `BattleInputTests` 참고.
+  - 주의: InputTestFixture는 Game 창 포커스를 무시하므로 "에디터에서 키가 안 먹는" 문제는 못 잡는다.
+- Input System 설정 에셋 `_Project/Input/InputSystemSettings.asset`: 에디터 플레이 중 키보드가 항상 Game 창으로 (`InputSettingsSetup`이 에디터 켤 때 확인). 지우지 말 것.
 - PlayMode 테스트는 반드시 `TestSave.Begin()/End()` — 실제 세이브(persistentDataPath) 대신 임시 폴더 (`GameSession.SaveDirectoryOverrideForTests`).
 - 세이브: `GameSession.Save`(SaveService) 하나로만 읽고 쓴다. 진행(save.json)·설정(settings.json) 분리, 쓰기는 `JsonFileStore`(임시 파일→교체 + .bak).
 - 입력 맵: UI(메뉴) / Player(이동) / System(ESC, 항상 켜짐). 메뉴·창이 겹칠 땐 여는 쪽이 자기 메뉴 GameObject를 끈다 (켜진 MenuNavigator만 입력을 받음).

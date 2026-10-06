@@ -1,0 +1,55 @@
+{
+    "schemaVersion": 1,
+    "id": "stage_006",
+    "name": "1-6 가로지르는 빛",
+    "grid": {
+        "width": 26,
+        "depth": 12,
+        "cellSize": 0.5
+    },
+    "playerStart": {
+        "x": 2,
+        "z": 2
+    },
+    "enemy": {
+        "enemyId": "Enemy_Test",
+        "position": {
+            "x": 23,
+            "z": 9
+        }
+    },
+    "gems": [
+        {
+            "id": "gem_01",
+            "type": "heal",
+            "position": {
+                "x": 8,
+                "z": 4
+            },
+            "spawnChance": 0.25
+        },
+        {
+            "id": "gem_02",
+            "type": "attack",
+            "position": {
+                "x": 17,
+                "z": 7
+            },
+            "spawnChance": 0.25
+        }
+    ],
+    "gemRules": {
+        "maxPerTurn": 1
+    },
+    "enemyTurn": {
+        "duration": 9.0,
+        "patterns": [
+            "Pattern_Test"
+        ]
+    },
+    "_tool": {
+        "generatedBy": "StageEditor",
+        "toolVersion": 1,
+        "checksum": "sha256:33ce539bf0ac789291633d7558912883de9385b35e25658b5946f27fe1362b6d"
+    }
+}

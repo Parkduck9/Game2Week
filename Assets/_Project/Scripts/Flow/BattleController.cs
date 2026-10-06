@@ -55,6 +55,8 @@ namespace Game2Week.Flow
             spawner.Spawn(stage, enemyData);
             cameraDirector.Setup(spawner.Arena.Size, spawner.Arena.transform.position, spawner.Enemy ? spawner.Enemy.transform : null);
             world.Init(spawner, stage);
+            world.ConfigureActions(input, cameraDirector);
+            world.BindThreatVolume(() => session.Save.Settings.sfxVolume);
 
             var events = new BattleEvents();
             var player = new PlayerCombatant(session.Player);

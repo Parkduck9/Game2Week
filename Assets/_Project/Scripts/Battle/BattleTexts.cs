@@ -13,7 +13,7 @@ namespace Game2Week.Battle
         public const string Spare = "살려주기";
         public const string SpareReadyColor = "#FFD84A";
 
-        public const string TurnHint = "적에게 닿으면 공격 기회! · 보석을 주우면 좋은 일이";
+        public const string TurnHint = "WASD 이동 · Shift 회피 · Space 점프 · 우클릭 쳐내기 · 휠 클릭 록온";
         public const string MissedEnemy = "* 적에게 닿지 못했다. 숨을 고르자.";
         public const string SkipTurn = "* 가만히 숨을 골랐다.";
         public const string NoItems = "* 가진 아이템이 없다.";

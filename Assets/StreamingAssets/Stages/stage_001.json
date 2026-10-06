@@ -53,12 +53,12 @@
     "enemyTurn": {
         "duration": 8.0,
         "patterns": [
-            "Pattern_Test"
+            "Pattern_YellowTraining"
         ]
     },
     "_tool": {
         "generatedBy": "StageEditor",
         "toolVersion": 1,
-        "checksum": "sha256:3cb57f5cb6834a0d89d99594cbd3800adce0fd6ca79065fe9d29d8bfb1976770"
+        "checksum": "sha256:125952798ce81a6b1d9c42f1381bd58688575cbfec78d7a3b480736d03964386"
     }
 }

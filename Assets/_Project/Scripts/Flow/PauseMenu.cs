@@ -59,6 +59,7 @@ namespace Game2Week.Flow
             if (IsPaused || !CanPause || SceneLoader.IsLoading) return;
             IsPaused = true;
             savedMode = input.CurrentMode;
+            input.ClearPlayerCommands();
             Time.timeScale = 0f;
             battleUiRoot.SetActive(false);
             panel.SetActive(true);

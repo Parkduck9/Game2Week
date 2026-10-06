@@ -24,9 +24,8 @@ namespace Game2Week.Tests
         [UnityTest]
         public IEnumerator Battle_BuildsStage_AndShowsEachPhase()
         {
-            SceneManager.LoadScene(SceneNames.Battle);
             BattleController battle = null;
-            yield return SceneFlowTests.WaitForBattle(c => battle = c);
+            yield return SceneFlowTests.EnterStage(0, c => battle = c);
 
             var spawner = battle.Spawner;
             var stage = new StageRepository(StageRepository.DefaultDirectory).LoadStage("stage_001").Stage;
@@ -42,8 +41,8 @@ namespace Game2Week.Tests
             battle.World.ShowGems(spawner.Gems.Keys.ToList()); // 확인용: 모든 보석 표시
             yield return new WaitForSeconds(1f);
             Assert.That(Vector3.Distance(spawner.Arena.CellToWorld(stage.playerStart), spawner.Player.position), Is.LessThan(0.01f));
-            var pattern = battle.World.Patterns.CurrentObject ? battle.World.Patterns.CurrentObject.GetComponent<Game2Week.Battle.Patterns.RadialBurstPattern>() : null;
-            Assert.IsNotNull(pattern, "stage_001 → Pattern_Test(방사형 결정탄)");
+            var pattern = battle.World.Patterns.CurrentObject ? battle.World.Patterns.CurrentObject.GetComponent<Game2Week.Battle.Patterns.YellowTrainingPattern>() : null;
+            Assert.IsNotNull(pattern, "stage_001 → 노랑 직선 조작 시험");
             Assert.Greater(pattern.ActiveBullets, 0, "첫 물결 발사됨");
             yield return new WaitForSeconds(0.5f);
             SceneCapture.Save("battle_2_EnemyTurn");
@@ -74,7 +73,7 @@ namespace Game2Week.Tests
             SceneCapture.Save("battle_6_Defeat");
         }
 
-        /// <summary>11단계 확장성: 코드 수정 없이 에셋만으로 만든 1-2 (주황 적, 빠른 결정탄, 8×9m 경기장)</summary>
+        /// <summary>에셋 연결 검증: 1-2 주황 적·노랑 사인파·8×9m 경기장.</summary>
         [UnityTest]
         public IEnumerator Stage2_FromAssetsOnly_Works()
         {
@@ -92,7 +91,7 @@ namespace Game2Week.Tests
 
             battle.Context.ChangeState(BattleStateId.EnemyTurn);
             yield return new WaitForSeconds(1.2f);
-            var pattern = battle.World.Patterns.CurrentObject.GetComponent<Game2Week.Battle.Patterns.RadialBurstPattern>();
+            var pattern = battle.World.Patterns.CurrentObject.GetComponent<Game2Week.Battle.Patterns.YellowTrainingPattern>();
             Assert.Greater(pattern.ActiveBullets, 0);
             SceneCapture.Save("stage2_EnemyTurn");
 
@@ -101,12 +100,42 @@ namespace Game2Week.Tests
             SceneCapture.Save("stage2_ActionMenu");
         }
 
+        /// <summary>모든 스테이지가 데이터대로 만들어지고 탄막이 도는지 + 스테이지별 캡처 (Logs/scene_stage_*.png)</summary>
+        [UnityTest]
+        public IEnumerator AllStages_BuildFromData()
+        {
+            var repo = new StageRepository(StageRepository.DefaultDirectory);
+            var ids = repo.LoadIndex().stages;
+            Assert.GreaterOrEqual(ids.Count, 5);
+
+            for (int i = 0; i < ids.Count; i++)
+            {
+                SceneManager.LoadScene(SceneNames.StageSelect);
+                yield return SceneFlowTests.WaitForScene(SceneNames.StageSelect);
+                Object.FindAnyObjectByType<StageSelectController>().Choose(i);
+                yield return SceneFlowTests.WaitForScene(SceneNames.Battle);
+                BattleController battle = null;
+                yield return SceneFlowTests.WaitForBattle(c => battle = c);
+
+                var stage = repo.LoadStage(ids[i]).Stage;
+                Assert.AreEqual(ids[i], battle.Context.Stage.id);
+                Assert.AreEqual(StageGeometry.ArenaSize(stage.grid), battle.Spawner.Arena.Size, ids[i]);
+                Assert.AreEqual(stage.gems.Count, battle.Spawner.Gems.Count, ids[i]);
+                Assert.That(Vector3.Distance(battle.Spawner.Arena.CellToWorld(stage.enemy.position), battle.Spawner.Enemy.transform.position), Is.LessThan(0.01f), ids[i]);
+
+                battle.Context.ChangeState(BattleStateId.EnemyTurn);
+                battle.World.ShowGems(battle.Spawner.Gems.Keys.ToList());
+                yield return new WaitForSeconds(1.3f);
+                Assert.IsNotNull(battle.World.Patterns.CurrentObject, $"{ids[i]}: 탄막 패턴 실행");
+                SceneCapture.Save($"stage_{i + 1}_{ids[i]}");
+            }
+        }
+
         [UnityTest]
         public IEnumerator ItemMenu_Capture()
         {
-            SceneManager.LoadScene(SceneNames.Battle);
             BattleController battle = null;
-            yield return SceneFlowTests.WaitForBattle(c => battle = c);
+            yield return SceneFlowTests.EnterStage(0, c => battle = c);
             battle.Context.ChangeState(BattleStateId.ItemMenu);
             yield return new WaitForSeconds(0.8f);
             SceneCapture.Save("battle_5_ItemMenu");

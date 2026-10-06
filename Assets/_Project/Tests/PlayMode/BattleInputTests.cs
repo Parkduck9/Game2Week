@@ -50,9 +50,8 @@ namespace Game2Week.Tests
         [UnityTest]
         public IEnumerator Keyboard_ReachEnemy_ChooseAct_CancelBack()
         {
-            SceneManager.LoadScene(SceneNames.Battle);
             BattleController battle = null;
-            yield return SceneFlowTests.WaitForBattle(c => battle = c);
+            yield return SceneFlowTests.EnterStage(0, c => battle = c);
             var ctx = battle.Context;
 
             // 등장 대사: Z 한 번 = 전부 표시, 한 번 더 = 닫기
@@ -79,9 +78,8 @@ namespace Game2Week.Tests
         [UnityTest]
         public IEnumerator Esc_PausesAndResumes_DialogueStillWorks()
         {
-            SceneManager.LoadScene(SceneNames.Battle);
             BattleController battle = null;
-            yield return SceneFlowTests.WaitForBattle(c => battle = c);
+            yield return SceneFlowTests.EnterStage(0, c => battle = c);
             Assert.AreEqual(BattleStateId.Intro, battle.Context.CurrentState);
 
             yield return Tap(keyboard.escapeKey);

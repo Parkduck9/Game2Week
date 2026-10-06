@@ -17,6 +17,7 @@ namespace Game2Week.Battle.View
         [SerializeField] bool showGridLines = true;
 
         Transform built;
+        readonly Renderer[] boundaries = new Renderer[4];
 
         public StageGrid Grid { get; private set; }
         public Vector2 Size { get; private set; }
@@ -32,10 +33,10 @@ namespace Game2Week.Battle.View
             Box("Floor", new Vector3(0, -0.05f, 0), new Vector3(Size.x, 0.1f, Size.y), floorMaterial);
 
             float halfW = Size.x * 0.5f, halfD = Size.y * 0.5f, t = wallThickness, h = wallHeight;
-            Box("Wall_Near", new Vector3(0, h * 0.5f, -halfD - t * 0.5f), new Vector3(Size.x + t * 2, h, t), wallMaterial);
-            Box("Wall_Far", new Vector3(0, h * 0.5f, halfD + t * 0.5f), new Vector3(Size.x + t * 2, h, t), wallMaterial);
-            Box("Wall_Left", new Vector3(-halfW - t * 0.5f, h * 0.5f, 0), new Vector3(t, h, Size.y), wallMaterial);
-            Box("Wall_Right", new Vector3(halfW + t * 0.5f, h * 0.5f, 0), new Vector3(t, h, Size.y), wallMaterial);
+            boundaries[0] = Box("Wall_Near", new Vector3(0, h * 0.5f, -halfD - t * 0.5f), new Vector3(Size.x + t * 2, h, t), wallMaterial);
+            boundaries[1] = Box("Wall_Far", new Vector3(0, h * 0.5f, halfD + t * 0.5f), new Vector3(Size.x + t * 2, h, t), wallMaterial);
+            boundaries[2] = Box("Wall_Left", new Vector3(-halfW - t * 0.5f, h * 0.5f, 0), new Vector3(t, h, Size.y), wallMaterial);
+            boundaries[3] = Box("Wall_Right", new Vector3(halfW + t * 0.5f, h * 0.5f, 0), new Vector3(t, h, Size.y), wallMaterial);
 
             if (!showGridLines) return;
             const float line = 0.015f, y = 0.002f;
@@ -57,7 +58,13 @@ namespace Game2Week.Battle.View
             return transform.TransformPoint(local);
         }
 
-        void Box(string name, Vector3 localPos, Vector3 scale, Material material)
+        public void UpdateBoundaryVisibility(Vector3? cameraPosition)
+        {
+            var local = cameraPosition.HasValue ? transform.InverseTransformPoint(cameraPosition.Value) : Vector3.zero;
+            bool[] visible = { local.z >= -Size.y * .5f, local.z <= Size.y * .5f, local.x >= -Size.x * .5f, local.x <= Size.x * .5f };
+            for (int i = 0; i < boundaries.Length; i++) if (boundaries[i]) boundaries[i].enabled = !cameraPosition.HasValue || visible[i];
+        }
+        Renderer Box(string name, Vector3 localPos, Vector3 scale, Material material)
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
             go.name = name;
@@ -68,6 +75,7 @@ namespace Game2Week.Battle.View
             var renderer = go.GetComponent<MeshRenderer>();
             if (material) renderer.sharedMaterial = material;
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            return renderer;
         }
     }
 }

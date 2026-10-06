@@ -1,26 +1,29 @@
+using Game2Week.Data;
 using UnityEngine;
 
 namespace Game2Week.Battle.View
 {
-    /// <summary>
-    /// 탄막 턴 주인공 이동: 바닥 평면 8방향 (점프·대시 없음). 카메라가 +Z를 보므로 ↑ = +Z.
-    /// 리깅 전이라 걷는 느낌은 모델을 통통 튀게 해서 낸다.
-    /// </summary>
+    /// <summary>이동 모델의 결과를 경기장 위치와 캐릭터 외형에 적용한다.</summary>
     public sealed class PlayerMover : MonoBehaviour
     {
-        [SerializeField, Min(0.1f)] float speed = 2.8f;
         [SerializeField, Min(0.05f)] float radius = 0.22f;
         [SerializeField] float turnSpeed = 720f;
-        [SerializeField] float bounceHeight = 0.06f;
-        [SerializeField] float bounceSpeed = 14f;
-        [Tooltip("통통 튈 모델 (없으면 첫 번째 자식)")]
         [SerializeField] Transform model;
 
         BattleArena arena;
-        float bouncePhase;
+        PlayerActionSettings settings;
+        PlayerActionView actionView;
+        float groundY;
+        bool ownsSettings;
         Vector3 modelBase;
 
         public float Radius => radius;
+        public float BodyHeight => settings.bodyHeight;
+        public float ParryReach => settings.parryReach;
+        public PlayerMotorModel Motor { get; private set; }
+        public Vector3 PreviousPosition { get; private set; }
+        public int ParrySuccesses { get; private set; }
+        public bool CanContactEnemy => Motor.IsGrounded && !Motor.Dodging;
 
         Renderer[] renderers;
 
@@ -28,40 +31,55 @@ namespace Game2Week.Battle.View
         public void SetVisible(bool visible)
         {
             renderers ??= GetComponentsInChildren<Renderer>(true);
-            foreach (var r in renderers) r.enabled = visible;
+            foreach (var r in renderers) if (r) r.enabled = visible;
         }
 
-        public void Init(BattleArena battleArena)
+        public void Init(BattleArena battleArena, PlayerActionSettings actionSettings = null)
         {
             arena = battleArena;
+            settings = actionSettings;
+            if (!settings) { settings = ScriptableObject.CreateInstance<PlayerActionSettings>(); ownsSettings = true; }
+            Motor = new PlayerMotorModel(settings);
             if (!model && transform.childCount > 0) model = transform.GetChild(0);
             if (model) modelBase = model.localPosition;
+            if (!TryGetComponent(out actionView)) actionView = gameObject.AddComponent<PlayerActionView>();
+            actionView.Init(this, model);
         }
 
         public void Teleport(Vector3 position)
         {
             transform.SetPositionAndRotation(position, Quaternion.identity);
-            bouncePhase = 0f;
+            groundY = position.y;
+            PreviousPosition = position;
+            Motor.Reset();
+            ParrySuccesses = 0;
             if (model) model.localPosition = modelBase;
         }
 
-        public void Move(Vector2 input, float deltaTime)
+        public void Move(Vector2 worldInput, float dt, Vector3? facing = null)
         {
-            var dir = new Vector3(input.x, 0f, input.y);
-            if (dir.sqrMagnitude > 1f) dir.Normalize();
-            bool moving = dir.sqrMagnitude > 0.0001f;
-
-            if (moving)
-            {
-                var next = transform.position + dir * (speed * deltaTime);
-                transform.position = arena ? arena.ClampToArena(next, radius) : next;
-                var look = Quaternion.LookRotation(dir, Vector3.up);
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, look, turnSpeed * deltaTime);
-                bouncePhase += deltaTime * bounceSpeed;
-            }
-            else bouncePhase = 0f;
-
-            if (model) model.localPosition = modelBase + Vector3.up * (Mathf.Abs(Mathf.Sin(bouncePhase)) * bounceHeight);
+            PreviousPosition = transform.position;
+            Motor.Tick(worldInput, dt);
+            var delta = Motor.Displacement;
+            var next = transform.position + new Vector3(delta.x, 0f, delta.y);
+            next.y = groundY + Motor.Height;
+            transform.position = arena ? arena.ClampToArena(next, radius) : next;
+            var dir = facing ?? new Vector3(worldInput.x, 0f, worldInput.y);
+            dir.y = 0f;
+            if (dir.sqrMagnitude > 0.0001f)
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(dir), turnSpeed * dt);
         }
+        public void OnParrySuccess(Vector3 incoming)
+        {
+            ParrySuccesses++;
+            actionView.PlayDeflection(Vector3.Dot(incoming - transform.position, transform.right) > 0f ? -1f : 1f);
+        }
+        public void StopActions()
+        {
+            Motor.Reset();
+            var position = transform.position; position.y = groundY; transform.position = position;
+            PreviousPosition = position;
+        }
+        void OnDestroy() { if (ownsSettings && settings) Destroy(settings); }
     }
 }

@@ -4,6 +4,7 @@ using UnityEngine;
 namespace Game2Week.Battle.Patterns
 {
     /// <summary>탄막 턴마다 패턴 프리팹을 만들어 돌리고, 턴이 끝나면 치운다.</summary>
+    [DefaultExecutionOrder(100)]
     public sealed class PatternRunner : MonoBehaviour
     {
         GameObject instance;

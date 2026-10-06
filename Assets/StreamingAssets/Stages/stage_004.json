@@ -1,0 +1,64 @@
+{
+    "schemaVersion": 1,
+    "id": "stage_004",
+    "name": "1-4 넓은 들판",
+    "grid": {
+        "width": 24,
+        "depth": 20,
+        "cellSize": 0.5
+    },
+    "playerStart": {
+        "x": 12,
+        "z": 1
+    },
+    "enemy": {
+        "enemyId": "Enemy_Test2",
+        "position": {
+            "x": 12,
+            "z": 18
+        }
+    },
+    "gems": [
+        {
+            "id": "gem_01",
+            "type": "heal",
+            "position": {
+                "x": 5,
+                "z": 8
+            },
+            "spawnChance": 0.25
+        },
+        {
+            "id": "gem_02",
+            "type": "attack",
+            "position": {
+                "x": 19,
+                "z": 11
+            },
+            "spawnChance": 0.25
+        },
+        {
+            "id": "gem_03",
+            "type": "spare",
+            "position": {
+                "x": 12,
+                "z": 13
+            },
+            "spawnChance": 0.25
+        }
+    ],
+    "gemRules": {
+        "maxPerTurn": 1
+    },
+    "enemyTurn": {
+        "duration": 10.0,
+        "patterns": [
+            "Pattern_Test2"
+        ]
+    },
+    "_tool": {
+        "generatedBy": "StageEditor",
+        "toolVersion": 1,
+        "checksum": "sha256:5b2c40160058fbd0eda5e6ac7db2de8e4cff932c92f39ab18c66685f4bd2ed98"
+    }
+}

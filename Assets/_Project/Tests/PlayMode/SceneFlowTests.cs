@@ -47,6 +47,19 @@ namespace Game2Week.Tests
             found(controller);
         }
 
+        /// <summary>
+        /// 스테이지 선택 화면을 거쳐 index번 스테이지 전투로 들어간다.
+        /// Battle 씬을 바로 열면 이전 테스트의 스테이지가 남아 있을 수 있어 항상 이걸로 들어간다.
+        /// </summary>
+        public static IEnumerator EnterStage(int index, System.Action<BattleController> found)
+        {
+            SceneManager.LoadScene(SceneNames.StageSelect);
+            yield return WaitForScene(SceneNames.StageSelect);
+            Object.FindAnyObjectByType<StageSelectController>().Choose(index);
+            yield return WaitForScene(SceneNames.Battle);
+            yield return WaitForBattle(found);
+        }
+
         static T Find<T>() where T : Object
         {
             var found = Object.FindAnyObjectByType<T>();
@@ -137,7 +150,20 @@ namespace Game2Week.Tests
             yield return WaitForScene(SceneNames.Battle);
             BattleController battle = null;
             yield return WaitForBattle(c => battle = c);
-            Assert.AreEqual("stage_002", battle.Context.Stage.id);
+            Assert.AreEqual("stage_002", battle.Context.Stage.id, "다음 스테이지 = 2번");
+
+            // 스테이지 수와 상관없이: 마지막 스테이지로 바로 가서 클리어
+            Find<PauseMenu>().CanPause = false;
+            SceneLoader.Load(SceneNames.StageSelect);
+            yield return WaitForScene(SceneNames.StageSelect);
+            var select = Find<StageSelectController>();
+            int last = Find<StageSelectController>().Items.Count; // 해금된 수 (2) — 마지막은 Choose로 직접
+            Assert.AreEqual(2, last);
+            var stageIds = new Game2Week.Stages.StageRepository(Game2Week.Stages.StageRepository.DefaultDirectory).LoadIndex().stages;
+            select.Choose(stageIds.Count - 1);
+            yield return WaitForScene(SceneNames.Battle);
+            yield return WaitForBattle(c => battle = c);
+            Assert.AreEqual(stageIds[stageIds.Count - 1], battle.Context.Stage.id);
             battle.Context.FinishBattle(BattleOutcome.EnemySpared);
             yield return WaitForScene(SceneNames.Result);
 
