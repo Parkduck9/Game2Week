@@ -1,6 +1,8 @@
 # Claude · Codex 병렬 작업 계획 (3·4단계)
 
-작성일: 2026-10-06 · 상태: 0단계 커밋(`0d3a146`)·worktree 생성 완료, 3·4단계 진행 대기 · 5~8단계 분할 계획 포함
+작성일: 2026-10-06 · 상태: 3·4단계 완료·main 합침, 5-0 연결 지점 완료, 5단계 진행 · 5~8단계 분할 계획 포함
+
+> **지금 각자 할 일은 따로 정리한 문서를 본다**: Codex → [Codex_Log.md](Parallel/Codex_Log.md) · Claude → [Claude_Log.md](Parallel/Claude_Log.md). 두 문서 모두 "할 일 → 한 일 → 작업량" 순서이고, 기록은 **한국어로만** 쓴다. (`claude.md`는 Windows에서 `CLAUDE.md`와 같은 파일이 되므로 쓰지 않는다.)
 
 HTML 보기: [Parallel_Work_Plan.html](Parallel_Work_Plan.html) · 액션 설계: [Action_Balance_Plan.md](Action_Balance_Plan.md)
 

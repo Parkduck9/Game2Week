@@ -55,6 +55,7 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
   - **닿지 못하고** 탄막 턴이 끝나면 → **ITEM / 넘기기** 메뉴.
 - 현재 구현 조작: 주인공이 **카메라 기준 이동·Shift 회피·Space 점프·우클릭 쳐내기·Ctrl 정지 자세(빨강 통과, 파랑은 실제 이동으로 통과)**, 캐릭터 뒤 허리 추적 카메라와 마우스 회전/휠 클릭 록온. 1·2단계 구현과 기존 흐름 검증 완료: 노랑 직선/사인파/측면 교대, 거리 경고음·화면 밖 표시. 최신 상세는 액션 설계 MD 1절의 실제 적용 상태를 따른다.
 - 경기장은 **스테이지 데이터(JSON)** 로 크기·배치가 정해지고, JSON은 **맵툴로만** 편집 (계획: `Plans/MapTool_Plan.html`).
+- 새 탄막 패턴은 **`Tools ▸ Pattern Editor`** 로 만든다 (`GraphPatternDefinition` + 궤적 8종, 저장 시 ContentCatalog 등록 → 맵툴에서 `Attack_Graph_이름` 선택).
 - Tasks.md 5번의 "구조만" → 테스트 패턴 1종으로 **실제 피격까지** 구현.
 - Tasks.md 9번 ChatGPT 이미지는 2D 리소스(UI·텍스처·아이콘)용. 3D 모델 출처는 미정.
 - **독자 IP** — 세계관/캐릭터는 미정, 정해질 때까지 임시 이름 사용.
@@ -70,6 +71,7 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 - 3단계(Pattern Editor) = **Codex**, 4단계(빨강·파랑) = **Claude**. 기준: `Plans/Parallel_Work_Plan.md` (파일 담당표·worktree·합치기 규칙).
 - 각자 worktree 폴더(`..\Game2Week-codex`, `..\Game2Week-claude`)에서 작업하고 **담당 밖 파일은 고치지 않는다.** 배치모드도 자기 폴더에서만.
 - 병렬 기간에는 TODO·WORKLOG·CLAUDE·설계 MD를 고치지 않고 `Plans/Parallel/<이름>_Log.md`에 기록 → 합칠 때 main에서 반영.
+- 각자 할 일·한 일 문서: Codex → `Plans/Parallel/Codex_Log.md`, Claude → `Plans/Parallel/Claude_Log.md` (+HTML). 다음 단계 지시는 Claude가 여기에 쓴다. **모든 기록은 한국어로만** (사용자 요청).
 - 연결 지점(`ITrajectory`, `AttackColor`, `IHitRule`, `ThreatPoint`, `PatternContext`)은 공용 — 바꿔야 하면 사용자에게 먼저 알린다.
 - 이후 단계(5~8)도 같은 방식: 영역별 기본 담당(계획 8절) + 단계마다 N-0 연결 지점을 main에 먼저.
 - **작업량(사람 기준)**: 작업을 끝낼 때마다 `Plans/Work_Effort.md`에 한 줄 (중급 Unity 개발자 1명 추정 시간, 8시간=1일). 대시보드가 Claude·Codex 막대로 표시. 병렬 중에는 로그 파일의 "작업량" 표에 적고 합칠 때 옮긴다.

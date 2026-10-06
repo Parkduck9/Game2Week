@@ -1,6 +1,6 @@
 # 패턴 누적 · 색 대응 · 3D 액션 회피 설계 v3
 
-작성일: 2026-10-06 · 상태: 1·2·4단계 구현 및 검증 완료, 3단계 Codex 진행 중 · 수치: 플레이 검증용 초안
+작성일: 2026-10-06 · 상태: 1~4단계 구현 및 검증 완료 (3단계 Codex·4단계 Claude 병렬) · 수치: 플레이 검증용 초안
 
 HTML 보기: [Action_Balance_Plan.html](Action_Balance_Plan.html)
 
@@ -124,7 +124,7 @@ HTML 보기: [Action_Balance_Plan.html](Action_Balance_Plan.html)
 |---|---|---|
 | 1 | 공통 액션 기반: 허리 카메라·마우스 회전/록온·이동·Shift 회피·Space 점프·우클릭 쳐내기, 1-1 노랑 직선 시험 공격·오른손 모션·어깨 뒤 탄 흘리기 | 구현, EditMode 119 / PlayMode 15 통과 |
 | 2 | 노랑 랜덤 조준·사인파·측면 발사원, 접근 경고음·화면 밖 표시 | 구현, EditMode 125 / PlayMode 16 통과 |
-| 3 | Unity Pattern Editor, 8종 궤적·발사 간격·속도 그래프·3D 미리보기 | 미구현 |
+| 3 | Unity Pattern Editor, 8종 궤적·발사 간격·속도 그래프·3D 미리보기 | 구현 (Codex), 브랜치 EditMode 143 / PlayMode 17 통과 — 3·4단계 통합 후 main 합침 |
 | 4 | Ctrl 빨강 정지 자세·파랑 이동 판정, 색 학습과 허용 조합 | 판정 구현 (Claude), EditMode 135 / PlayMode 19 통과 — 색 학습·조합·맵 연결은 5단계 |
 | 5 | 단계별 누적·간격·예산, 8개 맵 연결과 실제 밸런스 | 미구현 |
 
@@ -168,6 +168,19 @@ HTML 보기: [Action_Balance_Plan.html](Action_Balance_Plan.html)
 - EditMode 125개 / PlayMode 16개 전체 통과. 결과: `Logs/action_phase2_editmode.xml`, `Logs/action_phase2_playmode_retry.xml`. 새 씬 테스트의 InputTestFixture 격리를 기존 입력 테스트와 통일해 첫 전체 실행의 입력 테스트 실패를 해결했다. 8개 맵 생성·입력/일시정지·처치/살려주기/패배·씬 흐름도 재검증했다.
 - 실제 화면에서 허리 카메라·적 가시성·측면 예고/표시 확인. 위쪽 표시 캡처에는 화면 밖 투영 검증용 시험 탄이 포함돼 일반 공격과 구분한다. 손 애니메이션·효과음은 임시 자원이다.
 
+### 실제 적용된 3단계 — Pattern Editor (Codex, 병렬 작업)
+
+- `Tools ▸ Pattern Editor`: 목록·새 패턴·복제·삭제(맵에서 쓰는 에셋은 삭제 막음), 임시 편집 사본, 검증 오류 표시, 저장 시 ContentCatalog 등록 → Stage Editor에서 `Attack_Graph_이름`으로 선택.
+- `GraphPatternDefinition`(SO): 색·발사원(적/좌/우/교대)·배열(단발/부채꼴/원형)·발사 수·조준 오차·시드·예고·수명·높이·기준 속도·궤적 속성·발사 간격/속도 배율 그래프.
+- 궤적 8종 `GraphTrajectory`(ITrajectory): 직선·사인파·지그재그·높이 포물선·원호·확장 나선·8자·3D 베지어. 발사 기준값 + 경과 시간으로 평가 — 게임과 미리보기가 같은 구현.
+- 속도 배율 = 수명 비율 0~1 입력, 256구간 적분값 보간 (프레임 분할과 무관). 주파수는 진행 거리 m당 주기. 호 길이 균일화는 하지 않음.
+- `PatternTimeline`: 예고 때 목표 고정, 시드 재현, 다음 발사 예약 때 간격 그래프 한 번 평가, 최소 간격·예고 시간보다 짧게 예약하지 않음.
+- `GraphAttackPattern`: `Bullet.Launch(trajectory)`/`Bullet.Color` 사용, 탄 풀·수명·예고선·색 표시·ThreatPoint 경고·종료 정리. 빨강/파랑 통과 판정은 4단계 규칙이 그대로 적용.
+- 3D 미리보기: 재생/일시정지/정지·1/60초 진행·시간 스크럽·반복·고정 시드·카메라 각도·허리 시점·경기장/적/목표 표시, 경계 밖 궤적 경고.
+- 프리셋 `Graph_` 8종 (데이터·프리팹·AttackPatternData) 카탈로그 등록. **기존 1-1~1-8 맵 연결은 바꾸지 않음** — 맵별 누적 연결은 5단계.
+- 제한: 기존 YellowTraining/Radial 프리팹은 자동 변환하지 않음. 나선·8자는 발사 지점 주변을 도는 형태. 접근 안전로 자동 판정 없음. 편집 창 마우스 조작은 사용자 확인 대상.
+- 상세: `Plans/Parallel/Codex_Log.md`. 미리보기 캡처 `Logs/preview_Graph_*.png`(Codex 폴더).
+
 ### 실제 적용된 4단계 — 빨강·파랑 판정 (Claude, 병렬 작업)
 
 | 색 | 통과 조건 | 수치 (`PlayerActionSettings`) |
@@ -182,7 +195,7 @@ HTML 보기: [Action_Balance_Plan.html](Action_Balance_Plan.html)
 - 표시(색만으로 구분하지 않음): 탄 색 입히기 + 회전 차이(빨강 멈춤·파랑 2배), 자세 시 몸 10% 낮춤·손 가슴 앞·발밑 원판(연빨강 → 빨강 = 준비), HUD `정지 자세`, 화면 밖 표시 글자색, 조작 안내에 Ctrl.
 - 시험 자원: `ColorTest/Pattern_RedTest`·`Pattern_BlueTest` (노랑 연습 패턴 Variant). **맵 미연결** — 색 첫 등장 안내·조합 금지 규칙·맵 연결은 5단계.
 - 검증: EditMode `ColorRuleTests` 7개, PlayMode `ActionPhaseFourTests` 3개 (실제 키 입력: Ctrl+W 정지·빨강만 통과, 이동 중 파랑 통과·벽에 막히면 실패, 빨강 패턴 실행 시 자세면 HP 유지·아니면 감소). 화면 캡처로 원판·HUD·빨강 탄 확인.
-- 남은 것: 예고선 재질은 노랑 고정 (패턴 쪽, 3단계 새 패턴에서 색별로). 손·자세 표현은 리깅 전 임시 (7단계).
+- 남은 것: 기존 `YellowTrainingPattern` 예고선은 노랑 고정 (새 Graph 패턴은 색별 예고선). 손·자세 표현은 리깅 전 임시 (7단계).
 
 사용자 요청: 난이도마다 패턴을 하나씩 늘리고 쏘는 시간을 줄이는 밸런스 패치, 탑다운 느낌을 줄이고 3D 액션처럼 피하는 전투. 초기에는 설계 문서를 작성했고 후속 제작 요청으로 1단계 구현, 이어서 진행 요청으로 2단계 제작까지 진행했다. 코드는 위 실제 적용 항목에 따라 변경했으며 사용자 세이브는 수정하지 않았다.
 
@@ -364,4 +377,4 @@ AttackPatternData → PatternEncounterData → DifficultyProfile
 
 ## 다음에 할 일
 
-3단계(Unity Pattern Editor·8종 궤적·간격/속도 그래프)는 Codex가 병렬로 진행 중이고, 4단계 빨강·파랑 판정은 main에 합쳐졌다. 3단계가 합쳐지면 5단계(누적·간격·예산, 8개 맵 연결, 색 학습·조합)를 `Plans/Parallel_Work_Plan.md` 8절대로 나눠 진행한다. 실제 플레이의 조작/카메라/음량 체감은 계속 확인하고 수치를 에셋에서 조정한다.
+3단계(Pattern Editor, Codex)와 4단계(빨강·파랑, Claude)가 main에 합쳐졌다. 다음은 5단계(누적·간격·예산, 8개 맵 연결, 색 학습·조합)를 `Plans/Parallel_Work_Plan.md` 8절대로 나눠 진행한다. 실제 플레이의 조작/카메라/음량 체감은 계속 확인하고 수치를 에셋에서 조정한다.

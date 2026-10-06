@@ -26,11 +26,13 @@ namespace Game2Week.Battle.View
         StageDefinition stage;
         PlayerMover player;
         PlayerHitRule hitRule;
+        readonly EncounterMemory encounterMemory = new();
         float invulnerableLeft;
         int pendingDamage;
 
         public PlayerMover Player => player;
         public PlayerHitRule HitRule => hitRule;
+        public EncounterMemory EncounterMemory => encounterMemory;
         public PatternRunner Patterns => patternRunner;
         public ThreatFeedbackView ThreatFeedback => threatFeedback;
         public void BindThreatVolume(System.Func<float> volume) { if (threatFeedback) threatFeedback.Bind(patternRunner,player,volume); }
@@ -103,7 +105,7 @@ namespace Game2Week.Battle.View
             pendingDamage = 0;
             var enemy = spawner.Enemy;
             var context = new PatternContext(spawner.Arena, enemy ? enemy.transform : spawner.Arena.transform, enemy,
-                player.transform, player.Radius, damagePerHit, OnPlayerHit, player, hitRule);
+                player.transform, player.Radius, damagePerHit, OnPlayerHit, player, hitRule, encounterMemory);
             hitRule.ResetCounts();
             patternRunner.Begin(pattern, context, spawner.Arena.transform);
         }

@@ -1,55 +1,104 @@
-# Claude 작업 로그 — 4단계 빨강·파랑 (브랜치 `phase4-color-rules`)
+# Claude 작업 문서 — 할 일 · 한 일
 
-> 병렬 기간 기록. main에 합칠 때 TODO·WORKLOG·Action_Balance_Plan·Work_Effort로 옮긴다.
+최종 갱신: 2026-10-06 · 지금 할 일: **5단계 — 자동 플레이 측정 도구 · 색 처음 등장 안내**
 
-## 2026-10-06 — 4단계 구현 완료
+> Claude는 이 문서의 "지금 할 일"부터 진행하고, 끝나면 "한 일"과 "작업량"을 추가한다.
+> 짝 문서: Codex 쪽은 `Plans/Parallel/Codex_Log.md`. 전체 규칙은 `CLAUDE.md`와 `Plans/Parallel_Work_Plan.md`.
 
-### 한 일
-- **입력**: Player 맵에 `Brace` 동작 (왼/오른 Ctrl, 게임패드 LB). `InputReader.BraceHeld` (누르고 있는지).
-- **이동 모델** `PlayerMotorModel`: `SetBrace`, `Bracing`, `BraceReady`.
-  - 지상이고 회피 중이 아닐 때만 자세로 들어간다. 회피·점프 중에 누르면 끝난 뒤에 자세로 들어가 판정을 건너뛰지 않는다.
-  - 자세 중에는 이동 입력을 무시하고, 새 회피·점프·쳐내기를 막는다. 진행 중이던 쳐내기는 취소된다.
-  - 자세 전환 시간(`braceSettleTime` 0.08초)이 지나야 `BraceReady`가 된다.
-- **실제 속도** `PlayerMover.GroundSpeed`: 경기장 경계로 제한한 뒤 실제로 움직인 수평 속도. 벽에 막히면 입력이 있어도 0에 가깝다. 자세 중에는 몸을 돌리지 않는다.
-- **색 규칙** `ColorRules`(순수 로직) + `PlayerHitRule`(IHitRule 구현) → `BattleWorld`가 `PatternContext`에 주입한다.
-  - 빨강: 정지 자세 완성 + 실제 속도 ≤ 0.05m/s일 때만 통과.
-  - 파랑: 실제 속도 ≥ 1.2m/s일 때만 통과 (이동 속도 3.4의 약 35%).
-  - 노랑: 색 규칙으로는 통과 없음 (쳐내기·회피·점프로 대응). 정지 자세가 노랑·파랑을 막지 못한다.
-- **표시**: 색만으로 구분하지 않도록 했다.
-  - `Bullet`이 발사할 때 빨강·파랑 색을 입힌다. 노랑은 프리팹 재질 그대로.
-  - 회전으로도 구분한다: 빨강 = 멈춤, 파랑 = 2배 빠르게.
-  - 정지 자세: 몸을 10% 낮추고 손을 가슴 앞에 두며, 발밑 원판이 연빨강 → 빨강(준비 완료)으로 바뀐다.
-  - HUD에 `정지 자세` / `자세 잡는 중` / `Ctrl 정지 자세`를 표시한다.
-  - 화면 밖 경고 표시를 색별 글자색으로 바꿨다.
-  - 조작 안내에 `Ctrl 정지 자세`를 추가했다.
-- **시험 자원** `ColorTest/Pattern_RedTest`·`Pattern_BlueTest`: `Pattern_YellowTraining` 프리팹 Variant(attackColor만 바꿈)와 AttackPatternData. 맵·ContentCatalog에는 연결하지 않았다 (5단계).
-- 수치는 `PlayerActionSettings`에 있다: `braceSettleTime 0.08`, `stillSpeedMax 0.05`, `blueMinSpeed 1.2`.
+## 0. 작성 규칙
 
-### 검증
-- **EditMode** 135/135 (`Logs/phase4_EditMode.xml`). `ColorRuleTests` 7개 추가:
-  - 빨강·파랑·노랑 판정
-  - 자세가 이동을 막는지, 전환 시간
-  - 회피 중·공중에 누른 자세는 끝난 뒤 시작되는지
-  - 자세 중 새 동작이 막히는지
-- **PlayMode** 19/19 (`Logs/phase4_PlayMode.xml`). `ActionPhaseFourTests` 3개 추가, 모두 실제 키 입력으로 확인:
-  - Ctrl+W를 누르면 멈춰 있고 빨강만 통과한다. 노랑·파랑은 맞는다. Ctrl을 놓으면 다시 이동하고 빨강에 맞는다.
-  - A로 이동 중이면 파랑이 통과하고, 가만히 있거나 벽에 막힌 채 입력만 하면 맞는다.
-  - `Pattern_RedTest`를 실제로 돌렸을 때 정지 자세로는 HP가 그대로이고, 자세 없이 서 있으면 HP가 줄어든다.
-- 화면 확인: `Logs/scene_action_phase4_brace.png`, `scene_action_phase4_red_pattern.png`.
-  - 빨강 원판, HUD의 "정지 자세", 빨강 탄을 확인했다.
+- 기록·주석·커밋 메시지·사용자 답변은 **한국어**로 쓴다. 코드 식별자만 영어.
+- 작업 폴더는 `C:\Unity\Game2Week\Game2Week-claude`. Unity 배치모드·테스트는 이 폴더로만.
+- 담당 파일만 고친다. 공용 연결 지점을 바꿔야 하면 사용자에게 먼저 알린다.
+- 병렬 기간에는 TODO·WORKLOG·설계 MD·Work_Effort를 고치지 않고 이 문서에 기록 → main에 합칠 때 반영 (Codex 문서도 함께).
+- 커밋·push·합치기는 사용자 요청 시. 커밋 전 폰트 에셋·ProjectSettings 자동 변경 되돌리기.
+- HTML: `node Tools/render_plan.mjs Plans/Parallel/Claude_Log.md`.
 
-### 남은 것 / Codex 쪽에 알릴 것
-- `YellowTrainingPattern`의 예고선 재질은 노랑으로 고정이다. 빨강·파랑 패턴에서도 노랑 선이 나오므로 색별 예고선이 필요하다. Codex 담당 파일이라 고치지 않았다.
-  - 3단계 새 패턴에서 `AttackColor`에 맞춰 칠하면 해결된다.
-- 색 첫 등장 안내, 색 조합 금지 규칙, 맵 연결은 5단계에서 한다.
-- 손 동작과 자세 표현은 리깅 전 임시 큐다 (7단계).
+## 1. 지금 할 일 — 5단계 (브랜치 `phase5-measure`)
 
-### 다음에 할 일
-- 사용자 요청 시 커밋한다. 커밋 전에 폰트 에셋을 되돌리고, ProjectSettings 줄바꿈 변경은 커밋에서 뺀다.
-- Codex 3단계가 끝나면 합치는 순서를 정한다 (계획 5절).
+### 만들 것
+1. **자동 플레이 측정 도구** (PlayMode 테스트 형태의 봇):
+   - 8개 맵을 각각 정해진 턴 수만큼 자동으로 플레이한다.
+   - 봇은 적에게 접근하면서 대응한다: 노랑은 가까우면 쳐내기·회피, 빨강은 Ctrl 정지 자세, 파랑은 계속 이동.
+   - 기록할 것: 맵별 피격 수, 적 접근 성공률·소요 시간, 회피·쳐내기·자세 사용, 색 통과 수, 턴 수.
+   - 결과는 `Logs/balance_report.json`에 쓴다. `Tools/render_balance_report.mjs`가 그걸 읽어 `Plans/Balance_Report.html`(맵별 표·막대)을 만든다.
+   - 자동 테스트 통과만으로 재미나 밸런스를 확정하지 않는다. 사용자 플레이 확인의 근거 자료로 쓴다.
+2. **색 처음 등장 안내**:
+   - 한 전투에서 빨강·파랑이 처음 나오는 순간 상단 안내를 잠깐 바꾼다 ("빨강 = Ctrl로 멈추기" / "파랑 = 계속 움직이기").
+   - 색은 `ThreatPoint`에서 읽는다. 문구는 `BattleTexts`에 둔다.
+3. **테스트**: 안내 표시(처음 한 번만), 측정 도구가 8개 맵 리포트를 만드는지.
+
+### 5단계 담당 파일
+| 구분 | 경로 |
+|---|---|
+| 새로 만듦 | `Tests/PlayMode/Balance*` (측정 봇), `Tools/render_balance_report.mjs`, `Plans/Balance_Report.html`, 색 안내 View (`Scripts/Battle/UI/`) |
+| 기존 | 플레이어·입력·카메라·`BattleWorld`·`BattleController`·전투 UI·`Scenes/Battle.unity`·`BattleTexts`·`ThreatFeedbackView` |
+| 수정 금지 | 패턴 쪽·맵·맵툴·ContentCatalog (Codex), 공용 연결 지점 |
+
+### 합친 뒤
+- 측정 리포트로 맵별 수치 조정을 정리해 Codex 문서 "요청"에 적는다 (데이터 에셋은 Codex 담당).
+- 사용자 플레이 확인을 받은 뒤 6단계 N-0 연결 지점을 main에 만든다: `BattleAudio`·이펙트 훅 이벤트 목록.
+
+## 2. 이후 할 일
+
+| 단계 | 먼저 (main, N-0) | Claude 할 일 |
+|---|---|---|
+| 6 연출·사운드 | `BattleAudio`·이펙트 훅 이벤트 목록 확정 | AudioMixer + 음량 설정 연결, BGM·메뉴/전투 효과음 연결 지점, AudioListener 정리, 씬 전환 페이드 |
+| 7 캐릭터·툴 | 애니메이션 상태 이름 목록 (`PlayerActionView` ↔ Animator) | 주인공 v2 + 리깅 + 애니메이션 (쳐내기 오른손 두 방향·회피·점프·정지 자세) |
+| 8 출시 준비 | 사용자 결정: 회사·게임 이름, 아이콘 방향 | 이름 반영 (PlayerSettings·MSIX·UI 문구), 정적 폰트 아틀라스, 빌드·MSIX 재검증 |
+
+## 3. 한 일
+
+### 2026-10-06 — 5-0 연결 지점 (main)
+- `ColorCombinationRules`: 빨강·파랑 동시 위험 금지 (`CanOverlap`, `IsAllowed`), 전환 유예 `SwitchGraceSeconds` 0.6초.
+- `EncounterMemory` + `PatternContext.Memory`: 전투 동안 유지되는 패턴 기록. `BattleWorld`가 전투마다 하나 만들어 주입. 재도전하면 새로 시작.
+- `EncounterContractTests` 2개.
+- 3단계(Codex) 합침: Codex 브랜치에 main(4단계)을 받아 통합 테스트 EditMode 150/150, PlayMode 20/20 → main `020df2f`.
+
+### 2026-10-06 — 4단계 빨강·파랑 판정 (브랜치 `phase4-color-rules` → main `58d2e54`)
+
+**한 일**
+- 입력: Player 맵에 `Brace` (왼/오른 Ctrl, 게임패드 LB), `InputReader.BraceHeld`.
+- `PlayerMotorModel` 정지 자세 (`SetBrace`·`Bracing`·`BraceReady`):
+  - 지상이고 회피 중이 아닐 때만 시작한다. 회피·점프 중에 누르면 끝난 뒤에 자세로 들어간다.
+  - 자세 중에는 이동 입력을 무시하고, 새 회피·점프·쳐내기를 막는다.
+  - 자세 전환 시간 0.08초가 지나야 `BraceReady`가 된다.
+- `PlayerMover.GroundSpeed`: 경계로 제한한 뒤 실제로 움직인 수평 속도 (벽에 막히면 0에 가깝다).
+- `ColorRules`(순수 로직) + `PlayerHitRule`(IHitRule) → `BattleWorld`가 `PatternContext`에 주입.
+  - 빨강 = 자세 + 실제 정지 (≤ 0.05m/s)일 때 통과.
+  - 파랑 = 실제 이동 ≥ 1.2m/s일 때 통과.
+  - 노랑은 색 규칙으로 통과하지 않는다.
+- 표시 (색만으로 구분하지 않음):
+  - 탄 색 입히기 + 회전 차이 (빨강은 멈춤, 파랑은 2배 빠르게).
+  - 정지 자세: 몸을 낮추고 손을 가슴 앞에, 발밑 원판이 연빨강 → 빨강.
+  - HUD에 정지 자세 표시, 화면 밖 경고를 색별 글자색으로.
+- 시험 패턴 `ColorTest/Pattern_RedTest`·`Pattern_BlueTest` (맵 미연결).
+
+**검증**
+- EditMode 135/135: `ColorRuleTests` 7개 추가.
+- PlayMode 19/19: `ActionPhaseFourTests` 3개 추가, 모두 실제 키 입력으로 확인.
+  - Ctrl+W를 누르면 멈춰 있고 빨강만 통과한다.
+  - 이동 중이면 파랑이 통과하고, 벽에 막혀 입력만 하면 맞는다.
+  - 빨강 패턴을 돌렸을 때 자세면 HP가 그대로이고, 자세가 없으면 HP가 줄어든다.
+- 화면 캡처로 원판·HUD·빨강 탄을 확인했다.
+
+**남은 것**
+- 기존 `YellowTrainingPattern` 예고선은 노랑 고정이다 (새 Graph 패턴은 색별 예고선).
+- 손·자세 표현은 리깅 전 임시 큐 (7단계).
+
+### 2026-10-06 — 병렬 준비
+- 병렬 작업 계획 (`Plans/Parallel_Work_Plan.md`): 파일 담당표·worktree·합치기 규칙·5~8단계 분할.
+- 0단계 연결 지점: `ITrajectory`·`AttackColor`·`IHitRule`·`ThreatPoint`.
+- 작업 폴더 두 개, 사람 기준 작업량 표시 (`Plans/Work_Effort.md` + 대시보드 카드).
+
+### 2026-10-06 — 이전 작업 (병렬 이전, WORKLOG에 상세)
+- 기획·문서, 주인공 모델 v1, Unity 프로젝트 셋업, 전투 상태 머신·데이터·UI, 맵툴 M1~M3, 서비스 흐름 S1~S6(세이브·설정·스테이지 선택·일시정지·결과/엔딩·빌드/MSIX), 타이밍 공격·방사형 탄막, 세 결말 검증, 키보드 포커스 버그, 맵 1-3~1-5.
 
 ## 작업량
 
+중급 Unity 개발자 1명 기준 추정 시간 (8시간 = 1일). main의 `Plans/Work_Effort.md`에 옮겨진 줄은 ✓.
+
 | 날짜 | 누가 | 단계 | 작업 | 사람 기준(시간) |
 |---|---|---|---|---:|
-| 2026-10-06 | Claude | 액션 4단계 | Ctrl 정지 자세 입력·이동 모델, 실제 속도, 빨강/파랑 색 규칙 + 주입, 색 표시·HUD, 시험 패턴, EditMode 7·PlayMode 3 | 16 |
+| 2026-10-06 | Claude | 액션 4단계 | Ctrl 정지 자세 입력·이동 모델, 실제 속도, 빨강/파랑 색 규칙 + 주입, 색 표시·HUD, 시험 패턴, EditMode 7·PlayMode 3 ✓ | 16 |
+| 2026-10-06 | Claude | 병렬 준비 | 3단계 통합 테스트·합치기, 5-0 연결 지점(색 조합 규칙·전투 기록) + 테스트, 할 일 문서 정리 | 4 |

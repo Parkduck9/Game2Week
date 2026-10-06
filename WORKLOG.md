@@ -719,3 +719,21 @@
 ### 다음에 할 일
 - Codex 3단계 완료 → Codex 브랜치에 main 받기(merge) → 전체 테스트 → main 합침 → Codex_Log 내용을 TODO·WORKLOG·설계 MD·Work_Effort에 반영.
 - 그다음 5단계 N-0 연결 지점(회피·쳐내기·색 통과 이벤트, 색 조합 검사 함수)을 main에 만들고 분할 진행.
+---
+
+## 2026-10-06 — Claude: 3단계 합침 + 5-0 연결 지점 + 각자 할 일 문서
+
+### 한 일
+- Codex 3단계(Pattern Editor) 커밋 `ed6c404` → Codex 브랜치에 main(4단계) 받기 → 통합 테스트 EditMode 150/150, PlayMode 20/20 → main 합침 `020df2f`. Codex 작업은 모두 담당 경로 안, 요청 사항 없음.
+- 5-0 연결 지점: `ColorCombinationRules`(빨강·파랑 동시 위험 금지, 전환 유예 0.6초), `EncounterMemory` + `PatternContext.Memory`(전투 동안 유지되는 패턴 기록, BattleWorld가 주입). `EncounterContractTests` 2개. main EditMode 152/152, PlayMode 20/20.
+- 각자 할 일 문서 정리 (사용자 요청): `Plans/Parallel/Codex_Log.md` — Codex가 바로 시작할 5단계 지시(만들 것·8개 맵 기본안·담당 파일·작성 규칙), `Plans/Parallel/Claude_Log.md` — Claude 5단계 할 일. 둘 다 "할 일 → 한 일 → 작업량", HTML 생성.
+- 설계 MD에 "실제 적용된 3단계", TODO·작업량·CLAUDE.md 갱신.
+
+### 결정
+- `claude.md`는 만들지 않음 — Windows에서 `CLAUDE.md`(규칙 파일)와 같은 파일. 기존 `Claude_Log.md`·`Codex_Log.md`에 씀.
+- 모든 기록은 한국어로만 (사용자 요청) — 두 문서와 CLAUDE.md에 규칙으로 기록.
+- 5단계 브랜치: Codex `phase5-director`, Claude `phase5-measure`.
+
+### 다음에 할 일
+- 사용자: Codex에게 "`Plans/Parallel/Codex_Log.md`의 지금 할 일부터 진행" 전달.
+- Claude: `Game2Week-claude`(`phase5-measure`)에서 측정 도구·색 안내.

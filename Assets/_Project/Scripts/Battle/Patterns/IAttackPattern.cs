@@ -22,9 +22,10 @@ namespace Game2Week.Battle.Patterns
         readonly Action<int> reportHit;
         readonly IHitRule hitRule;
 
-        public PatternContext(BattleArena arena, Transform enemy, EnemyView enemyView, Transform player, float playerRadius, int damagePerHit, Action<int> reportHit, PlayerMover playerMover = null, IHitRule hitRule = null)
+        public PatternContext(BattleArena arena, Transform enemy, EnemyView enemyView, Transform player, float playerRadius, int damagePerHit, Action<int> reportHit, PlayerMover playerMover = null, IHitRule hitRule = null, EncounterMemory memory = null)
         {
             this.hitRule = hitRule;
+            Memory = memory ?? new EncounterMemory();
             Arena = arena;
             Enemy = enemy;
             EnemyView = enemyView;
@@ -43,6 +44,8 @@ namespace Game2Week.Battle.Patterns
         public float PlayerRadius { get; }
         public int DamagePerHit { get; }
         public PlayerMover PlayerMover { get; }
+        /// <summary>전투 동안 유지되는 패턴 기록 (턴 간 소개 여부·셔플 백). 없으면 이 턴 전용으로 새로 만든다.</summary>
+        public EncounterMemory Memory { get; }
         public Vector3 PreviousPlayerPosition => PlayerMover ? PlayerMover.PreviousPosition : Player.position;
         public float PlayerBodyHeight => PlayerMover ? PlayerMover.BodyHeight : 0.85f;
 

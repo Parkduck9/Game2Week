@@ -39,9 +39,9 @@ for (let i = 0; i < lines.length;) {
     if (level === 2) toc.push({ id, text: heading[2] });
     body += `<h${level} id="${id}">${inline(heading[2])}</h${level}>`; continue;
   }
-  if (line.startsWith('|')) {
+  if (line.trimStart().startsWith('|')) { // 목록 안에 들여쓴 표도 표로
     const rows = [];
-    while (i < lines.length && lines[i].startsWith('|')) rows.push(lines[i++]);
+    while (i < lines.length && lines[i].trimStart().startsWith('|')) rows.push(lines[i++]);
     const head = cells(rows[0]);
     const data = rows.slice(2).map(cells);
     body += `<div class="table"><table><thead><tr>${head.map(c => `<th>${inline(c)}</th>`).join('')}</tr></thead><tbody>` +
@@ -57,7 +57,7 @@ for (let i = 0; i < lines.length;) {
     body += `<${tag}>${items.map(t => `<li>${inline(t)}</li>`).join('')}</${tag}>`; continue;
   }
   const para = [];
-  while (i < lines.length && lines[i].trim() && !/^(#|\||```|\s*(-|\d+\.) )/.test(lines[i])) para.push(lines[i++]);
+  while (i < lines.length && lines[i].trim() && !/^(#|\s*\||```|\s*(-|\d+\.) )/.test(lines[i])) para.push(lines[i++]);
   body += `<p>${inline(para.join(' '))}</p>`;
 }
 

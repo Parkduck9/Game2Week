@@ -22,9 +22,14 @@
 - [x] 이후 단계 5~8 분할 계획 (영역별 기본 담당 + 단계별 N-0 연결 지점) — 계획 8절
 - [x] 작업량 표시 (사람 기준) — `Plans/Work_Effort.md` + 대시보드 카드
 - [ ] Codex에 계획 7절 지시문 전달 (사용자)
-- [ ] (Codex) Unity Pattern Editor: 8종 궤적·발사 간격·속도 그래프, 동일 런타임 평가 경로와 3D 미리보기 구현/검증
+- [x] (Codex) Unity Pattern Editor: 8종 궤적·발사 간격·속도 그래프, 동일 런타임 평가 경로와 3D 미리보기 구현/검증 — `Graph_` 프리셋 8종 카탈로그 등록 (맵 연결은 5단계)
+- [ ] Pattern Editor 창 직접 조작 확인 (사용자, `Tools ▸ Pattern Editor`)
 - [x] (Claude) 빨강 Ctrl 정지 자세·파랑 실제 이동 판정 구현/검증 — main 합침 `58d2e54`, EditMode 135 / PlayMode 19 (맵 연결·조합 규칙은 5단계)
-- [ ] 3·4단계 main에 합치기 → 전체 테스트 → TODO·WORKLOG·설계 MD 갱신, worktree 정리
+- [x] 3·4단계 main에 합치기 → 통합 테스트 EditMode 150 / PlayMode 20 → 문서 갱신 (`020df2f`)
+- [x] 5-0 연결 지점: `ColorCombinationRules`(빨강·파랑 겹침 금지·전환 유예), `EncounterMemory`(전투 동안 패턴 기록) — EditMode 152 / PlayMode 20
+- [x] 각자 할 일 문서: Codex → [Codex_Log.md](Plans/Parallel/Codex_Log.md) · Claude → [Claude_Log.md](Plans/Parallel/Claude_Log.md) (+HTML)
+- [ ] (Codex) 5단계: PatternDirector·DifficultyProfile·EncounterData, 8개 맵 1→8종 연결 (브랜치 `phase5-director`)
+- [ ] (Claude) 5단계: 자동 플레이 측정 도구·리포트, 색 처음 등장 안내 (브랜치 `phase5-measure`)
 > 아래 A1~A6는 v1 제작 순서 참고. 최신 제작 순서는 설계 MD의 0절을 우선하며 점프는 사용자 요청으로 포함한다.
 - [x] A1 공통 카메라 기준 이동·회피 기반 구현/검증 (최신 허리 카메라 적용)
 - [x] A2 실제 점프·높이/상대 이동 충돌 구현/검증 (최신 노랑 직선으로 시험, 충격파는 v1 참고안)
