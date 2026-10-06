@@ -20,7 +20,14 @@ namespace Game2Week.Tests
         public override void Setup()
         {
             base.Setup();
+            TestSave.Begin();
             keyboard = InputSystem.AddDevice<Keyboard>();
+        }
+
+        public override void TearDown()
+        {
+            TestSave.End();
+            base.TearDown();
         }
 
         IEnumerator WaitUntil(Func<bool> condition, float timeout, string what)
@@ -67,6 +74,34 @@ namespace Game2Week.Tests
 
             yield return Tap(keyboard.xKey);
             Assert.AreEqual(BattleStateId.ActionMenu, ctx.CurrentState);
+        }
+
+        [UnityTest]
+        public IEnumerator Esc_PausesAndResumes_DialogueStillWorks()
+        {
+            SceneManager.LoadScene(SceneNames.Battle);
+            BattleController battle = null;
+            yield return SceneFlowTests.WaitForBattle(c => battle = c);
+            Assert.AreEqual(BattleStateId.Intro, battle.Context.CurrentState);
+
+            yield return Tap(keyboard.escapeKey);
+            Assert.IsTrue(battle.Pause.IsPaused);
+            Assert.AreEqual(0f, Time.timeScale);
+            Assert.IsTrue(battle.Pause.Menu.gameObject.activeInHierarchy);
+            SceneCapture.Save("battle_pause");
+
+            yield return Tap(keyboard.zKey); // 일시정지 중 Z는 "계속"을 고름 (대사는 넘어가지 않음)
+            Assert.IsFalse(battle.Pause.IsPaused);
+            Assert.AreEqual(1f, Time.timeScale);
+            Assert.AreEqual(BattleStateId.Intro, battle.Context.CurrentState);
+
+            yield return Tap(keyboard.escapeKey);
+            yield return Tap(keyboard.escapeKey); // ESC 두 번 = 일시정지 후 계속
+            Assert.IsFalse(battle.Pause.IsPaused);
+
+            // 풀린 뒤 대사창이 다시 입력을 받는지
+            for (int i = 0; i < 4 && battle.Context.CurrentState == BattleStateId.Intro; i++) yield return Tap(keyboard.zKey);
+            Assert.AreEqual(BattleStateId.EnemyTurn, battle.Context.CurrentState);
         }
     }
 }

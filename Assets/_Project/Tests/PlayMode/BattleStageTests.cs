@@ -15,6 +15,12 @@ namespace Game2Week.Tests
     /// <summary>Battle 씬이 stage_001대로 구성되는지 + 상태별 화면 캡처 (Logs/scene_battle_*.png).</summary>
     public class BattleStageTests
     {
+        [SetUp]
+        public void SetUp() => TestSave.Begin();
+
+        [TearDown]
+        public void TearDown() => TestSave.End();
+
         [UnityTest]
         public IEnumerator Battle_BuildsStage_AndShowsEachPhase()
         {

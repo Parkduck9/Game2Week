@@ -1,7 +1,10 @@
 using System.Collections;
+using System.Linq;
 using Game2Week.Battle;
 using Game2Week.Core;
 using Game2Week.Flow;
+using Game2Week.Save;
+using Game2Week.UI;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -9,10 +12,16 @@ using UnityEngine.TestTools;
 
 namespace Game2Week.Tests
 {
-    /// <summary>메인 → 전투 → 결과 → 메인 루프가 빌드 목록의 씬들로 끝까지 도는지 확인.</summary>
+    /// <summary>서비스 흐름: 메인 → 스테이지 선택 → 전투 → 결과 → 엔딩/선택/메인, 진행·설정 저장 유지.</summary>
     public class SceneFlowTests
     {
         const float Timeout = 10f;
+
+        [SetUp]
+        public void SetUp() => TestSave.Begin();
+
+        [TearDown]
+        public void TearDown() => TestSave.End();
 
         public static IEnumerator WaitForScene(string name)
         {
@@ -45,33 +54,92 @@ namespace Game2Week.Tests
             return found;
         }
 
-        [UnityTest]
-        public IEnumerator FullLoop_MainMenu_Battle_Result_Back()
+        static IEnumerator PlayStageOne(BattleOutcome outcome)
         {
-            SceneManager.LoadScene(SceneNames.MainMenu);
-            yield return WaitForScene(SceneNames.MainMenu);
-            SceneCapture.Save(SceneNames.MainMenu);
-
-            Find<MainMenuController>().Choose(MainMenuController.StartIndex);
+            Find<StageSelectController>().Choose(0);
             yield return WaitForScene(SceneNames.Battle);
             BattleController battle = null;
             yield return WaitForBattle(c => battle = c);
-
-            battle.Context.FinishBattle(BattleOutcome.EnemySpared);
+            battle.Context.FinishBattle(outcome);
             yield return WaitForScene(SceneNames.Result);
-            Assert.AreEqual("전투 종료", Find<ResultController>().Title);
-            SceneCapture.Save(SceneNames.Result);
+        }
 
-            Find<ResultController>().Choose(ResultController.RetryIndex);
+        [UnityTest]
+        public IEnumerator NewGame_Play_Records_Continue_Settings()
+        {
+            SceneManager.LoadScene(SceneNames.MainMenu);
+            yield return WaitForScene(SceneNames.MainMenu);
+            var main = Find<MainMenuController>();
+            Assert.IsFalse(main.CanContinue);
+            Assert.IsFalse(main.Menu.IsEnabled(MainMenuController.ContinueIndex), "세이브 없으면 이어하기 비활성");
+            SceneCapture.Save("main_fresh");
+
+            main.Choose(MainMenuController.NewGameIndex); // 진행 없음 → 확인 없이
+            yield return WaitForScene(SceneNames.StageSelect);
+            Assert.AreEqual(1, Find<StageSelectController>().Items.Count, "처음엔 1번만");
+
+            yield return PlayStageOne(BattleOutcome.EnemySpared);
+            var result = Find<ResultController>();
+            Assert.AreEqual("전투 종료", result.Title);
+            StringAssert.Contains(UiTexts.NewRecord, result.TimeText);
+            Assert.AreEqual(UiTexts.ToEnding, result.Items[0], "스테이지가 1개뿐 → 마지막 → 엔딩으로");
+            SceneCapture.Save("result_victory");
+
+            result.Choose(UiTexts.Retry);
             yield return WaitForScene(SceneNames.Battle);
+            BattleController battle = null;
             yield return WaitForBattle(c => battle = c);
-
             battle.Context.FinishBattle(BattleOutcome.PlayerDefeated);
             yield return WaitForScene(SceneNames.Result);
-            Assert.AreEqual("GAME OVER", Find<ResultController>().Title);
+            result = Find<ResultController>();
+            Assert.AreEqual("GAME OVER", result.Title);
+            CollectionAssert.AreEqual(new[] { UiTexts.Retry, UiTexts.StageSelect }, result.Items);
 
-            Find<ResultController>().Choose(ResultController.MainMenuIndex);
+            result.Choose(UiTexts.StageSelect);
+            yield return WaitForScene(SceneNames.StageSelect);
+            StringAssert.Contains("최고", Find<StageSelectController>().Items[0]);
+            SceneCapture.Save("stage_select");
+
+            Find<StageSelectController>().Back();
             yield return WaitForScene(SceneNames.MainMenu);
+            main = Find<MainMenuController>();
+            Assert.IsTrue(main.CanContinue, "클리어 후 이어하기 가능");
+
+            // 새로 시작 → 확인 창 → 아니요: 진행 유지
+            main.Choose(MainMenuController.NewGameIndex);
+            Assert.IsTrue(main.Confirm.IsOpen);
+            SceneCapture.Save("main_confirm");
+            main.Confirm.Choose(ConfirmPopup.NoIndex);
+            Assert.IsTrue(main.CanContinue);
+
+            // 설정 → 텍스트 속도 빠름 → 닫으면 파일에 저장
+            main.Choose(MainMenuController.SettingsIndex);
+            Assert.IsTrue(main.Settings.IsOpen);
+            main.Settings.Change(SettingRow.TextSpeed, 1);
+            SceneCapture.Save("settings");
+            main.Settings.Close();
+            Assert.AreEqual(TextSpeeds.Fast, new SaveService(TestSave.Directory).Settings.textSpeed);
+            Assert.IsTrue(new SaveService(TestSave.Directory).HasProgress, "진행도 파일에 남아 있음");
+        }
+
+        [UnityTest]
+        public IEnumerator LastStageClear_ShowsEnding_ThenMain()
+        {
+            SceneManager.LoadScene(SceneNames.MainMenu);
+            yield return WaitForScene(SceneNames.MainMenu);
+            Find<MainMenuController>().Choose(MainMenuController.NewGameIndex);
+            yield return WaitForScene(SceneNames.StageSelect);
+
+            yield return PlayStageOne(BattleOutcome.EnemyDefeated);
+            Find<ResultController>().Choose(UiTexts.ToEnding);
+            yield return WaitForScene(SceneNames.Ending);
+            yield return new WaitForSeconds(2f);
+            SceneCapture.Save("ending");
+            Assert.IsTrue(new SaveService(TestSave.Directory).Progress.endingSeen);
+
+            Find<EndingController>().Finish();
+            yield return WaitForScene(SceneNames.MainMenu);
+            Assert.IsTrue(Find<MainMenuController>().CanContinue);
         }
     }
 }

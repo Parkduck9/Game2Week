@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Game2Week.UI
 {
-    /// <summary>InputReader 입력으로 메뉴 커서를 움직이고, 확인/취소를 알린다.</summary>
+    /// <summary>InputReader 입력으로 메뉴 커서를 움직이고, 확인/취소를 알린다. 켜져 있을 때만 입력을 받는다.</summary>
     public sealed class MenuNavigator : MonoBehaviour
     {
         [SerializeField] InputReader input;
@@ -19,14 +19,32 @@ namespace Game2Week.UI
         public event Action Cancelled;
 
         public int Index => list.Index;
+        public IReadOnlyList<string> Labels => view.Labels;
 
-        public void SetItems(IReadOnlyList<string> items)
+        public void SetItems(IReadOnlyList<string> items, IEnumerable<int> disabledIndices = null)
         {
-            list.SetCount(items.Count);
+            var disabled = disabledIndices != null ? new List<int>(disabledIndices) : null;
+            list.SetCount(items.Count, disabled);
             list.Reset();
-            view.SetItems(items);
+            view.SetItems(items, disabled);
             view.SetSelected(list.Index);
         }
+
+        public bool IsEnabled(int index) => list.IsEnabled(index);
+
+        public void Select(int index)
+        {
+            list.Select(index);
+            view.SetSelected(list.Index);
+        }
+
+        /// <summary>테스트·코드용: 확인키 없이 항목 고르기 (비활성 항목은 무시)</summary>
+        public void Choose(int index)
+        {
+            if (list.IsEnabled(index)) Selected?.Invoke(index);
+        }
+
+        public void CancelMenu() => Cancelled?.Invoke();
 
         void OnEnable()
         {
@@ -52,7 +70,7 @@ namespace Game2Week.UI
 
         void OnSubmit()
         {
-            if (list.Count > 0) Selected?.Invoke(list.Index);
+            if (list.IsEnabled(list.Index)) Selected?.Invoke(list.Index);
         }
 
         void OnCancel() => Cancelled?.Invoke();

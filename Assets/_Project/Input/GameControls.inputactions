@@ -75,6 +75,25 @@
                 { "name": "", "id": "6b1f3a52-2c4e-4d8a-9f10-1a2b3c4d5f15", "path": "<Gamepad>/dpad", "interactions": "", "processors": "", "groups": "Gamepad", "action": "Move", "isComposite": false, "isPartOfComposite": false },
                 { "name": "", "id": "6b1f3a52-2c4e-4d8a-9f10-1a2b3c4d5f16", "path": "<Gamepad>/leftStick", "interactions": "", "processors": "", "groups": "Gamepad", "action": "Move", "isComposite": false, "isPartOfComposite": false }
             ]
+        },
+        {
+            "name": "System",
+            "id": "6b1f3a52-2c4e-4d8a-9f10-1a2b3c4d6001",
+            "actions": [
+                {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "6b1f3a52-2c4e-4d8a-9f10-1a2b3c4d6002",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                { "name": "", "id": "6b1f3a52-2c4e-4d8a-9f10-1a2b3c4d6010", "path": "<Keyboard>/escape", "interactions": "", "processors": "", "groups": "Keyboard", "action": "Pause", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "6b1f3a52-2c4e-4d8a-9f10-1a2b3c4d6011", "path": "<Gamepad>/start", "interactions": "", "processors": "", "groups": "Gamepad", "action": "Pause", "isComposite": false, "isPartOfComposite": false }
+            ]
         }
     ],
     "controlSchemes": [

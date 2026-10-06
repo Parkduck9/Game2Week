@@ -121,7 +121,8 @@ Assets/_Project/
 ├─ Scripts/
 │  ├─ Core/           GameSession(씬 간 데이터), SceneLoader, SceneNames, GameQuit, InputReader
 │  ├─ UI/             공용 UI 부품 (MenuList, MenuListView, MenuNavigator)
-│  ├─ Flow/           씬별 컨트롤러 (MainMenu, Result, 임시 BattleFlowStub)
+│  ├─ Flow/           씬별 컨트롤러 (MainMenu, StageSelect, Battle, Result, Ending, PauseMenu)
+│  ├─ Save/           SaveService, SaveData/SettingsData, JsonFileStore, SettingsModel, DisplaySettings
 │  ├─ Battle/
 │  │  ├─ States/      전투 상태 클래스
 │  │  ├─ UI/          BattleUi(IBattleUi), DialogueBox, StatusBar, TurnHud, PopupText, BarView
@@ -149,6 +150,10 @@ Assets/StreamingAssets/Stages/   stages.json(순서) + stage_XXX.json — 맵툴
 - Unity C# 제약: `init` 접근자·`record` 사용 금지 (IsExternalInit 없음). 커밋 전에는 컴파일·테스트 통과 확인.
 - 테스트 실행: `Unity.exe -batchmode -projectPath . -runTests -testPlatform EditMode|PlayMode -assemblyNames Game2Week.Tests.EditMode|Game2Week.Tests.PlayMode -testResults <xml> -logFile <log>` (`-quit` 붙이지 않음, `-assemblyNames` 없으면 Input System 패키지 테스트가 섞임).
 - 키보드 입력 테스트는 `InputTestFixture` (manifest `testables`에 inputsystem) — `BattleInputTests` 참고.
+- PlayMode 테스트는 반드시 `TestSave.Begin()/End()` — 실제 세이브(persistentDataPath) 대신 임시 폴더 (`GameSession.SaveDirectoryOverrideForTests`).
+- 세이브: `GameSession.Save`(SaveService) 하나로만 읽고 쓴다. 진행(save.json)·설정(settings.json) 분리, 쓰기는 `JsonFileStore`(임시 파일→교체 + .bak).
+- 입력 맵: UI(메뉴) / Player(이동) / System(ESC, 항상 켜짐). 메뉴·창이 겹칠 땐 여는 쪽이 자기 메뉴 GameObject를 끈다 (켜진 MenuNavigator만 입력을 받음).
+- 빌드: `Tools/build_windows.ps1` → Builds/Windows, 포장: `Tools/package_msix.ps1` → Builds/Msix (Builds/는 git 제외).
 - 씬 사이 데이터는 `GameSession` 에셋으로 (싱글톤·static 상태 금지). 씬 이름은 `SceneNames` 상수만.
 - 화면 확인은 PlayMode 테스트의 `Capture()` 이미지로 — 배치모드 첫 렌더는 색이 깨지므로 두 번 렌더.
 - PowerShell 한 명령 안에 `"C:\Program Files\..."` 경로와 `Remove-Item`을 같이 쓰면 안전검사에 막힘 → `Join-Path $env:ProgramFiles` 사용, 삭제는 따로.

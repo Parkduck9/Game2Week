@@ -22,9 +22,14 @@ namespace Game2Week.Flow
         [SerializeField] BattlePresentation presentation;
         [SerializeField] BattleUi ui;
         [SerializeField] StatusBar statusBar;
+        [SerializeField] PauseMenu pauseMenu;
 
         BattleStateMachine machine;
         bool finished;
+
+        /// <summary>전투 시간 (일시정지 제외) — 클리어 기록용</summary>
+        public float ElapsedSeconds { get; private set; }
+        public PauseMenu Pause => pauseMenu;
 
         public BattleContext Context { get; private set; }
         public BattleUi Ui => ui;
@@ -59,6 +64,7 @@ namespace Game2Week.Flow
             presentation.Bind(events, spawner.Enemy);
             statusBar.Bind(events, player.Data.DisplayName, player.Data.Level, player.CurrentHp, player.MaxHp);
             machine.StateChanged += (_, id) => events.RaiseStateChanged(id);
+            ui.Dialogue.SpeedMultiplier = () => Save.TextSpeeds.Multiplier(session.Save.Settings.textSpeed);
 
             input.EnableUI();
             IsReady = true;
@@ -67,7 +73,9 @@ namespace Game2Week.Flow
 
         void Update()
         {
-            if (IsReady && !finished) machine.Tick(Time.deltaTime);
+            if (!IsReady || finished || (pauseMenu && pauseMenu.IsPaused)) return;
+            ElapsedSeconds += Time.deltaTime;
+            machine.Tick(Time.deltaTime);
         }
 
         void OnDestroy()
@@ -79,7 +87,8 @@ namespace Game2Week.Flow
         {
             if (finished) return;
             finished = true;
-            session.EndBattle(outcome);
+            if (pauseMenu) pauseMenu.CanPause = false;
+            session.EndBattle(outcome, ElapsedSeconds);
             SceneLoader.Load(SceneNames.Result);
         }
     }

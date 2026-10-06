@@ -4,7 +4,9 @@ namespace Game2Week.Core
     public static class SceneNames
     {
         public const string MainMenu = "MainMenu";
+        public const string StageSelect = "StageSelect";
         public const string Battle = "Battle";
         public const string Result = "Result";
+        public const string Ending = "Ending";
     }
 }

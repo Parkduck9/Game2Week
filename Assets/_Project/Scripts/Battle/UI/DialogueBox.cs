@@ -24,6 +24,9 @@ namespace Game2Week.Battle.UI
         public bool IsWaitingForInput { get; private set; }
         public string Text => text.text;
 
+        /// <summary>설정의 텍스트 속도 배율 (BattleController가 연결)</summary>
+        public System.Func<float> SpeedMultiplier { get; set; }
+
         /// <summary>대사를 출력하고 확인키로 닫히면 onClosed.</summary>
         public void Show(string message, Action closed)
         {
@@ -84,13 +87,19 @@ namespace Game2Week.Battle.UI
         void Update()
         {
             if (!typing) return;
-            visible += charactersPerSecond * Time.deltaTime;
+            visible += charactersPerSecond * (SpeedMultiplier?.Invoke() ?? 1f) * Time.deltaTime;
             text.maxVisibleCharacters = Mathf.Min(total, Mathf.FloorToInt(visible));
             if (visible >= total)
             {
                 typing = false;
                 text.maxVisibleCharacters = int.MaxValue;
             }
+        }
+
+        // 일시정지로 꺼졌다 켜지면 기다리던 대사의 입력을 다시 받는다
+        void OnEnable()
+        {
+            if (IsWaitingForInput) Subscribe(true);
         }
 
         void OnDisable() => Subscribe(false);
