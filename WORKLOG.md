@@ -1002,3 +1002,19 @@
 
 ### 다음에 할 일
 - 사용자: 행동 뒤 거리 체감 확인 — 더 멀게/가깝게는 `CombatPresentationSettings.asset`의 `retreatToStartRatio`(지금 0.8).
+---
+
+## 2026-10-07 — Claude: Play할 때마다 키보드가 됐다 안 됐다 하는 문제
+
+### 원인
+- Input System 1.20에서는 `AllDeviceInputAlwaysGoesToGameView`가 "빌드와 똑같이" 동작한다: Game 창 포커스가 없고 `runInBackground`가 꺼져 있으면 키 이벤트를 버리고(`InputManager` `!gameHasFocus` 분기), 포커스를 잃으면 키보드를 끈다(`ResetAndDisableNonBackgroundDevices`). Play 직전에 어느 창을 눌렀는지에 따라 결과가 달라졌다.
+
+### 한 일
+- `InputSettingsSetup`: 에디터 플레이 중에만 `backgroundBehavior = IgnoreFocus`(Game 창 포커스와 상관없이 입력), 플레이가 끝나면 빌드용 값으로 되돌림. 에셋(빌드) 값은 그대로.
+- EditMode 테스트 asmdef에 `Unity.InputSystem` 참조, `InputFocusSettingsTests` 2개.
+
+### 검증
+- EditMode 213/213, PlayMode 45/45 (+측정 전용 1). 테스트 실행 뒤에도 에셋 값은 빌드용 그대로.
+
+### 다음에 할 일
+- 사용자: 에디터에서 Play를 여러 번(다른 창을 누른 뒤 포함) 눌러 키보드가 바로 먹는지 확인. 에디터를 다시 열어야 새 설정이 적용된다 (스크립트 다시 컴파일되면 자동).

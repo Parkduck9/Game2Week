@@ -186,7 +186,7 @@ Assets/StreamingAssets/Stages/   stages.json(순서) + stage_XXX.json — 맵툴
 - 테스트 실행: `Unity.exe -batchmode -projectPath . -runTests -testPlatform EditMode|PlayMode -assemblyNames Game2Week.Tests.EditMode|Game2Week.Tests.PlayMode -testResults <xml> -logFile <log>` (`-quit` 붙이지 않음, `-assemblyNames` 없으면 Input System 패키지 테스트가 섞임).
 - 키보드 입력 테스트는 `InputTestFixture` (manifest `testables`에 inputsystem) — `BattleInputTests` 참고.
   - 주의: InputTestFixture는 Game 창 포커스를 무시하므로 "에디터에서 키가 안 먹는" 문제는 못 잡는다.
-- Input System 설정 에셋 `_Project/Input/InputSystemSettings.asset`: 에디터 플레이 중 키보드가 항상 Game 창으로 (`InputSettingsSetup`이 에디터 켤 때 확인). 지우지 말 것.
+- Input System 설정 에셋 `_Project/Input/InputSystemSettings.asset`: 에디터 플레이 중 키보드가 항상 Game 창으로 (`InputSettingsSetup`이 에디터 켤 때 확인). 지우지 말 것. Input System 1.20부터는 그것만으로 부족해 **에디터 플레이 중에만 `backgroundBehavior = IgnoreFocus`** (끝나면 빌드용 `ResetAndDisableNonBackgroundDevices`로 복귀) — 없으면 Play 직전 포커스에 따라 키보드가 됐다 안 됐다 함 (2026-10-07).
 - PlayMode 테스트는 반드시 `TestSave.Begin()/End()` — 실제 세이브(persistentDataPath) 대신 임시 폴더 (`GameSession.SaveDirectoryOverrideForTests`).
 - 세이브: `GameSession.Save`(SaveService) 하나로만 읽고 쓴다. 진행(save.json)·설정(settings.json) 분리, 쓰기는 `JsonFileStore`(임시 파일→교체 + .bak).
 - 입력 맵: UI(메뉴) / Player(이동) / System(ESC, 항상 켜짐). 메뉴·창이 겹칠 땐 여는 쪽이 자기 메뉴 GameObject를 끈다 (켜진 MenuNavigator만 입력을 받음).

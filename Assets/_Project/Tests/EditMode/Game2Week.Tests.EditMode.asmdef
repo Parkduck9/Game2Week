@@ -4,6 +4,7 @@
     "references": [
         "Game2Week",
         "Game2Week.Editor",
+        "Unity.InputSystem",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
