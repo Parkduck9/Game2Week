@@ -66,7 +66,10 @@ namespace Game2Week.EditorTools.Stages
                 PrefabUtility.SaveAsPrefabAsset(root,prefabPath);
             }
             finally{PrefabUtility.UnloadPrefabContents(root);}
-            AssetDatabase.SaveAssets();Debug.Log("주인공 v2 스킨·동작 10종·컨트롤러·플레이어 프리팹 연결 완료. 씬 변경 없음.");
+            AssetDatabase.SaveAssets();
+            // glb 안 클립은 팔다리가 거의 움직이지 않아 T자 자세로 보였다 → 자세 함수로 만든 클립으로 교체 (8.5단계)
+            Game2Week.EditorTools.Animation.HeroineClipAuthoring.Build();
+            Debug.Log("주인공 v2 스킨·동작 10종·컨트롤러·플레이어 프리팹 연결 완료. 씬 변경 없음.");
         }
     }
 }

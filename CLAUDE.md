@@ -72,6 +72,8 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 - 맵 패턴은 `PatternDirector` + `PatternEncounterData`/`DifficultyProfile`(`Data/Patterns/Director/`)로 누적 — 새 패턴은 `IDirectablePattern` 구현(색·난이도 배율). 1-1만 단일 패턴.
 - 월드 사건은 `BattleFeedback`, 이펙트는 `BattleFxRig` 프리팹 아래 `IBattleFxModule`(씬 수정 없이), 소리는 `BattleAudio`·`UiSoundSet`·`SceneBgm` + `AudioRouting`(믹서 선택). 씬 전환은 `SceneLoader`(페이드 0.25초, `FadeSeconds`).
 - 이름·버전은 `Data/ProductInfo.asset` 한 곳 (회사 `DefaultCompany`는 세이브 경로라 확정 전까지 유지). 폰트는 정적 아틀라스 — 새 한글 문구는 `FontCoverageTests`가 검사.
+- 주인공 동작 클립은 glb 안 클립이 아니라 `Tools ▸ Heroine ▸ 동작 클립 다시 만들기`(`HeroineClipAuthoring`)가 만든 `Art/Characters/Heroine/Clips/Heroine_*.anim` — 동작을 고칠 땐 이 도구의 자세 함수를 고치고 다시 실행 (2026-10-07, glb 클립은 T자 자세 버그).
+- 개선 설계(9~12단계)는 `Plans/Playtest_Fix_Plan.md` (사용자 컨펌 2026-10-07): 맵 확대, 적별 기술·겹·페이즈, 자비 = 공통 3턴 + 적별 조건, 대화 JSON + Dialogue Editor(전투 안에서만), 로우폴리 유지 + 셰이더·이펙트.
 - 밸런스 측정: `-runBalance`로 `BalanceMeasurementTests.MeasureAllStages` → `node Tools/render_balance_report.mjs`.
 - 에디터 스크립트 함정 추가: (3) `EditorSceneManager.OpenScene` 뒤에는 앞에서 잡은 에셋 참조가 끊길 수 있음 → 씬마다 다시 `LoadAssetAtPath`.
 
