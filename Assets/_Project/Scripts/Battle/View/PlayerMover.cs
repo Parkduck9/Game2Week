@@ -29,6 +29,7 @@ namespace Game2Week.Battle.View
         public bool CanContactEnemy => Motor.IsGrounded && !Motor.Dodging;
         /// <summary>마지막 이동에서 실제로 움직인 수평 속도 (m/s) — 벽에 막히면 입력이 있어도 0에 가깝다</summary>
         public float GroundSpeed { get; private set; }
+        public bool IsLockOnMovement { get; private set; }
         /// <summary>최근 수평 이동 속도 벡터 (부드럽게, 이동 속도 이하로 제한) — 탄 예측 조준용. 회피 순간 속도로 튀지 않는다.</summary>
         public Vector3 GroundVelocity { get; private set; }
         public PlayerActionSettings Settings => settings;
@@ -71,6 +72,7 @@ namespace Game2Week.Battle.View
             Motor.Reset();
             ParrySuccesses = 0;
             GroundSpeed = 0f;
+            IsLockOnMovement = false;
             GroundVelocity = Vector3.zero;
             if (model) model.localPosition = modelBase;
         }
@@ -78,6 +80,7 @@ namespace Game2Week.Battle.View
         public void Move(Vector2 worldInput, float dt, Vector3? facing = null)
         {
             PreviousPosition = transform.position;
+            IsLockOnMovement = facing.HasValue;
             bool wasDodging = Motor.Dodging, wasAirborne = Motor.Airborne, wasBraced = Motor.BraceReady;
             Motor.Tick(worldInput, dt);
             var delta = Motor.Displacement;
@@ -118,6 +121,7 @@ namespace Game2Week.Battle.View
             var position = transform.position; position.y = groundY; transform.position = position;
             PreviousPosition = position;
             GroundSpeed = 0f;
+            IsLockOnMovement = false;
             GroundVelocity = Vector3.zero;
         }
         void OnDestroy() { if (ownsSettings && settings) Destroy(settings); }

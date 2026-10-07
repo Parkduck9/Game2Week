@@ -70,6 +70,7 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 
 ### 5~8단계 결과로 생긴 규칙 (2026-10-06 합침)
 - 11단계: 그래픽 재현은 `GraphicsAuthoring.Build`, 툰 그래프 생성은 `Tools/author_toon_graph.py`. 주인공 원본 스킨 파츠는 자세 도구용으로 보존하고 통합 외형만 렌더하므로, 표시/숨기기는 처음 켜진 렌더러 상태를 보존해야 한다. 1080p 배치 측정은 `FrameMeasurement`로 직접 렌더하며 종료 때 측정을 끈 뒤 렌더 대상을 해제한다.
+- 12단계: 동작 재현은 `AnimationPhaseAuthoring.Build`(내부 `HeroineClipAuthoring.Build`), glb 클립 사용 금지. 대화 자세는 등록식 화자/자세 매핑으로 전달한다. 강약 피격은 표현만 구분하며 피해/체력 수치는 바꾸지 않는다. 록온 블렌드 방향은 캐릭터 로컬 속도다.
 - 10단계: 자비는 전투별 `SpareTracker`와 `EnemyData.SpareRule`, 대화는 `Tools ▸ Dialogue Editor`로만 JSON 저장. `ActOption.SpareFlags`와 대화 선택은 자비 플래그만 바꾸며 데미지/공격 패턴은 바꾸지 않는다. 샘플 재생성은 `DialogueSampleAuthoring.Generate`, 대화 글자 검증/아틀라스 재생성은 기존 폰트 도구를 사용한다.
 - 맵 패턴은 `PatternDirector` + `PatternEncounterData`/`DifficultyProfile`(`Data/Patterns/Director/`)로 누적 — 새 패턴은 `IDirectablePattern` 구현(색·난이도 배율). 9단계부터 1-1 포함 8개 맵 모두 Director, 한 턴 최대 3겹, 적 고유 기술은 `EnemyData.signatureMoves`/`phaseMoves`, 체력 단계는 `DifficultyProfile.phases`.
 - 맵은 칸 1m·시작점-적 15m 이상 (맵툴 경고). 스테이지 JSON v2 (`theme`·`dialogues`). 테스트에서 하위 패턴은 `BattleTestUtil.FindPattern`, 탄을 맞히려면 `MoveNearEnemy`.

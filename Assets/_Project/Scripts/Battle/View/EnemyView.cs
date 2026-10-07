@@ -1,4 +1,5 @@
 using UnityEngine;
+using Game2Week.Battle.View.Animation;
 
 namespace Game2Week.Battle.View
 {
@@ -35,7 +36,19 @@ namespace Game2Week.Battle.View
         float flash;
         float shake;
         float attack;
-        float endTime;
+        float endTime,warning,phase;
+        bool relaxed,dialogueHold;
+        Quaternion baseRotation;
+        EnemyMotion? dialoguePose;
+        public EnemyMotion CurrentMotion { get; private set; }
+        public Transform Body=>body;
+        public void PlayWarning()=>warning=.65f;
+        public void PlayPhase()=>phase=.8f;
+        public void SetRelaxed(bool value)=>relaxed=value;
+        public void HoldForDialogue(bool value)=>dialogueHold=value;
+        public bool PlayDialoguePose(string id)
+        {if(!EnemyMotionMap.TryPose(id,out var pose))return false;dialoguePose=pose;return true;}
+        public void ClearDialoguePose()=>dialoguePose=null;
 
         public float ContactRadius => contactRadius;
 
@@ -43,6 +56,7 @@ namespace Game2Week.Battle.View
         {
             if (!body) body = transform;
             baseLocalPos = body.localPosition;
+            baseRotation=body.localRotation;
             baseScale = body.localScale;
             block = new MaterialPropertyBlock();
             baseColors = new Color[flashRenderers.Length];
@@ -56,7 +70,7 @@ namespace Game2Week.Battle.View
             shake = 1f;
         }
 
-        public void PlayAttack() => attack = 1f;
+        public void PlayAttack(){attack=1f;warning=0;}
 
         public void PlayDefeated() => End(State.Defeated);
 
@@ -71,6 +85,9 @@ namespace Game2Week.Battle.View
         void Update()
         {
             float dt = Time.deltaTime;
+            if(dt<=0)return;
+            warning=Mathf.Max(0,warning-dt);phase=Mathf.Max(0,phase-dt);
+            CurrentMotion=EnemyMotionMap.Resolve(state==State.Defeated,state==State.Spared,shake>0,phase>0,warning>0,attack>0,relaxed,dialoguePose);
             time += dt;
             flash = Mathf.MoveTowards(flash, 0f, dt * 4f);
             shake = Mathf.MoveTowards(shake, 0f, dt * 3f);
@@ -85,10 +102,21 @@ namespace Game2Week.Battle.View
                     body.localPosition = baseLocalPos + new Vector3(offset.x, bob + hop, offset.z);
                     float squash = 1f + Mathf.Sin(time * idleBobSpeed) * 0.03f;
                     body.localScale = Vector3.Scale(baseScale, new Vector3(1f / squash, squash, 1f / squash));
+                    body.localRotation=baseRotation;
+                    float wave=Mathf.Sin(time*8);
+                    switch(CurrentMotion)
+                    {
+                        case EnemyMotion.Warning:body.localScale=Vector3.Scale(baseScale,new Vector3(1.12f,.78f,1.12f));body.localRotation=baseRotation*Quaternion.Euler(0,12*wave,0);break;
+                        case EnemyMotion.Phase:body.localScale*=1+.12f*wave;body.localRotation=baseRotation*Quaternion.Euler(0,35*wave,0);break;
+                        case EnemyMotion.Relaxed:body.localScale=Vector3.Scale(baseScale,new Vector3(1.06f,.91f,1.06f));break;
+                        case EnemyMotion.Talk:body.localRotation=baseRotation*Quaternion.Euler(5*wave,8*wave,0);break;
+                        case EnemyMotion.Nod:body.localRotation=baseRotation*Quaternion.Euler(18*Mathf.Abs(wave),0,0);break;
+                        case EnemyMotion.Surprise:body.localPosition+=Vector3.up*.12f;body.localScale=Vector3.Scale(baseScale,new Vector3(.9f,1.15f,.9f));break;
+                    }
                     break;
 
                 case State.Defeated:
-                    endTime += dt;
+                    endTime = dialogueHold?Mathf.Min(endTime+dt,endDuration*.4f):endTime+dt;
                     float k = Mathf.Clamp01(endTime / endDuration);
                     body.localScale = baseScale * (1f - k);
                     body.localPosition = baseLocalPos + Vector3.down * k * 0.3f;
@@ -96,7 +124,7 @@ namespace Game2Week.Battle.View
                     break;
 
                 case State.Spared:
-                    endTime += dt;
+                    endTime = dialogueHold?Mathf.Min(endTime+dt,endDuration*.4f):endTime+dt;
                     float s = Mathf.Clamp01(endTime / endDuration);
                     body.localPosition = baseLocalPos + Vector3.up * s * 0.8f;
                     body.Rotate(0f, 180f * dt, 0f, Space.Self);

@@ -134,6 +134,29 @@ namespace Game2Week.EditorTools.Animation
             });
         }
 
+        static IEnumerable<ClipSpec> PresentationSpecs()
+        {
+            for(int i=0;i<8;i++)
+            {
+                float angle=i*Mathf.PI/4f,dx=Mathf.Sin(angle),dz=Mathf.Cos(angle);
+                yield return new ClipSpec("Strafe"+i,.5f,true,t=>
+                {
+                    float wave=Mathf.Sin(t*Mathf.PI*2);
+                    return new Pose {bob=.025f*Mathf.Abs(Mathf.Cos(t*Mathf.PI*2)),spineLean=6*dz,sideLean=-5*dx,
+                        right=new Arm(16-15*wave*dz,12,40),left=new Arm(16+15*wave*dz,12,40),
+                        rightLeg=new Leg(30*wave*dz,18+22*Mathf.Max(0,-wave),3+25*wave*dx),
+                        leftLeg=new Leg(-30*wave*dz,18+22*Mathf.Max(0,wave),3+25*wave*dx)};
+                });
+            }
+            yield return new ClipSpec("Stop",.18f,false,t=>new Pose {spineLean=12*(1-Ease(t)),rightLeg=new Leg(18*(1-Ease(t)),26*(1-Ease(t))),leftLeg=new Leg(-12*(1-Ease(t)),10)});
+            yield return new ClipSpec("HitStrong",.42f,false,t=>new Pose {spineLean=-35*Bell(t),headNod=-24*Bell(t),bob=-.05f*Bell(t),right=new Arm(-20*Bell(t),18+38*Bell(t),40),left=new Arm(-16*Bell(t),18+35*Bell(t),35),rightLeg=new Leg(28*Bell(t),50*Bell(t)),leftLeg=new Leg(-18*Bell(t),20*Bell(t))});
+            yield return new ClipSpec("Victory",1.2f,false,t=>new Pose {right=new Arm(150*Ease(t/.45f),18,15),left=new Arm(10,16,30),headNod=-8*Ease(t/.45f),tailSway=8*Bell(t)});
+            yield return new ClipSpec("Spare",1f,true,t=>new Pose {right=new Arm(42,32,32),left=new Arm(42,32,32),headNod=4*Mathf.Sin(t*Mathf.PI*2),bob=.006f*Mathf.Sin(t*Mathf.PI*2)});
+            yield return new ClipSpec("Talk",1f,true,t=>new Pose {right=new Arm(30+12*Mathf.Sin(t*Mathf.PI*2),20,45),left=new Arm(8,12,20),headNod=3*Mathf.Sin(t*Mathf.PI*2)});
+            yield return new ClipSpec("Nod",.7f,true,t=>new Pose {headNod=18*Bell(t),right=new Arm(6,12,20),left=new Arm(6,12,20)});
+            yield return new ClipSpec("Surprise",.65f,false,t=>new Pose {headNod=-12*Bell(t),spineLean=-10*Bell(t),right=new Arm(55*Ease(t/.3f),20,65),left=new Arm(55*Ease(t/.3f),20,65)});
+        }
+
         static Pose Parry(float t, bool fromLeft)
         {
             // 0~0.25 준비(반대쪽으로 끌어옴) → 0.25~0.6 휘두름 → 0.6~1 복귀
@@ -164,16 +187,26 @@ namespace Game2Week.EditorTools.Animation
             {
                 var rig = new Rig(instance.GetComponentInChildren<Animator>().transform);
                 var states = controller.layers[0].stateMachine.states.ToDictionary(s => s.state.name, s => s.state);
-                foreach (var spec in Specs())
+                foreach (var spec in Specs().Concat(PresentationSpecs()))
                 {
                     var clip = rig.Bake(spec);
                     string path = $"{ClipFolder}/Heroine_{spec.name}.anim";
                     var existing = AssetDatabase.LoadAssetAtPath<AnimationClip>(path);
                     if (existing) { EditorUtility.CopySerialized(clip, existing); clip = existing; }
                     else AssetDatabase.CreateAsset(clip, path);
-                    if (!states.TryGetValue(spec.name, out var state)) throw new InvalidOperationException("컨트롤러에 상태 없음: " + spec.name);
+                    if (!states.TryGetValue(spec.name, out var state)) state=controller.layers[0].stateMachine.AddState(spec.name);
                     state.motion = clip;
                 }
+                foreach(var name in new[]{"MoveX","MoveY"})
+                    if(!controller.parameters.Any(item=>item.name==name))controller.AddParameter(name,AnimatorControllerParameterType.Float);
+                var strafe=controller.layers[0].stateMachine.states.FirstOrDefault(item=>item.state.name=="Strafe").state;
+                if(!strafe)strafe=controller.layers[0].stateMachine.AddState("Strafe");
+                var tree=AssetDatabase.LoadAllAssetsAtPath(ControllerPath).OfType<BlendTree>().FirstOrDefault(item=>item.name=="록온8방향");
+                if(!tree){tree=new BlendTree{name="록온8방향"};AssetDatabase.AddObjectToAsset(tree,controller);}
+                tree.blendType=BlendTreeType.FreeformDirectional2D;tree.blendParameter="MoveX";tree.blendParameterY="MoveY";tree.useAutomaticThresholds=false;
+                var children=new List<ChildMotion>{new(){motion=AssetDatabase.LoadAssetAtPath<AnimationClip>(ClipFolder+"/Heroine_Idle.anim"),position=Vector2.zero,timeScale=1}};
+                for(int i=0;i<8;i++){float angle=i*Mathf.PI/4;children.Add(new ChildMotion{motion=AssetDatabase.LoadAssetAtPath<AnimationClip>(ClipFolder+"/Heroine_Strafe"+i+".anim"),position=new Vector2(Mathf.Sin(angle),Mathf.Cos(angle)),timeScale=1});}
+                tree.children=children.ToArray();strafe.motion=tree;EditorUtility.SetDirty(tree);
                 EditorUtility.SetDirty(controller);
                 AssetDatabase.SaveAssets();
                 Debug.Log($"[HeroineClipAuthoring] 동작 클립 다시 만듦 — 앞 {rig.Forward}, 오른쪽 {rig.Right}");

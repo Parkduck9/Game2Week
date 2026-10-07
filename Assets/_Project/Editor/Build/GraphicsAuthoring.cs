@@ -31,7 +31,7 @@ namespace Game2Week.EditorTools.Build
             var fx=Material("효과잔광",Shader.Find("Game2Week/효과 잔광"),Color.white);
             var props=Material("테마소품",toon,Color.white);
             var sky=Material("하늘",Shader.Find("Game2Week/그라디언트 하늘"),Color.white);
-            Environment(sky);Renderer();Bullets(glow,fx);Fx(fx);Characters(toon);
+            Environment(sky);Renderer();Bullets(glow,fx);Fx(fx);Characters(toon);RepairPalette();
             var themes=Themes(props);
             var previous=EditorSceneManager.GetSceneManagerSetup();
             try
@@ -157,6 +157,24 @@ namespace Game2Week.EditorTools.Build
             }
             finally{PrefabUtility.UnloadPrefabContents(root);}
         }
+        /// <summary>glTF의 전용 색 속성을 읽어 기존 팔레트를 보존한다.</summary>
+        public static Color OriginalColor(Material material)
+        {
+            foreach(var name in new[]{"baseColorFactor","_BaseColor","_Color"})
+                if(material.HasProperty(name))return material.GetColor(name);
+            return Color.white;
+        }
+        public static void RepairPalette()
+        {
+            var originals=AssetDatabase.LoadAllAssetsAtPath("Assets/_Project/Art/Characters/Heroine/heroine_v2.glb").OfType<Material>();
+            foreach(var source in originals)
+            {
+                string name="툰_"+source.name.Replace("/","_").Replace("\\","_");
+                var target=AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Art/Presentation/"+name+".mat");
+                if(target){target.SetColor("_BaseColor",OriginalColor(source));EditorUtility.SetDirty(target);}
+            }
+            AssetDatabase.SaveAssets();
+        }
         static void Characters(Shader toon)
         {
             foreach(string path in new[]{"Assets/_Project/Prefabs/Battle/Player_Heroine.prefab","Assets/_Project/Prefabs/Enemies/EnemyView_TestBlob.prefab","Assets/_Project/Prefabs/Enemies/EnemyView_TestBlob_Orange.prefab"})
@@ -170,7 +188,7 @@ namespace Game2Week.EditorTools.Build
                         for(int i=0;i<materials.Length;i++)
                         {
                             var old=materials[i];if(!old||old.shader==toon)continue;
-                            var color=old.HasProperty("_BaseColor")?old.GetColor("_BaseColor"):old.HasProperty("_Color")?old.GetColor("_Color"):Color.white;
+                            var color=OriginalColor(old);
                             materials[i]=Material("툰_"+old.name.Replace("/","_").Replace("\\","_"),toon,color);
                         }
                         renderer.sharedMaterials=materials;

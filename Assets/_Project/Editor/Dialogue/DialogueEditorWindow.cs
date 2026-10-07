@@ -95,7 +95,12 @@ namespace Game2Week.EditorTools.Dialogue
                     Text("화자 이름", node.speaker, value => EditNode(n => n.speaker = value));
                     EditorGUILayout.LabelField("대사"); string text = EditorGUILayout.TextArea(node.text, GUILayout.MinHeight(65));
                     if (text != node.text) EditNode(n => n.text = text);
-                    Text("자세", node.pose, value => EditNode(n => n.pose = value));
+                    string[] poseIds={"","idle","talk","nod","surprise","victory","spare"};
+                    string[] poseLabels={"기본 자세","대기","말하기","끄덕임","놀람","승리","자비"};
+                    int poseIndex=Array.IndexOf(poseIds,node.pose??string.Empty);
+                    if(poseIndex<0){Text("사용자 자세",node.pose,value=>EditNode(n=>n.pose=value));poseIndex=0;}
+                    int nextPose=EditorGUILayout.Popup("자세 선택",poseIndex,poseLabels);
+                    if(nextPose!=poseIndex)EditNode(n=>n.pose=poseIds[nextPose]);
                     Text("카메라 컷", node.camera, value => EditNode(n => n.camera = value));
                     Text("다음 노드", node.next, value => EditNode(n => n.next = value));
                     bool end = EditorGUILayout.Toggle("대화 종료", node.end); if (end != node.end) EditNode(n => n.end = end);

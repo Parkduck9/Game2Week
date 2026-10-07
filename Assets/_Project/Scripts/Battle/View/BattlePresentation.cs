@@ -1,4 +1,7 @@
 using UnityEngine;
+using System;
+using System.Collections.Generic;
+using Game2Week.Battle.View.Animation;
 
 namespace Game2Week.Battle.View
 {
@@ -15,6 +18,9 @@ namespace Game2Week.Battle.View
         BattleEvents events;
         EnemyView enemy;
         PlayerMover player;
+        PlayerAnimationDriver animationDriver;
+        int playerMaxHp;
+        readonly Dictionary<string,Func<string,bool>> poseActors=new(StringComparer.OrdinalIgnoreCase);
 
         public static BattleShot ShotFor(BattleStateId state) => state switch
         {
@@ -25,12 +31,16 @@ namespace Game2Week.Battle.View
             _ => BattleShot.EnemyFocus,
         };
 
-        public void Bind(BattleEvents battleEvents, EnemyView enemyView, PlayerMover playerMover)
+        public void Bind(BattleEvents battleEvents, EnemyView enemyView, PlayerMover playerMover,int maxHp=20)
         {
             Unbind();
             events = battleEvents;
             enemy = enemyView;
-            player = playerMover;
+            player = playerMover;playerMaxHp=maxHp;
+            animationDriver=player?player.GetComponentInChildren<PlayerAnimationDriver>():null;
+            poseActors.Clear();
+            if(animationDriver){poseActors["heroine"]=animationDriver.PlayDialoguePose;poseActors["player"]=animationDriver.PlayDialoguePose;}
+            if(enemy)poseActors["enemy"]=enemy.PlayDialoguePose;
             events.StateChanged += OnStateChanged;
             events.EnemyDamaged += OnEnemyDamaged;
             events.PlayerDamaged += OnPlayerDamaged;
@@ -51,11 +61,14 @@ namespace Game2Week.Battle.View
             events = null;
         }
 
-        void OnStateChanged(BattleStateId state) => cameraDirector.Show(ShotFor(state));
+        void ClearPoses(){if(animationDriver)animationDriver.ClearDialoguePose();if(enemy)enemy.ClearDialoguePose();}
+        void OnStateChanged(BattleStateId state){ClearPoses();cameraDirector.Show(ShotFor(state));}
         void OnDialogueCue(string anchor, string pose, string camera)
         {
             if (!string.IsNullOrEmpty(camera)) cameraDirector.ShowDialogueCut(camera);
-            if (!string.IsNullOrEmpty(pose)) Debug.LogWarning("대화 자세는 12단계에서 연결합니다: " + pose);
+            ClearPoses();
+            if(!string.IsNullOrEmpty(pose)&&(!poseActors.TryGetValue(anchor??string.Empty,out var apply)||!apply(pose)))
+                Debug.LogWarning("등록되지 않은 대화 자세 또는 화자: "+anchor+" / "+pose);
         }
 
         void OnEnemyDamaged(int amount)
@@ -68,10 +81,11 @@ namespace Game2Week.Battle.View
             effects.PlayHit(pos);
         }
 
-        void OnPlayerDamaged(int amount) => cameraDirector.Shake(0.6f);
+        void OnPlayerDamaged(int amount){if(amount<=0)return;cameraDirector.Shake(0.6f);if(animationDriver)animationDriver.PlayDamage(amount,playerMaxHp);}
 
         void OnBattleEnded(BattleOutcome outcome)
         {
+            if(animationDriver)animationDriver.PlayOutcome(outcome);
             switch (outcome)
             {
                 case BattleOutcome.EnemyDefeated:

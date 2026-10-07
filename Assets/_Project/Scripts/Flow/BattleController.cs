@@ -73,7 +73,7 @@ namespace Game2Week.Flow
             spareFeedback = new SpareFeedbackBinding(world.Feedback, Context);
             BattleStates.RegisterAll(machine, Context);
 
-            presentation.Bind(events, spawner.Enemy, world.Player);
+            presentation.Bind(events, spawner.Enemy, world.Player,player.MaxHp);
             if (audioHooks)
             {
                 audioHooks.Bind(events, () => session.Save.Settings.sfxVolume);
