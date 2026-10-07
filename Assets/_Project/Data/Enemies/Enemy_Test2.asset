@@ -64,6 +64,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 51e4c15cad19f6b4eb28fba24b84e397, type: 2}
   phaseMoves:
   - {fileID: 11400000, guid: fda57494adc3e474fad22a793e14d3c5, type: 2}
+  - {fileID: 11400000, guid: 108aa0bdb4adf564ba79a0ca10958b96, type: 2}
   references:
     version: 2
     RefIds:

@@ -4,9 +4,12 @@ using Game2Week.Data.Patterns;
 
 namespace Game2Week.Battle.Patterns.Trajectories
 {
-    public sealed class GraphAttackPattern : MonoBehaviour, IAttackPattern, IThreatSource, IDirectablePattern
+    public sealed class GraphAttackPattern : MonoBehaviour, IAttackPattern, IThreatSource, IDirectablePattern, ISeededPattern
     {
         float intervalScale = 1f, speedScale = 1f;
+        int? seedOverride;
+        public GraphPatternDefinition Definition => definition;
+        public void ApplySeed(int seed) => seedOverride = seed;
         bool warningAnnounced;
         public AttackColor PatternColor => definition ? definition.color : AttackColor.Yellow;
         /// <summary>Director가 Begin 전에 한 번 — 사본(snapshot)에만 적용해 원본 에셋은 그대로</summary>
@@ -38,6 +41,7 @@ namespace Game2Week.Battle.Patterns.Trajectories
             var errors=PatternGraphRules.Validate(definition);
             if(errors.Count>0||!bulletPrefab){Debug.LogError("패턴 시작 실패: "+string.Join(" / ",errors));return;}
             snapshot=Instantiate(definition);snapshot.hideFlags=HideFlags.HideAndDontSave;
+            if(seedOverride.HasValue)snapshot.seed=seedOverride.Value;
             if(!Mathf.Approximately(intervalScale,1f))ScaleCurve(snapshot.interval,intervalScale);
             snapshot.speed*=speedScale;
             snapshot.lifetime=ReachLifetime(snapshot,value);

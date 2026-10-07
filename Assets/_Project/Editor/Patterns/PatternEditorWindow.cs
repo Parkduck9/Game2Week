@@ -11,6 +11,8 @@ namespace Game2Week.EditorTools.Patterns
         GraphPatternDefinition selected,draft;
         SerializedObject properties;
         PatternPreview preview;
+        SequenceEditorPanel sequencePanel;
+        int tab;
         Vector2 scroll,leftScroll;
         float time,yaw=20,pitch=30,duration=12;
         Vector2 arena=new Vector2(8,10);
@@ -20,8 +22,8 @@ namespace Game2Week.EditorTools.Patterns
         string notice="";
         [MenuItem("Tools/Pattern Editor")]
         public static void Open()=>GetWindow<PatternEditorWindow>("Pattern Editor");
-        void OnEnable(){minSize=new Vector2(1000,650);Refresh();preview=new PatternPreview();lastUpdate=EditorApplication.timeSinceStartup;EditorApplication.update+=UpdatePreview;}
-        void OnDisable(){EditorApplication.update-=UpdatePreview;preview?.Dispose();if(draft)DestroyImmediate(draft);}
+        void OnEnable(){minSize=new Vector2(1000,650);Refresh();preview=new PatternPreview();sequencePanel=new SequenceEditorPanel();lastUpdate=EditorApplication.timeSinceStartup;EditorApplication.update+=UpdatePreview;}
+        void OnDisable(){EditorApplication.update-=UpdatePreview;preview?.Dispose();sequencePanel?.Dispose();if(draft)DestroyImmediate(draft);}
         void Refresh()=>list=PatternAssetStore.List();
         void Select(GraphPatternDefinition asset)
         {
@@ -38,6 +40,8 @@ namespace Game2Week.EditorTools.Patterns
         }
         void OnGUI()
         {
+            tab=GUILayout.Toolbar(tab,new[]{"그래프 패턴","시퀀스"});
+            if(tab==1){sequencePanel.Draw();return;}
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.BeginVertical(GUILayout.Width(205));
             EditorGUILayout.LabelField("패턴",EditorStyles.boldLabel);

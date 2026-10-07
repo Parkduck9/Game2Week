@@ -32,10 +32,27 @@ namespace Game2Week.EditorTools.Patterns
         }
         public Texture RenderFrame(Rect rect,GraphPatternDefinition d,float time,float yaw,float pitch,bool waist,Vector2 arena,Vector3 enemy,Vector3 target)
         {
-            shots.Clear();warning.Clear();ActiveCount=0;HasBoundaryCrossing=false;
-            var timeline=new PatternTimeline(d);
-            timeline.Advance(time,enemy,target,arena,shots);timeline.WarningShots(warning);
-            var trajectory=GraphTrajectory.Create(d);
+            ActiveCount=0;HasBoundaryCrossing=false;
+            BeginFrame(rect,yaw,pitch,waist,arena,enemy,target);
+            DrawGraph(d,time,arena,enemy,target);
+            render.Render(true);return render.EndPreview();
+        }
+        public void DrawSequence(Rect rect,AttackSequence sequence,float time)
+        {
+            var arena=new Vector2(18,20);var enemy=new Vector3(0,0,5);var target=new Vector3(0,0,-5);
+            ActiveCount=0;HasBoundaryCrossing=false;
+            BeginFrame(rect,20,35,false,arena,enemy,target);
+            foreach(var start in SequenceSchedule.Build(sequence))
+            {
+                float age=time-start.Time;
+                if(age<0||age>=start.Duration||!start.Pattern.PatternPrefab.TryGetComponent<GraphAttackPattern>(out var pattern))continue;
+                var copy=Object.Instantiate(pattern.Definition);copy.seed=start.Seed;
+                try{DrawGraph(copy,age,arena,enemy,target);}finally{Object.DestroyImmediate(copy);}
+            }
+            render.Render(true);GUI.DrawTexture(rect,render.EndPreview(),ScaleMode.StretchToFill,false);
+        }
+        void BeginFrame(Rect rect,float yaw,float pitch,bool waist,Vector2 arena,Vector3 enemy,Vector3 target)
+        {
             render.BeginPreview(rect,GUIStyle.none);
             var focus=waist?target+Vector3.up*.6f:Vector3.zero;
             render.camera.transform.position=focus+Quaternion.Euler(pitch,yaw,0)*new Vector3(0,0,waist?-2.8f:-12f);
@@ -44,6 +61,13 @@ namespace Game2Week.EditorTools.Patterns
             DrawMesh(cube,new Vector3(0,-.08f,0),new Vector3(arena.x,.1f,arena.y),new Color(.12f,.16f,.22f));
             DrawMesh(cube,target+Vector3.up*.45f,new Vector3(.4f,.9f,.4f),Color.cyan);
             DrawMesh(sphere,enemy+Vector3.up*.65f,Vector3.one*.7f,new Color(.7f,.3f,.8f));
+        }
+        void DrawGraph(GraphPatternDefinition d,float time,Vector2 arena,Vector3 enemy,Vector3 target)
+        {
+            shots.Clear();warning.Clear();
+            var timeline=new PatternTimeline(d);
+            timeline.Advance(time,enemy,target,arena,shots);timeline.WarningShots(warning);
+            var trajectory=GraphTrajectory.Create(d);
             var color=ColorFor(d.color);
             foreach(var shot in shots)
             {
@@ -63,7 +87,6 @@ namespace Game2Week.EditorTools.Patterns
                     DrawMesh(sphere,p,Vector3.one*.045f,color);
                 }
             }
-            render.Render(true);return render.EndPreview();
         }
         bool CrossedBoundary(GraphTrajectory trajectory,PatternShot shot,float age,Vector2 arena)
         {
