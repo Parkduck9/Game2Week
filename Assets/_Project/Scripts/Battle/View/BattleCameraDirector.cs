@@ -51,6 +51,10 @@ namespace Game2Week.Battle.View
         float yaw, followPitch = 6f;
         CinemachineCamera followCamera;
         BattleArena followArena;
+        bool dialogueCameraMoved;
+        Vector3 savedDialoguePosition;
+        Quaternion savedDialogueRotation;
+        float savedDialogueFov;
         public bool IsLockedOn { get; private set; }
         public float Yaw => yaw;
         public Vector3 FacingDirection => Quaternion.Euler(0f, yaw, 0f) * Vector3.forward;
@@ -134,6 +138,16 @@ namespace Game2Week.Battle.View
 
         public void Show(BattleShot shot)
         {
+            if (dialogueCameraMoved)
+            {
+                foreach (var camera in shots)
+                    if (camera.shot == BattleShot.EnemyFocus)
+                    {
+                        camera.camera.transform.SetPositionAndRotation(savedDialoguePosition, savedDialogueRotation);
+                        var lens = camera.camera.Lens; lens.FieldOfView = savedDialogueFov; camera.camera.Lens = lens;
+                    }
+                dialogueCameraMoved = false;
+            }
             foreach (var s in shots) s.camera.gameObject.SetActive(s.shot == shot);
             Current = shot;
         }
@@ -143,6 +157,26 @@ namespace Game2Week.Battle.View
             if (!impulse) return;
             var dir = UnityEngine.Random.insideUnitCircle.normalized;
             impulse.GenerateImpulse(new Vector3(dir.x, dir.y * 0.5f, 0f) * (force * shakeAmplitude));
+        }
+        public bool ShowDialogueCut(string name)
+        {
+            if (name == "enemy_close") Show(BattleShot.EnemyFocus);
+            else if (name == "two_shot") Show(BattleShot.Intro);
+            else if (name == "player_close" && followPlayer)
+            {
+                Show(BattleShot.EnemyFocus);
+                foreach (var camera in shots)
+                    if (camera.shot == BattleShot.EnemyFocus)
+                    {
+                        savedDialoguePosition = camera.camera.transform.position; savedDialogueRotation = camera.camera.transform.rotation;
+                        savedDialogueFov = camera.camera.Lens.FieldOfView;
+                    }
+                var target = followPlayer.position + Vector3.up * .65f;
+                Place(BattleShot.EnemyFocus, target + new Vector3(.7f, .35f, 1.8f), target, 38f);
+                dialogueCameraMoved = true;
+            }
+            else { Debug.LogWarning("등록되지 않은 대화 카메라: " + name); return false; }
+            return true;
         }
 
         void Place(BattleShot shot, Vector3 position, Vector3 lookAt, float fov)

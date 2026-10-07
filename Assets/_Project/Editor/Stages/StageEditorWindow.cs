@@ -348,6 +348,20 @@ namespace Game2Week.EditorTools.Stages
                 EditorGUILayout.LabelField("위치", stage.enemy.position.ToString());
 
                 EditorGUILayout.Space(6);
+                EditorGUILayout.LabelField("전투 대화", EditorStyles.boldLabel);
+                var dialogueNames = new[] { string.Empty }.Concat(new Game2Week.Dialogue.DialogueRepository(Game2Week.Dialogue.DialogueRepository.DefaultDirectory).List()).ToArray();
+                void DialogueField(string label, string value, System.Action<StageDefinition, string> change)
+                {
+                    var options = dialogueNames.Contains(value) ? dialogueNames : dialogueNames.Concat(new[] { value }).ToArray();
+                    int next = EditorGUILayout.Popup(label, System.Array.IndexOf(options, value), options.Select(id => string.IsNullOrEmpty(id) ? "없음 (적 기본 대화)" : id).ToArray());
+                    if (next >= 0 && options[next] != value) model.Edit(s => change(s, options[next]));
+                }
+                DialogueField("전투 시작", stage.dialogues.intro, (s, id) => s.dialogues.intro = id);
+                DialogueField("체력 단계", stage.dialogues.phase2, (s, id) => s.dialogues.phase2 = id);
+                DialogueField("자비 가능", stage.dialogues.spareReady, (s, id) => s.dialogues.spareReady = id);
+                DialogueField("전투 종료", stage.dialogues.victory, (s, id) => s.dialogues.victory = id);
+
+                EditorGUILayout.Space(6);
                 EditorGUILayout.LabelField("탄막 턴", EditorStyles.boldLabel);
                 Field(EditorGUILayout.Slider("시간 (초)", stage.enemyTurn.duration, StageLimits.MinTurnDuration, StageLimits.MaxTurnDuration), stage.enemyTurn.duration,
                     v => model.Edit(s => s.enemyTurn.duration = Mathf.Round(v * 2f) / 2f));

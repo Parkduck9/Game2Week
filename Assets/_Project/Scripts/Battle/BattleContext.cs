@@ -57,6 +57,18 @@ namespace Game2Week.Battle
         public Func<AttackPatternData> NextPattern { get; }
 
         public BattleStateId? CurrentState => stateMachine.CurrentId;
+        public DialogueCoordinator Dialogues { get; private set; }
+        public void ConfigureDialogues(Game2Week.Dialogue.DialogueRepository repository) => Dialogues = new DialogueCoordinator(this, repository);
+        public void CompletePlayerTurn(bool fought = false)
+        {
+            Enemy.Spare.CompletePlayerTurn(fought);
+            RefreshSpare();
+        }
+        public void RefreshSpare() => Events.RaiseSpareChanged(Enemy.Spare.UsesRule ? BattleTexts.SpareHearts(Enemy.Spare) : string.Empty);
+        public void NextTurn()
+        {
+            if (Dialogues != null) Dialogues.NextTurn(); else ChangeState(BattleStateId.EnemyTurn);
+        }
 
         public void ChangeState(BattleStateId id) => stateMachine.ChangeState(id);
 

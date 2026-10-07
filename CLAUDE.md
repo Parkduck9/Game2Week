@@ -69,6 +69,7 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 - 쳐내기는 오른손으로 왼쪽에서 오는 탄을 오른쪽 어깨 뒤로, 오른쪽 탄을 왼쪽 어깨 뒤로 흘린다. 입력 방향으로 이동을 계속한다. 적에게 단순 반사하는 방식이나 강제 뒤 밀림이 아니다. 점프는 후속 답변으로 포함이 확정됐고, 록온 가운데 버튼/점프 Space는 기본안이다.
 
 ### 5~8단계 결과로 생긴 규칙 (2026-10-06 합침)
+- 10단계: 자비는 전투별 `SpareTracker`와 `EnemyData.SpareRule`, 대화는 `Tools ▸ Dialogue Editor`로만 JSON 저장. `ActOption.SpareFlags`와 대화 선택은 자비 플래그만 바꾸며 데미지/공격 패턴은 바꾸지 않는다. 샘플 재생성은 `DialogueSampleAuthoring.Generate`, 대화 글자 검증/아틀라스 재생성은 기존 폰트 도구를 사용한다.
 - 맵 패턴은 `PatternDirector` + `PatternEncounterData`/`DifficultyProfile`(`Data/Patterns/Director/`)로 누적 — 새 패턴은 `IDirectablePattern` 구현(색·난이도 배율). 9단계부터 1-1 포함 8개 맵 모두 Director, 한 턴 최대 3겹, 적 고유 기술은 `EnemyData.signatureMoves`/`phaseMoves`, 체력 단계는 `DifficultyProfile.phases`.
 - 맵은 칸 1m·시작점-적 15m 이상 (맵툴 경고). 스테이지 JSON v2 (`theme`·`dialogues`). 테스트에서 하위 패턴은 `BattleTestUtil.FindPattern`, 탄을 맞히려면 `MoveNearEnemy`.
 - 월드 사건은 `BattleFeedback`, 이펙트는 `BattleFxRig` 프리팹 아래 `IBattleFxModule`(씬 수정 없이), 소리는 `BattleAudio`·`UiSoundSet`·`SceneBgm` + `AudioRouting`(믹서 선택). 씬 전환은 `SceneLoader`(페이드 0.25초, `FadeSeconds`).

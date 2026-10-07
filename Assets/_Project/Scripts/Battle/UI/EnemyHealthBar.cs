@@ -13,6 +13,7 @@ namespace Game2Week.Battle.UI
 
         BattleEvents events;
         float timer;
+        string enemyName;
 
         public bool IsVisible => panel.activeSelf;
         public float Ratio => bar.Ratio;
@@ -24,6 +25,8 @@ namespace Game2Week.Battle.UI
             Unbind();
             events = battleEvents;
             events.EnemyHpChanged += OnHp;
+            events.SpareChanged += OnSpare;
+            this.enemyName = enemyName;
             nameText.text = enemyName;
             bar.SetRatio(maxHp > 0 ? (float)hp / maxHp : 0f);
         }
@@ -33,7 +36,14 @@ namespace Game2Week.Battle.UI
         void Unbind()
         {
             if (events != null) events.EnemyHpChanged -= OnHp;
+            if (events != null) events.SpareChanged -= OnSpare;
             events = null;
+        }
+        void OnSpare(string icons)
+        {
+            nameText.text = enemyName + " " + icons;
+            if (string.IsNullOrEmpty(icons)) return;
+            panel.SetActive(true); timer = showSeconds;
         }
 
         void OnHp(int hp, int maxHp)

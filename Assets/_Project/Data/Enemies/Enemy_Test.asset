@@ -33,11 +33,26 @@ MonoBehaviour:
     resultText: "* \uD14C\uC2A4\uD2B8 \uC801\uC744 \uC751\uC6D0\uD588\uB2E4.\n* \uC870\uAE08
       \uAE30\uBED0 \uBCF4\uC778\uB2E4."
     spareProgress: 1
+    spareFlags: []
   - displayName: "\uB9D0 \uAC78\uAE30"
     resultText: "* \uB0A0\uC528 \uC774\uC57C\uAE30\uB97C \uAEBC\uB0C8\uB2E4.\n* \uD14C\uC2A4\uD2B8
       \uC801\uC774 \uACE0\uAC1C\uB97C \uB044\uB355\uC778\uB2E4."
     spareProgress: 1
+    spareFlags:
+    - listened
   spareThreshold: 2
+  spareRule:
+    enabled: 1
+    noFightTurns: 3
+    halveOnFight: 0
+    conditions:
+    - rid: 9003145516138889216
+    - rid: 9003145516138889217
+  dialogues:
+    intro: 
+    phase2: 
+    spareReady: 
+    victory: 
   attackPatterns:
   - {fileID: 11400000, guid: c1c6e4638125bbb42a39b78446000747, type: 2}
   patternOrder: 0
@@ -45,3 +60,17 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 891a66aa3de86494eb13ceb18907eab2, type: 2}
   phaseMoves:
   - {fileID: 11400000, guid: 71842c2bfc05a5c4980d333e10ae74ef, type: 2}
+  references:
+    version: 2
+    RefIds:
+    - rid: 9003145516138889216
+      type: {class: ActSequenceCondition, ns: Game2Week.Battle, asm: Game2Week}
+      data:
+        acts:
+        - "\uC751\uC6D0\uD558\uAE30"
+        - "\uB9D0 \uAC78\uAE30"
+    - rid: 9003145516138889217
+      type: {class: DialogueFlagCondition, ns: Game2Week.Battle, asm: Game2Week}
+      data:
+        flag: listened
+        hint: "\uB300\uD654\uC5D0\uC11C \uC774\uC57C\uAE30\uB97C \uB4E4\uC5B4 \uBCF4\uC790."

@@ -35,6 +35,7 @@ namespace Game2Week.Battle.View
             events.EnemyDamaged += OnEnemyDamaged;
             events.PlayerDamaged += OnPlayerDamaged;
             events.BattleEnded += OnBattleEnded;
+            events.DialogueCue += OnDialogueCue;
         }
 
         void OnDestroy() => Unbind();
@@ -46,10 +47,16 @@ namespace Game2Week.Battle.View
             events.EnemyDamaged -= OnEnemyDamaged;
             events.PlayerDamaged -= OnPlayerDamaged;
             events.BattleEnded -= OnBattleEnded;
+            events.DialogueCue -= OnDialogueCue;
             events = null;
         }
 
         void OnStateChanged(BattleStateId state) => cameraDirector.Show(ShotFor(state));
+        void OnDialogueCue(string anchor, string pose, string camera)
+        {
+            if (!string.IsNullOrEmpty(camera)) cameraDirector.ShowDialogueCut(camera);
+            if (!string.IsNullOrEmpty(pose)) Debug.LogWarning("대화 자세는 12단계에서 연결합니다: " + pose);
+        }
 
         void OnEnemyDamaged(int amount)
         {

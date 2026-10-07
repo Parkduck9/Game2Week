@@ -18,6 +18,7 @@ namespace Game2Week.Data
         [SerializeField, TextArea] string resultText = "* ...";
         [Tooltip("살려주기 진행도 증가량. 적의 Spare Threshold 이상이 되면 살려줄 수 있다.")]
         [SerializeField, Min(0)] int spareProgress = 1;
+        [SerializeField] List<string> spareFlags = new();
 
         public ActOption() { }
 
@@ -31,6 +32,7 @@ namespace Game2Week.Data
         public string DisplayName => displayName;
         public string ResultText => resultText;
         public int SpareProgress => spareProgress;
+        public IReadOnlyList<string> SpareFlags => spareFlags;
     }
 
     [CreateAssetMenu(menuName = "Game2Week/Enemy", fileName = "Enemy_")]
@@ -58,6 +60,8 @@ namespace Game2Week.Data
         [SerializeField] List<ActOption> acts = new();
         [Tooltip("살려주기 진행도가 이 값 이상이면 살려줄 수 있다. 0이면 처음부터 가능.")]
         [SerializeField, Min(0)] int spareThreshold = 2;
+        [SerializeField] Battle.SpareRule spareRule = new();
+        [SerializeField] Stages.StageDialogues dialogues = new();
 
         [Header("공격")]
         [SerializeField] List<AttackPatternData> attackPatterns = new();
@@ -80,6 +84,8 @@ namespace Game2Week.Data
         public string DefeatText => defeatText;
         public IReadOnlyList<ActOption> Acts => acts;
         public int SpareThreshold => spareThreshold;
+        public Battle.SpareRule SpareRule => spareRule;
+        public Stages.StageDialogues Dialogues => dialogues;
         public IReadOnlyList<AttackPatternData> AttackPatterns => attackPatterns;
         public PatternOrder PatternOrder => patternOrder;
         public IReadOnlyList<AttackPatternData> SignatureMoves => signatureMoves;

@@ -161,6 +161,7 @@ namespace Game2Week.Tests
                     HoldCtrl(false);
                 }
                 if (ui.Dialogue.IsWaitingForInput) { yield return Tap(keyboard.zKey); continue; }
+                if (state == BattleStateId.Dialogue && ui.IsListMenuOpen) { yield return Tap(keyboard.zKey); continue; }
 
                 switch (state)
                 {

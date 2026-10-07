@@ -20,6 +20,7 @@ namespace Game2Week.Battle
         Mercy,
         Victory,
         Defeat,
+        Dialogue,
     }
 
     public enum BattleOutcome

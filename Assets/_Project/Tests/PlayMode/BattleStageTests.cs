@@ -32,7 +32,7 @@ namespace Game2Week.Tests
             Assert.AreEqual(StageGeometry.ArenaSize(stage.grid), spawner.Arena.Size);
             Assert.AreEqual(stage.gems.Count, spawner.Gems.Count);
             Assert.IsNotNull(spawner.Enemy, "적에 EnemyView가 있어야 함");
-            Assert.AreEqual(BattleStateId.Intro, battle.Context.CurrentState);
+            Assert.AreEqual(BattleStateId.Dialogue, battle.Context.CurrentState);
 
             yield return new WaitForSeconds(1.2f);
             SceneCapture.Save("battle_1_Intro");

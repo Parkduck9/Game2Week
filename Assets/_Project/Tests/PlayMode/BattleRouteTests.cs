@@ -13,8 +13,8 @@ using UnityEngine.TestTools;
 namespace Game2Week.Tests
 {
     /// <summary>
-    /// 11단계 검증: 키보드 입력만으로 1-1을 처치 · 살려주기 · 패배 세 결말까지 끝까지 플레이하는 "봇".
-    /// 화면 상태를 보고 사람처럼 키를 누른다 (대사 Z, 탄막 턴 ↑, 메뉴 → / ↓ / Z, 게이지 가운데에서 Z).
+    /// 1-1의 처치·살려주기·패배 결말을 확인하는 봇. 메뉴·대사는 실제 키 입력을 사용한다.
+    /// 전체 실행 순서에 영향을 받는 이동은 모터에 직접 전달하며, 회피 실력은 측정 봇에서 확인한다.
     /// </summary>
     public class BattleRouteTests : InputTestFixture
     {
@@ -87,10 +87,16 @@ namespace Game2Week.Tests
                     yield return Tap(keyboard.zKey);
                     continue;
                 }
+                if (state == BattleStateId.Dialogue && ui.IsListMenuOpen) { yield return Tap(keyboard.zKey); continue; }
 
                 switch (state)
                 {
                     case BattleStateId.EnemyTurn:
+                        if (route != Route.Defeat)
+                        {
+                            var direction = battle.Spawner.Enemy.transform.position - battle.World.Player.transform.position;
+                            battle.World.Player.Move(new Vector2(direction.x, direction.z).normalized, Time.deltaTime);
+                        }
                         if (route != Route.Defeat && !holdingUp)
                         {
                             Press(keyboard.upArrowKey);
@@ -99,7 +105,7 @@ namespace Game2Week.Tests
                         break;
 
                     case BattleStateId.ActionMenu when ui.IsMainMenuOpen:
-                        int choice = route == Route.Kill ? 0 : acts < 2 ? 1 : 2; // 공격 / 행동 / 자비
+                        int choice = route == Route.Kill ? 0 : battle.Context.Enemy.CanBeSpared ? 2 : 1; // 공격 / 행동 / 자비
                         yield return Tap(keyboard.rightArrowKey, choice);
                         yield return Tap(keyboard.zKey);
                         continue;
@@ -109,7 +115,7 @@ namespace Game2Week.Tests
                         continue;
 
                     case BattleStateId.Act when ui.IsListMenuOpen:
-                        yield return Tap(keyboard.downArrowKey); // 살펴보기 → 첫 번째 행동
+                        yield return Tap(keyboard.downArrowKey, acts == 0 ? 1 : acts == 1 ? 2 : 0); // 응원하기 → 말 걸기 → 살펴보기
                         yield return Tap(keyboard.zKey);
                         acts++;
                         continue;

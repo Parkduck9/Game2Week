@@ -14,6 +14,7 @@ namespace Game2Week.Battle
         public override void Enter()
         {
             Context.Ui.HideAll();
+            if (Context.Dialogues?.TryStart(DialogueTrigger.Intro, () => Context.ChangeState(BattleStateId.EnemyTurn)) == true) return;
             Context.Ui.ShowDialogue(Context.Enemy.Data.EncounterText, () => Context.ChangeState(BattleStateId.EnemyTurn));
         }
     }
@@ -32,11 +33,13 @@ namespace Game2Week.Battle
         public override void Enter()
         {
             elapsed = 0f;
+            Context.Enemy.Spare.BeginBulletTurn();
             duration = Mathf.Max(0.1f, Context.Stage.enemyTurn.duration);
             Context.World.ResetPlayer();
             Context.World.ShowGems(Context.Gems.RollForTurn());
             Context.Ui.HideAll();
             var line = Context.Enemy.NextEnemyTurnLine();
+            if (Context.Enemy.Spare.UsesRule) line = BattleTexts.SpareHearts(Context.Enemy.Spare) + " " + line;
             Context.Ui.ShowTurnHud(string.IsNullOrEmpty(line) ? BattleTexts.TurnHint : $"{Context.Enemy.Data.DisplayName}: \"{line}\"   ·   {BattleTexts.TurnHint}");
             if (!string.IsNullOrEmpty(line)) Context.Events.RaiseEnemySpoke(line);
             var enemy = Context.Enemy;
@@ -56,12 +59,14 @@ namespace Game2Week.Battle
             {
                 Context.World.CollectGem(gemId);
                 Context.Ui.ShowPopup(GemRewards.Apply(gem.type, Context.RewardSettings, Context.Player, Context.Enemy));
+                Context.RefreshSpare();
                 Context.RaisePlayerHp();
             }
 
             int hit = Context.World.ConsumePlayerDamage();
             if (hit > 0)
             {
+                Context.Enemy.Spare.RecordHit();
                 Context.Events.RaisePlayerDamaged(Context.Player.TakeDamage(hit));
                 Context.RaisePlayerHp();
             }
@@ -73,6 +78,8 @@ namespace Game2Week.Battle
 
         public override void Exit()
         {
+            Context.Enemy.Spare.EndBulletTurn();
+            Context.RefreshSpare();
             Context.World.EndPattern();
             Context.Gems.EndTurn();
             Context.World.ShowGems(System.Array.Empty<string>());
@@ -88,9 +95,12 @@ namespace Game2Week.Battle
 
         public override void Enter()
         {
+            if (Context.Dialogues?.BeforePlayerMenu(BattleStateId.ActionMenu) == true) return;
             var flavor = Context.Enemy.NextFlavorText();
             Context.Ui.ShowBoxText(string.IsNullOrEmpty(flavor) ? BattleTexts.DefaultFlavor : flavor);
-            Context.Ui.ShowMainMenu(BattleTexts.ActionMenu, index => Context.ChangeState(index switch
+            var labels = (string[])BattleTexts.ActionMenu.Clone();
+            if (Context.Enemy.CanBeSpared) labels[2] = $"<color={BattleTexts.SpareReadyColor}>{labels[2]}</color>";
+            Context.Ui.ShowMainMenu(labels, index => Context.ChangeState(index switch
             {
                 0 => BattleStateId.Fight,
                 1 => BattleStateId.Act,
@@ -106,11 +116,12 @@ namespace Game2Week.Battle
 
         public override void Enter()
         {
+            if (Context.Dialogues?.BeforePlayerMenu(BattleStateId.ItemMenu) == true) return;
             Context.Ui.ShowBoxText(BattleTexts.MissedEnemy);
             Context.Ui.ShowMainMenu(BattleTexts.ItemMenu, index =>
             {
                 if (index == 0) Context.ChangeState(BattleStateId.Item);
-                else Context.Ui.ShowDialogue(BattleTexts.SkipTurn, () => Context.ChangeState(BattleStateId.EnemyTurn));
+                else { Context.CompletePlayerTurn(); Context.Ui.ShowDialogue(BattleTexts.SkipTurn, Context.NextTurn); }
             });
         }
     }
@@ -122,6 +133,7 @@ namespace Game2Week.Battle
 
         public override void Enter()
         {
+            Context.CompletePlayerTurn(true);
             Context.Ui.ShowTimingGauge(OnGaugeFinished);
         }
 
@@ -137,7 +149,7 @@ namespace Game2Week.Battle
             Context.RaiseEnemyHp();
             Context.Ui.ShowPopup(applied > 0 ? $"-{applied}" : BattleTexts.Miss);
             Context.Ui.ShowDialogue(BattleTexts.FightResult(enemy.Data.DisplayName, applied),
-                () => Context.ChangeState(enemy.IsDefeated ? BattleStateId.Victory : BattleStateId.EnemyTurn));
+                () => { if (enemy.IsDefeated) Context.ChangeState(BattleStateId.Victory); else Context.NextTurn(); });
         }
     }
 
@@ -155,16 +167,20 @@ namespace Game2Week.Battle
             Context.Ui.ShowListMenu(items, index =>
             {
                 string text;
-                if (index == 0) text = data.CheckText;
+                if (index == 0) text = data.CheckText + (Context.Enemy.Spare.UsesRule ? "\n" + Context.Enemy.Spare.Hint : string.Empty);
                 else
                 {
                     bool wasSpareable = Context.Enemy.CanBeSpared;
                     var act = data.Acts[index - 1];
+                    Context.Enemy.Spare.RecordAct(act.DisplayName);
+                    foreach (string flag in act.SpareFlags) Context.Enemy.Spare.SetFlag(flag);
                     Context.Enemy.AddSpareProgress(act.SpareProgress);
                     text = act.ResultText;
                     if (!wasSpareable && Context.Enemy.CanBeSpared) text += "\n" + BattleTexts.NowSpareable;
                 }
-                Context.Ui.ShowDialogue(text, () => Context.ChangeState(BattleStateId.EnemyTurn));
+                Context.CompletePlayerTurn();
+                if (Context.Enemy.Spare.UsesRule) text += "\n" + Context.Enemy.Spare.Hint;
+                Context.Ui.ShowDialogue(text, Context.NextTurn);
             }, () => Context.ChangeState(BattleStateId.ActionMenu));
         }
     }
@@ -187,8 +203,9 @@ namespace Game2Week.Battle
             {
                 var item = inventory.Take(index);
                 int healed = Context.Player.Heal(item.HealAmount);
+                Context.CompletePlayerTurn();
                 Context.RaisePlayerHp();
-                Context.Ui.ShowDialogue(item.FormatUseText(healed), () => Context.ChangeState(BattleStateId.EnemyTurn));
+                Context.Ui.ShowDialogue(item.FormatUseText(healed), Context.NextTurn);
             }, () => Context.ChangeState(BattleStateId.ItemMenu));
         }
     }
@@ -205,7 +222,7 @@ namespace Game2Week.Battle
             Context.Ui.ShowListMenu(new[] { label }, _ =>
             {
                 if (Context.Enemy.CanBeSpared) Context.ChangeState(BattleStateId.Victory);
-                else Context.Ui.ShowDialogue(BattleTexts.NotReadyToSpare, () => Context.ChangeState(BattleStateId.EnemyTurn));
+                else { Context.CompletePlayerTurn(); Context.Ui.ShowDialogue(BattleTexts.NotReadyToSpare + "\n" + Context.Enemy.Spare.Hint, Context.NextTurn); }
             }, () => Context.ChangeState(BattleStateId.ActionMenu));
         }
     }
@@ -221,6 +238,7 @@ namespace Game2Week.Battle
             Context.Events.RaiseBattleEnded(outcome);
             Context.Ui.HideAll();
             var data = Context.Enemy.Data;
+            if (Context.Dialogues?.TryStart(DialogueTrigger.Victory, () => Context.FinishBattle(outcome)) == true) return;
             Context.Ui.ShowDialogue(outcome == BattleOutcome.EnemyDefeated ? data.DefeatText : data.SpareText, () => Context.FinishBattle(outcome));
         }
     }
@@ -252,6 +270,7 @@ namespace Game2Week.Battle
             machine.Register(BattleStateId.Mercy, new MercyState(context));
             machine.Register(BattleStateId.Victory, new VictoryState(context));
             machine.Register(BattleStateId.Defeat, new DefeatState(context));
+            machine.Register(BattleStateId.Dialogue, new DialogueState(context));
         }
     }
 }

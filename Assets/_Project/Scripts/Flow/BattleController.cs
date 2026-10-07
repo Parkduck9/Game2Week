@@ -31,6 +31,7 @@ namespace Game2Week.Flow
 
         BattleStateMachine machine;
         bool finished;
+        SpareFeedbackBinding spareFeedback;
 
         /// <summary>전투 시간 (일시정지 제외) — 클리어 기록용</summary>
         public float ElapsedSeconds { get; private set; }
@@ -68,6 +69,8 @@ namespace Game2Week.Flow
             var gems = new GemField(stage.gems, stage.gemRules.maxPerTurn);
             machine = new BattleStateMachine();
             Context = new BattleContext(machine, events, input, ui, world, stage, player, enemy, gems, gemRewards, Finish, StagePatternSource(stage));
+            Context.ConfigureDialogues(new Game2Week.Dialogue.DialogueRepository(Game2Week.Dialogue.DialogueRepository.DefaultDirectory));
+            spareFeedback = new SpareFeedbackBinding(world.Feedback, Context);
             BattleStates.RegisterAll(machine, Context);
 
             presentation.Bind(events, spawner.Enemy, world.Player);
@@ -83,6 +86,7 @@ namespace Game2Week.Flow
             }
             statusBar.Bind(events, player.Data.DisplayName, player.Data.Level, player.CurrentHp, player.MaxHp);
             if (enemyHealthBar) enemyHealthBar.Bind(events, enemyData.DisplayName, enemy.CurrentHp, enemy.MaxHp);
+            Context.RefreshSpare();
             machine.StateChanged += (_, id) => events.RaiseStateChanged(id);
             ui.Dialogue.SpeedMultiplier = () => Save.TextSpeeds.Multiplier(session.Save.Settings.textSpeed);
 
@@ -100,6 +104,7 @@ namespace Game2Week.Flow
 
         void OnDestroy()
         {
+            spareFeedback?.Dispose();
             if (input) input.EnableUI();
         }
 

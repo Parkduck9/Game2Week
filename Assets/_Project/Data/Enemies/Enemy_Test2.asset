@@ -33,15 +33,30 @@ MonoBehaviour:
   - displayName: "\uCE6D\uCC2C\uD558\uAE30"
     resultText: "* \uBE60\uB974\uB2E4\uACE0 \uCE6D\uCC2C\uD588\uB2E4.\n* \uC6B0\uCB50\uD574\uD55C\uB2E4."
     spareProgress: 1
+    spareFlags: []
   - displayName: "\uAC19\uC774 \uB6F0\uAE30"
     resultText: "* \uAC19\uC774 \uD1B5\uD1B5 \uB6F0\uC5C8\uB2E4.\n* \uC2E0\uB098
       \uBCF4\uC778\uB2E4."
     spareProgress: 2
+    spareFlags: []
   - displayName: "\uAE30\uB2E4\uB9AC\uAE30"
     resultText: "* \uAC00\uB9CC\uD788 \uAE30\uB2E4\uB838\uB2E4.\n* ...\uC2EC\uC2EC\uD574
       \uBCF4\uC778\uB2E4."
     spareProgress: 0
+    spareFlags: []
   spareThreshold: 3
+  spareRule:
+    enabled: 1
+    noFightTurns: 3
+    halveOnFight: 0
+    conditions:
+    - rid: 9003145516138889218
+    - rid: 9003145516138889219
+  dialogues:
+    intro: 
+    phase2: 
+    spareReady: 
+    victory: 
   attackPatterns:
   - {fileID: 11400000, guid: d2298e2d19a29e04cb5d8666980ad51c, type: 2}
   patternOrder: 0
@@ -49,3 +64,16 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 51e4c15cad19f6b4eb28fba24b84e397, type: 2}
   phaseMoves:
   - {fileID: 11400000, guid: fda57494adc3e474fad22a793e14d3c5, type: 2}
+  references:
+    version: 2
+    RefIds:
+    - rid: 9003145516138889218
+      type: {class: BulletActionCondition, ns: Game2Week.Battle, asm: Game2Week}
+      data:
+        action: 0
+        required: 3
+    - rid: 9003145516138889219
+      type: {class: ActSequenceCondition, ns: Game2Week.Battle, asm: Game2Week}
+      data:
+        acts:
+        - "\uAC19\uC774 \uB6F0\uAE30"

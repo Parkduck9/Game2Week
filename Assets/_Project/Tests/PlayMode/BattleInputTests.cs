@@ -55,7 +55,7 @@ namespace Game2Week.Tests
             var ctx = battle.Context;
 
             // 등장 대사: Z 한 번 = 전부 표시, 한 번 더 = 닫기
-            for (int i = 0; i < 4 && ctx.CurrentState == BattleStateId.Intro; i++) yield return Tap(keyboard.zKey);
+            for (int i = 0; i < 12 && (ctx.CurrentState == BattleStateId.Intro || ctx.CurrentState == BattleStateId.Dialogue); i++) yield return Tap(keyboard.zKey);
             Assert.AreEqual(BattleStateId.EnemyTurn, ctx.CurrentState);
 
             // ↑를 누르고 있으면 적에게 닿는다 (시작 칸 → 적 칸 약 5.5m, 속도 2.8m/s, 턴 8초)
@@ -107,7 +107,7 @@ namespace Game2Week.Tests
         {
             BattleController battle = null;
             yield return SceneFlowTests.EnterStage(0, c => battle = c);
-            Assert.AreEqual(BattleStateId.Intro, battle.Context.CurrentState);
+            Assert.AreEqual(BattleStateId.Dialogue, battle.Context.CurrentState);
 
             yield return Tap(keyboard.escapeKey);
             Assert.IsTrue(battle.Pause.IsPaused);
@@ -118,14 +118,14 @@ namespace Game2Week.Tests
             yield return Tap(keyboard.zKey); // 일시정지 중 Z는 "계속"을 고름 (대사는 넘어가지 않음)
             Assert.IsFalse(battle.Pause.IsPaused);
             Assert.AreEqual(1f, Time.timeScale);
-            Assert.AreEqual(BattleStateId.Intro, battle.Context.CurrentState);
+            Assert.AreEqual(BattleStateId.Dialogue, battle.Context.CurrentState);
 
             yield return Tap(keyboard.escapeKey);
             yield return Tap(keyboard.escapeKey); // ESC 두 번 = 일시정지 후 계속
             Assert.IsFalse(battle.Pause.IsPaused);
 
             // 풀린 뒤 대사창이 다시 입력을 받는지
-            for (int i = 0; i < 4 && battle.Context.CurrentState == BattleStateId.Intro; i++) yield return Tap(keyboard.zKey);
+            for (int i = 0; i < 12 && (battle.Context.CurrentState == BattleStateId.Intro || battle.Context.CurrentState == BattleStateId.Dialogue); i++) yield return Tap(keyboard.zKey);
             Assert.AreEqual(BattleStateId.EnemyTurn, battle.Context.CurrentState);
         }
     }

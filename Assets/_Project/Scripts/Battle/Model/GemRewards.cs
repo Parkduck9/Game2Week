@@ -17,6 +17,7 @@ namespace Game2Week.Battle
                     player.GrantAttackBoost(settings.AttackMultiplier);
                     return $"다음 공격 ×{settings.AttackMultiplier:0.#}";
                 case GemTypes.Spare:
+                    if (enemy.Spare.UsesRule) return enemy.Spare.RevealGemHint();
                     enemy.AddSpareProgress(settings.SpareProgress);
                     return enemy.CanBeSpared ? "마음이 통했다" : "조금 가까워진 것 같다";
                 default:

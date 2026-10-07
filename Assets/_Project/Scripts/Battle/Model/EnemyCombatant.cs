@@ -16,6 +16,7 @@ namespace Game2Week.Battle
             Data = data ? data : throw new ArgumentNullException(nameof(data));
             this.random = random ?? new Random();
             CurrentHp = data.MaxHp;
+            Spare = new SpareTracker(data.SpareRule);
         }
 
         public EnemyData Data { get; }
@@ -23,13 +24,15 @@ namespace Game2Week.Battle
         public int CurrentHp { get; private set; }
         public bool IsDefeated => CurrentHp <= 0;
         public int SpareProgress { get; private set; }
-        public bool CanBeSpared => SpareProgress >= Data.SpareThreshold;
+        public SpareTracker Spare { get; }
+        public bool CanBeSpared => !IsDefeated && (Spare.UsesRule ? Spare.Ready : SpareProgress >= Data.SpareThreshold);
 
         /// <summary>실제로 깎인 HP를 돌려준다.</summary>
         public int TakeDamage(int amount)
         {
             int applied = Math.Clamp(amount, 0, CurrentHp);
             CurrentHp -= applied;
+            Spare.HealthRatio = (float)CurrentHp / MaxHp;
             return applied;
         }
 

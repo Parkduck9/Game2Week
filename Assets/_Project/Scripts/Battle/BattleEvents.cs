@@ -19,6 +19,10 @@ namespace Game2Week.Battle
         public event Action<BattleOutcome> BattleEnded;
         /// <summary>탄막 턴 시작 때 적이 한 대사 (말풍선용, 없으면 호출 안 함)</summary>
         public event Action<string> EnemySpoke;
+        public event Action<string, string, string> DialogueCue;
+        public event Action<string> SpareChanged;
+        public void RaiseDialogueCue(string anchor, string pose, string camera) => DialogueCue?.Invoke(anchor, pose, camera);
+        public void RaiseSpareChanged(string icons) => SpareChanged?.Invoke(icons);
 
         public void RaiseEnemySpoke(string line) => EnemySpoke?.Invoke(line);
 

@@ -40,7 +40,7 @@ namespace Game2Week.EditorTools.Build
             if(!font)throw new InvalidOperationException("기존 폰트 에셋이 없습니다.");
             var chars=new HashSet<char>(File.ReadAllText("Assets/_Project/Art/Fonts/korean_static_characters.txt"));
             chars.UnionWith(KoreanInContent());for(int i=32;i<127;i++)chars.Add((char)i);
-            chars.UnionWith("·→←↑↓▲▼◀▶×★☆✖⚠…");
+            chars.UnionWith("·→←↑↓▲▼◀▶×★☆✖⚠…●○");
             font.atlasPopulationMode=AtlasPopulationMode.Dynamic;
             var serialized=new SerializedObject(font);serialized.FindProperty("m_AtlasWidth").intValue=4096;serialized.FindProperty("m_AtlasHeight").intValue=4096;serialized.ApplyModifiedPropertiesWithoutUndo();
             font.ClearFontAssetData();

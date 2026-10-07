@@ -12,6 +12,14 @@ namespace Game2Week.Battle
         public const string Check = "살펴보기";
         public const string Spare = "살려주기";
         public const string SpareReadyColor = "#FFD84A";
+        public const string UnhurtHint = "탄막 턴을 한 번 맞지 않고 넘겨 보자.";
+        public const string ListenHint = "대화에서 이야기를 들어 보자.";
+        public const string HealthHint = "적이 지친 뒤 이야기를 해 보자.";
+        public static string NoFightHint(int count, int required) => $"공격하지 않은 턴 {count}/{required}";
+        public static string ActOrderHint(string order) => "행동 순서: " + order;
+        public static string GemHint(int count, int required) => $"자비 보석 {count}/{required}";
+        public static string ActionCountHint(SpareActionKind kind, int count, int required) => $"{(kind == SpareActionKind.Parry ? "쳐내기" : kind == SpareActionKind.RedPass ? "빨강 정지 통과" : "파랑 이동 통과")} {count}/{required}";
+        public static string SpareHearts(SpareTracker tracker) => new string('●', tracker.Fulfilled) + new string('○', tracker.Total - tracker.Fulfilled);
 
         public const string TurnHint = "WASD 이동 · Shift 회피 · Space 점프 · 우클릭 쳐내기 · Ctrl 정지 자세 · 휠 클릭 록온";
         public const string BraceSettling = "자세 잡는 중";
