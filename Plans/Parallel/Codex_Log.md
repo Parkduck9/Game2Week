@@ -1,64 +1,91 @@
 # Codex 작업 문서 — 할 일 · 한 일
 
-최종 갱신: 2026-10-06 (Claude 작성) · 지금 할 일: **7단계 → 8단계를 순서대로 한 번에** (같은 시간에 Claude는 5·6단계)
+최종 갱신: 2026-10-07 (Claude 작성) · 지금 할 일: **10단계 → 9b → 11단계 → 12단계를 순서대로** (이번부터 Codex 혼자 진행, Claude는 작업하지 않음)
 
-> 사용자 결정 (2026-10-06): **5·6단계 = Claude, 7·8단계 = Codex.** 이 문서의 이전 판에 있던 5·6단계 지시는 취소됐다 — 하지 않는다.
-> Codex는 "1. 할 일"을 7단계부터 순서대로 끝까지 진행한다. 단계 하나가 끝날 때마다 "3. 한 일"과 "작업량"을 추가하고 다음 단계로 넘어간다.
-> 짝 문서: `Plans/Parallel/Claude_Log.md`. 전체 규칙은 `CLAUDE.md`와 `Plans/Parallel_Work_Plan.md`.
+> 사용자 결정 (2026-10-07): 이후 작업은 Codex가 한다. 설계(사용자 컨펌 완료)는 `Plans/Playtest_Fix_Plan.md`(+HTML) — **이 문서의 지시와 설계 문서가 다르면 설계 문서의 "사용자 답변·결정"이 우선.**
+> 지금까지 완료: 8.5단계(주인공 T자 자세 버그) `20cc19e`, 9단계(맵 확대·겹 공격·적별 기술·체력 단계) + 플레이 피드백(메뉴 WASD·탄속 ×1.5·예측 조준) `1993860`.
+> 이전 판의 7·8단계 지시는 끝났다 (아래 "3. 한 일" 참고).
 
 ## 0. 작성·작업 규칙 (꼭 지킬 것)
 
 - **모든 기록·주석·커밋 메시지·답변은 한국어로 쓴다.** 영어로 바꾸지 않는다. 코드 식별자(클래스·변수 이름)만 영어.
-- 작업 폴더 `C:\Unity\Game2Week\Game2Week-codex`, 브랜치 **`phase7-codex`** 하나로 7·8단계를 진행한다.
-  - Unity 배치모드·테스트는 `-projectPath`를 이 폴더로만. 에디터: `C:\Program Files\Unity\Hub\Editor\6000.3.25f1\Editor\Unity.exe`
-  - 테스트: `-runTests -testPlatform EditMode|PlayMode -assemblyNames Game2Week.Tests.EditMode|Game2Week.Tests.PlayMode` (`-quit` 없음)
-- **아래 각 단계의 "담당 파일"만 고친다. 그 밖의 파일은 전부 수정 금지** (Claude가 5·6단계에서 전투·패턴·맵·UI·소리·씬을 고치는 중). 꼭 필요하면 고치지 말고 "2. 요청"에 적고 우회한다.
-- 특히 **씬 파일(`Scenes/*.unity`)은 고치지 않는다.** 스테이지 JSON(`StreamingAssets/Stages/`)도 고치지 않는다 (5단계 맵 연결 중).
-- `TODO.md`·`WORKLOG.md`·`CLAUDE.md`·`Plans/Action_Balance_Plan.md`·`Plans/Work_Effort.md`·`Plans/Parallel_Work_Plan.md`·`Plans/Parallel/Claude_Log.md`는 고치지 않는다 (Claude가 합칠 때 이 문서를 보고 반영).
-- **커밋**: 사용자 "한 번에 작업" 요청 → 단계 하나가 끝나고 전체 테스트가 통과하면 이 브랜치에 커밋 (예: `7단계 (Codex): ...`). push·main 합치기는 하지 않는다.
-- 커밋 전: `Assets/_Project/Art/Fonts/Pretendard-Regular SDF.asset`(8단계에서 정적 아틀라스로 바꾸기 전까지)과 `ProjectSettings/` 자동 변경을 되돌리고, `git diff --cached --name-only`로 담당 밖 파일이 없는지 확인.
-- 임시 에디터 스크립트는 `Assets/Editor/`에 두고 실행 후 폴더째 삭제.
-- `node`는 PATH에 없다: `C:\Program Files\Adobe\Adobe Creative Cloud Experience\libs\node.exe`. 이 문서의 HTML: `node Tools/render_plan.mjs Plans/Parallel/Codex_Log.md`.
-- 단계마다: 전체 테스트 통과 (결과 xml 경로 기록) → "3. 한 일" → "작업량" → HTML 재생성 → 커밋 → 다음 단계.
-- 막히면 (사용자 결정 필요·담당 밖 파일 필요) 그 항목만 "2. 요청"에 적고 나머지를 계속 진행한다. 질문하려고 멈추지 않는다.
+- 작업 폴더: **`C:\Unity\Game2Week\Game2Week`** (원래 폴더), 브랜치 **`main`**. 병렬 작업이 아니므로 worktree(`Game2Week-codex`)는 쓰지 않는다.
+  - Unity 에디터: `C:\Program Files\Unity\Hub\Editor\6000.3.25f1\Editor\Unity.exe`. **사용자가 에디터를 열어 두면 배치모드가 안 된다** (프로젝트 잠금) — 먼저 확인.
+  - 테스트: `-batchmode -projectPath . -runTests -testPlatform EditMode|PlayMode -assemblyNames Game2Week.Tests.EditMode|Game2Week.Tests.PlayMode -testResults <xml> -logFile <log>` (`-quit` 없음). 결과 xml에 한글 테스트 이름이 있어 PowerShell `[xml]` 변환이 실패할 수 있다 → 정규식으로 읽는다.
+  - git: PATH에 없음 → `$env:LOCALAPPDATA\GitHubDesktop\app-3.6.6\resources\app\git\cmd\git.exe`. node: `C:\Program Files\Adobe\Adobe Creative Cloud Experience\libs\node.exe`.
+- **CLAUDE.md의 규칙(DO/DON'T, 코드 규칙, 에디터 함정)을 그대로 따른다.** 특히:
+  - 스테이지 JSON은 손으로 고치지 않는다 — `StageEditorModel`(맵툴 코드)로만. 대화 JSON도 같은 원칙(10단계에서 만드는 Dialogue Editor 코드로만).
+  - 상태 전환은 `BattleContext.ChangeState`만, 적/패턴별 `if`·`switch` 하드코딩 금지, 데이터는 ScriptableObject/JSON, 화면 문구는 `BattleTexts`/`UiTexts`.
+  - MonoBehaviour는 파일 하나에 하나(파일 이름 = 클래스 이름). `init`·`record` 금지. `GetComponent ?? Add` 금지(`TryGetComponent`).
+  - Undertale 고유 요소(이름·대사·하트 SOUL·폰트·음악) 금지. 대사·이름은 독자 IP 임시 이름.
+  - 임시 에디터 스크립트는 `Assets/Editor/`에 두고 실행 후 폴더째 삭제. `EditorSceneManager.OpenScene` 뒤에는 에셋 참조를 다시 `LoadAssetAtPath`.
+- **수치 결정 금지 항목**: 피격 피해(적 공격 4)·주인공 체력(20)·적 체력(70/90)·데미지 공식은 사용자 결정 대기 (TODO `[결정 필요]`). 바꾸지 말고 필요하면 "2. 요청"에 적는다.
+- 정적 폰트 아틀라스: 새 한글 문구(특히 대화)가 아틀라스에 없으면 □로 나온다 → `FontCoverageTests`가 잡는다. 없는 글자가 나오면 8단계 방식(`Editor/Build/ReleasePreparation.cs`)으로 아틀라스를 다시 굽고, 폰트(각 약 65MB)는 **Git LFS** 대상이다(`.gitattributes`).
+- 테스트 도움: 하위 패턴은 `BattleTestUtil.FindPattern<T>`, 탄을 맞히는 시험은 `BattleTestUtil.MoveNearEnemy`(맵이 넓음). 키보드 이동(WASD·방향키)을 쓰는 `InputTestFixture` 테스트는 전체 실행 순서에 따라 이동 값이 0으로 읽히는 알려진 문제가 있다 → 동작 검사는 `PlayerMover.Move`를 직접 호출.
+- **문서 갱신 (혼자 작업이므로 Codex가 직접)**: 단계가 끝날 때마다
+  1. `TODO.md` 체크 + 새 문제는 "🔧 바꿔야 할 것"에 (결정 필요는 `[결정 필요]`).
+  2. `WORKLOG.md` 맨 아래에 기록 추가 — 형식 `## 날짜 — Codex: 제목` → 한 일 / 검증 / 결정 필요 / **마지막은 항상 `### 다음에 할 일`** (대시보드가 읽음).
+  3. `Plans/Work_Effort.md`에 한 줄 (사람 기준 시간, 중급 Unity 개발자 1명, 8시간 = 1일, 작업자 `Codex`).
+  4. `Plans/Playtest_Fix_Plan.md`의 해당 절에 "실제 적용" 추가 → `node Tools/render_plan.mjs Plans/Playtest_Fix_Plan.md`.
+  5. 이 문서 "3. 한 일"·"작업량" 추가 → `node Tools/render_plan.mjs Plans/Parallel/Codex_Log.md`.
+  6. 새 규칙이 생기면 `CLAUDE.md` "5~8단계 결과로 생긴 규칙" 아래에 한 줄.
+- **커밋**: 단계 하나가 끝나고 EditMode·PlayMode 전체가 통과하면 main에 커밋 (예: `10단계 (Codex): 자비 조건·대화 시스템`). 여러 줄 메시지는 파일로 `-F`. **push는 사용자가 요청할 때만.** 커밋 전 `git diff --cached --name-only`로 `Library/ Logs/ Exports/ *.csproj`가 없는지, `ProjectSettings/`가 줄바꿈만 바뀐 것이면 되돌린다.
+- 막히면(사용자 결정 필요) 그 항목만 "2. 요청"에 적고 나머지를 계속한다. 질문하려고 멈추지 않는다.
 
 ## 1. 할 일 (순서대로)
 
-### 7단계 — 주인공 v2 · 리깅 · 애니메이션 + 맵툴 2차 (M5)
+### 10단계 — 자비 조건 + 대화 시스템·툴 (설계 3절·6절)
 
-**A. 주인공 v2·리깅·애니메이션**
-1. 모델 v2 (`Preview/heroine_preview.html`의 three.js 코드 모델을 고친다, v1은 남겨 둠): 손 추가 (쳐내기용 오른손이 보이게), 측면에서 눈·볼이 뜨는 문제, 머리카락 결 보강. 설정: 노란 양갈래·노란 눈·연하늘 후드티·청바지·2.5등신·로우폴리 단색면. 레퍼런스 `Reference/heroine_turnaround.png` (덮어쓰지 말고 새 파일은 `_v2`).
-2. 리깅: three.js `SkinnedMesh` + 뼈 (골반·척추·머리·양팔(위팔·아래팔·손)·양다리·양갈래 2마디) → GLB 내보내기 (`Exports/` → `Assets/_Project/Art/Characters/Heroine/heroine_v2.glb`).
-3. 애니메이션 클립 (GLB에 포함): 대기·달리기·회피·점프·착지·쳐내기 2종(오른손 왼→오 / 오→왼, 반대쪽 어깨 뒤로 흘리는 동작)·정지 자세(빨강 대응, 몸을 낮추고 손을 가슴 앞)·피격·쓰러짐.
-4. Unity 연결: Animator Controller (`Art/Characters/Heroine/`), `Prefabs/Player_Heroine` 외형을 v2로 교체, 새 `PlayerAnimationDriver`(`Scripts/Battle/View/Animation/`)가 `PlayerMover.Motor` 상태(이동 속도·Dodging·Airborne·Parrying·Bracing·BraceReady)와 `BattleFeedback`(PlayerParried 쪽 방향·PlayerHit)을 읽어 Animator를 구동.
-   - `PlayerActionView`의 임시 손 큐·원판·웅크림은 Animator가 있으면 끄고 없으면 그대로 (둘 다 동작해야 함). 쳐낸 탄의 곡선 경로(Bullet)는 그대로.
-   - 판정 높이(`PlayerActionSettings.bodyHeight`)는 바꾸지 않는다.
-5. 테스트: 모터 상태 → Animator 상태 대응 (EditMode는 순수 매핑 함수, PlayMode는 실제 전투에서 회피·점프·자세 때 상태 전환), 기존 쳐내기·자세·입력 테스트 회귀, 화면 캡처 (`SceneCapture.Save("heroine_v2_*")`).
+**A. 자비 조건 (설계 3절, 사용자 결정: 공통 "공격 안 한 턴 3번" + 적별 특수 조건, FIGHT하면 카운트 0)**
+1. 순수 로직 (`Scripts/Battle/Model/`): `ISpareCondition`(진행·충족 여부·힌트 문구), `SpareRule`(공통 조건 + 적별 조건 목록, 모두 충족해야 자비), `SpareTracker`(전투 동안 상태).
+   - 공통: `NoFightTurns` — FIGHT를 고르지 않은 플레이어 턴 수 ≥ 3, FIGHT를 고르면 0 (적마다 "0 / 절반" 선택 가능).
+   - 적별 조건 클래스 (`[SerializeReference]`로 `EnemyData`에 목록): ACT 순서, 탄막 턴 행동 횟수(쳐내기·빨강 정지 통과·파랑 통과 — `BattleFeedback` 구독, 이미 사건 있음), 한 턴 안 맞기, 대화 선택(플래그), 자비 보석 n개, 적 체력 ≤ 비율.
+2. `EnemyCombatant.CanBeSpared`를 규칙으로 바꾸고 기존 `spareThreshold`·ACT `spareProgress`는 하위 호환(규칙이 비어 있으면 기존 방식) 또는 정리. 자비 보석은 **진행도 증가 → 아직 안 채운 조건의 힌트 1개 공개**로 변경 (사용자 결정 Q7).
+3. 표시: 적 이름 옆 "마음" 단계 아이콘(예: ○○● — 채운 조건 수), 살펴보기(Check)에 힌트, 자비 가능해지면 MERCY 메뉴 강조. 문구는 `BattleTexts`.
+4. 데이터 (제안값, 플레이 후 조정): `Enemy_Test` = 공통 3턴 + "응원하기 → 말 걸기" 순서 / `Enemy_Test2` = 공통 3턴 + 쳐내기 3번 + "같이 뛰기". 적별 ACT 결과 문구도 조건 진행에 맞게.
+5. 테스트: EditMode 조건별·규칙·FIGHT 초기화·보석 힌트, PlayMode 1-1 살려주기 시나리오(최소 3턴 전에는 자비 불가). **`BattleRouteTests.Route_Spare` 갱신** (지금은 ACT 2번 + 자비 — 새 규칙에 맞게 봇 수정, 체력 유지는 그대로).
 
-**B. 맵툴 2차 (M5)** — 기존 공개 API만 사용 (`GameSession.BeginStage(index)`, `SceneNames`, `StageRepository`, `StageEditorModel`)
-1. Stage Editor 3D 미리보기: Pattern Editor와 같은 `PreviewRenderUtility` 방식으로 경기장·시작점·적·보석 배치를 3D로.
-2. "바로 플레이": 편집 중인 스테이지 저장 → `GameSession`을 그 스테이지로 → Battle 씬 Play. 열어 둔 씬은 저장 여부를 물은 뒤 Play가 끝나면 원래 씬으로 돌아온다 (`EditorSceneManager`, `EditorApplication.playModeStateChanged`).
-3. 일괄 배치: 영역 드래그로 보석 여러 개 배치·삭제, 좌우/상하 대칭 복사.
-4. 기존 검증·되돌리기·체크섬 유지. 테스트: StageEditorModel 일괄 배치·대칭 로직 EditMode.
+**B. 대화 JSON + 실행기 (설계 6.2~6.3, 사용자 결정: 대화는 전투 안에서만, 선택지는 자비 조건에만 영향)**
+1. 형식: 설계 6.2의 JSON (`schemaVersion`, `id`, `speakers`, `start`, `nodes`(speaker·text·pose·camera·next·choices·effects·end), `_tool` 체크섬). 위치 `Assets/StreamingAssets/Dialogues/<id>.json`. 스테이지와 같은 구조로 `Scripts/Dialogue/`(새 폴더): `DialogueDefinition`·`DialogueJson`(체크섬)·`DialogueValidator`(끊긴 연결·도달 못 하는 노드·없는 화자·**정적 폰트에 없는 글자**)·`DialogueRepository`.
+2. `DialogueRunner` (순수 C#): 노드 진행·선택·효과 적용. 효과/조건은 등록식(`spareCondition`, `flag`) — 적별 `if` 금지.
+3. 전투 연결: `BattleStateId.Dialogue` + `DialogueState` (상태 머신 규칙대로), UI는 기존 `DialogueBox`·`MenuNavigator` 재사용(선택지 = 목록 메뉴), 텍스트 속도 설정 반영, Z 넘기기.
+   - 언제: `StageDefinition.dialogues` (`intro` 전투 시작 — 있으면 기존 EncounterText 대신, `phase2` — `BattleFeedback.EnemyPhaseChanged` 다음 플레이어 턴 시작, `spareReady` — 자비 가능해진 직후, `victory` — 처치/자비 뒤 결과 전). 비어 있으면 `EnemyData`의 같은 칸(새로 추가), 그것도 없으면 기존 흐름 그대로.
+   - `camera`: `BattleCameraDirector`에 컷 이름(예: `enemy_close`, `two_shot`, `player_close`) 등록 — 없으면 무시하고 경고. `pose`: 12단계 전까지는 무시(경고만).
+4. 테스트: EditMode 형식·검증·체크섬·실행기·효과, PlayMode 대화 상태 진입→선택→자비 조건 반영→복귀. `FontCoverageTests`가 대화 JSON 한글도 검사.
 
-**7단계 담당 파일**: `Preview/`, `Reference/`(새 파일만), `Exports/`, `Art/Characters/`, `Prefabs/Player_Heroine*`, `Scripts/Battle/View/PlayerActionView.cs`, 새 `Scripts/Battle/View/Animation/`, `Editor/Stages/`, 테스트 새 `Tests/*/PlayerAnimation*`·`StageEditorBatch*`, 기존 `StageEditorModelTests`.
+**C. Dialogue Editor (설계 6.4)** — `Editor/Dialogue/`(새 폴더), 메뉴 `Tools ▸ Dialogue Editor`
+1. 왼쪽 파일 목록 / 가운데 노드 목록 / 오른쪽 노드 편집(화자·대사·자세·카메라·선택지·효과). 되돌리기, 저장 시 검증 실패면 저장 안 함, 체크섬 기록.
+2. 미리 보기(툴 안에서 한 줄씩), "바로 플레이"(맵툴 M5 `StageQuickPlay` 방식으로 해당 스테이지 전투 시작).
+3. 맵툴(Stage Editor)에 스테이지별 대화 파일 고르는 칸 4개 (`intro`·`phase2`·`spareReady`·`victory`).
+4. 편집 로직은 UI 없는 모델 클래스로 분리(`StageEditorModel`처럼) → EditMode 테스트.
 
-### 8단계 — 출시 준비
+**D. 샘플 대화** — Dialogue Editor 코드로 생성: 1-1 `intro`·`spareReady`·`victory`, 1-2 `intro`·`phase2`. 독자 IP 임시 이름(주인공 / 테스트 적 / 주황 테스트 적), 짧게. 선택지 하나 이상이 자비 조건에 연결.
 
-**전제**: 회사·게임 이름은 사용자 결정 전 → **한 곳(`ProductInfo`)에 자리표시자로 모으고**, 이미지에는 제목 글자를 넣지 않는다 (로고 자리만 비움).
+### 9b단계 — Pattern Editor 공격 순서(시퀀스) 탭 (설계 2절 D)
+1. `AttackSequence`(ScriptableObject): 시간표 (시각, AttackPatternData, 반복 여부). 실행 프리팹 컴포넌트 `SequencePattern : IAttackPattern, IDirectablePattern, IThreatSource` — 시각마다 자식 패턴 시작, 난이도 배율 전달, 대표 색 = 구성 패턴 색(빨강+파랑 섞이면 저장 거부).
+2. Pattern Editor에 "시퀀스" 탭: 목록·시간표 편집·미리보기·저장 시 `AttackPatternData` + 프리팹 생성 + ContentCatalog 등록 (기존 `PatternAssetStore` 방식).
+3. 샘플: "고리 → 1.2초 뒤 부채꼴 저격 3번" 하나를 주황 테스트 적 `phaseMoves`에 추가.
+4. 테스트: 시간표 재현(시드)·색 검사·Director 안에서 실행·정리.
 
-1. `ProductInfo` (ScriptableObject `Data/ProductInfo.asset` + `Scripts/Core/ProductInfo.cs`): 회사 이름·게임 이름·버전·스토어 표시 이름. 메인 화면 타이틀 문구(`UiTexts`)·빌드 스크립트(PlayerSettings 회사/제품 이름)·MSIX 매니페스트가 여기서 읽도록. 지금 값은 기존과 같게 (회사 `DefaultCompany`는 세이브 경로라 **바꾸지 말고** "이름 확정 시 바꿀 곳" 안내만).
-2. 정적 폰트 아틀라스: Pretendard로 KS X 1001 한글 2,350자 + 영문·숫자·기호. 게임 문구가 모두 들어가는지 검사(코드·데이터·스테이지 JSON의 한글을 모아 아틀라스에 없는 글자 목록 출력) → 동적 폰트가 매번 git 변경으로 잡히는 문제 해결. 기존 폰트 에셋 GUID를 유지하거나 TMP 기본 폰트 설정만 바꿔 씬 수정 없이 적용.
-3. 스토어 이미지 세트 (이미지 생성 사용, `Reference/title_screen.png`·`store_screenshot.png`·주인공 3면도 참고): 정사각 로고 300×300·150×150·71×71·44×44, 와이드 타일 310×150, 대표 이미지 1920×1080, 게임 화면 스크린샷 3~5장(실제 PlayMode 캡처 기반). 저장 `Reference/store/`. MSIX 로고(`Tools/msix/`)에 연결.
-4. 스토어 설명 문구 초안 (한국어): 짧은 소개·긴 설명·주요 특징 5개·검색어, 이름은 `{게임 이름}` 자리표시자 → `Plans/Store_Listing.md` (+HTML). Undertale 고유 요소(이름·캐릭터·빨간 하트 등)를 쓰지 않았는지 점검해 기록.
-5. 빌드·MSIX 재검증: `Tools/build_windows.ps1` → `Tools/package_msix.ps1`, 빌드 실행 15초 오류 없음. `Plans/Store_Guide.html`에 "이름 확정 시 바꿀 곳" 추가.
+### 11단계 — 그래픽: 로우폴리 유지 + 셰이더·이펙트 (설계 4절, 사용자 결정 Q3)
+1. 11-A 렌더 기초: URP 후처리 볼륨(블룸·색 보정·비네트·약한 SSAO), 조명 방향·색, 안개, 그라디언트 하늘. 씬 수정은 최소(볼륨·조명 프리팹 하나를 Battle·MainMenu에 연결).
+2. 11-B 툰 셰이더: Shader Graph 셀 셰이딩 2~3단 + 림 라이트 + 외곽선(URP 렌더러 기능) — 주인공·적·소품 공용 재질.
+3. 11-C 탄 셰이더: 빛나는 탄 + 트레일, **색마다 모양 다르게**(노랑 구, 빨강 각진 결정, 파랑 고리) — 색맹 대비. 기존 `Bullet.ApplyTint`(MaterialPropertyBlock)와 호환.
+4. 11-D 이펙트: `BattleFxRig` 아래 `IBattleFxModule` 추가로만 (씬 수정 없이) — 발사 섬광, 피격 파편, 쳐내기 베기 궤적, 회피 잔상, 정지 자세 붉은 기운, 파랑 통과 속도선, 예고 바닥 표시, 자비·처치 연출, 체력 단계 전환(`EnemyPhaseChanged`).
+5. 11-E 경기장 꾸밈: 스테이지 JSON `theme`(이미 v2에 있음, 기본 `default`)별 바닥 무늬·가장자리 벽·배경 소품. 테마 데이터는 ScriptableObject, 맵툴에 테마 고르기. 1-1~1-8에 테마 2~3종 배정(맵툴 코드로).
+6. 성능: PC 1080p 60fps — 측정 봇(`-runBalance`)에 평균 프레임 기록 추가. 화면 캡처 전후 비교를 `Logs/`에 남기고 WORKLOG에 경로.
+7. 모델 교체는 하지 않는다 — 11 결과를 사용자가 본 뒤 결정 (출처 미정).
 
-**8단계 담당 파일**: 새 `Scripts/Core/ProductInfo.cs`·`Data/ProductInfo.asset`, `Scripts/UI/UiTexts.cs`(타이틀 문구만), `Art/Fonts/`, TMP 설정(`TextMesh Pro/Resources/TMP Settings.asset`), `ProjectSettings/ProjectSettings.asset`, `Editor/Build/`, `Tools/build_windows.ps1`·`package_msix.ps1`·`msix/`, `Reference/store/`, `Plans/Store_Listing.md/.html`, `Plans/Store_Guide.html`, 테스트 새 `Tests/EditMode/ProductInfo*`·`FontCoverage*`.
+### 12단계 — 애니메이션 (설계 5절)
+1. 주인공 동작은 **`Editor/Animation/HeroineClipAuthoring.cs`의 자세 함수**로 만든다 (`Tools ▸ Heroine ▸ 동작 클립 다시 만들기` → `Art/Characters/Heroine/Clips/Heroine_*.anim`). glb 안 클립은 T자 자세 버그 원인이었으니 쓰지 않는다. `HeroinePoseRegressionTests`가 계속 통과해야 한다.
+2. 추가 동작: 록온 중 8방향 이동(블렌드 트리), 멈춤, 피격 강/약, 승리, 자비, 대화(서서 말하기·끄덕임·놀람 — 10단계 `pose` 연결).
+3. 적 애니메이션 (사람형 아님 → 코드 절차 애니메이션, `EnemyView` 또는 새 컴포넌트): 대기 숨쉬기, 공격 준비(`BattleFeedback.WarningStarted`와 동시), 발사(`BulletFired`), 피격, 체력 단계 전환, 누그러짐(자비), 처치, 대화.
+4. 테스트: 매핑 순수 함수 EditMode, PlayMode 상태 전환 + 화면 캡처.
 
-## 2. 요청 (Codex → Claude/사용자)
+## 2. 요청 (Codex → 사용자)
 
-- 7단계 피격 사건 연결: `BattleWorld.Init`에서 `player.Init(...)` 다음에 `player.GetComponent<PlayerAnimationDriver>()?.Bind(player, feedback)` 연결이 필요하다. BattleWorld는 Claude 담당이므로 수정하지 않았다. 모터 상태와 쳐내기 좌우는 PlayerActionView로 연결되어 실제 게임에서 동작하며, 피격은 공개 Bind 주입 후 동작하는 것을 테스트한다. 통합 시 이 연결을 추가한다.
-- 쓰러짐 클립은 `PlayFall()` 진입 API를 제공한다. 전투 패배 표현의 호출 지점은 담당 밖 BattlePresentation이므로 통합 시 연결이 필요하다. 기존 패배 흐름은 유지한다.
+- (지금 없음 — 막히는 항목이 생기면 여기에 적는다.)
+- 참고 — 사용자 결정 대기 중: 9단계 뒤 난이도(피격 피해·주인공 체력·겹 수), 소리 출처, 회사·게임 이름, 3D 모델 교체 여부(11단계 결과를 본 뒤).
 
 ## 3. 한 일
 
