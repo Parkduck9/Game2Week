@@ -47,7 +47,7 @@
             "Attack_Stage_1-5"
         ]
     },
-    "theme": "default",
+    "theme": "grove",
     "dialogues": {
         "intro": "",
         "phase2": "",
@@ -57,6 +57,6 @@
     "_tool": {
         "generatedBy": "StageEditor",
         "toolVersion": 1,
-        "checksum": "sha256:61c78f03995a78a8208e32e9535ed89f4b4a22cff8a53f40e5e8910e1ed618c7"
+        "checksum": "sha256:0288e2ecd5c10b7a9ad0e5afabf3e72ce37d26b1f8d78a10c18ea9008d382440"
     }
 }

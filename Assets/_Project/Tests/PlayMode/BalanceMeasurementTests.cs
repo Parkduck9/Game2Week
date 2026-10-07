@@ -25,6 +25,8 @@ namespace Game2Week.Tests
         public string stageId, stageName, outcome;
         public int enemyTurns, contacts, timeouts, hits, dodges, jumps, parries, braces, redPasses, bluePasses, hpLeft, hpMax, maxLayers, maxPhase;
         public float averageApproachSeconds, startDistance, battleSeconds;
+        public int measuredFrames, width, height;
+        public float averageFrameMilliseconds, averageFps;
     }
 
     [Serializable]
@@ -87,6 +89,7 @@ namespace Game2Week.Tests
 
         /// <summary>8개 맵 전체 측정 — 수 분 걸려 명령줄에 -runBalance가 있을 때만 (Unity 배치 실행은 Explicit도 돌림)</summary>
         [UnityTest]
+        [Timeout(600000)]
         public IEnumerator MeasureAllStages()
         {
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "-runBalance") < 0) Assert.Ignore("전체 측정은 -runBalance로 실행");
@@ -117,6 +120,13 @@ namespace Game2Week.Tests
             Time.timeScale = 1f;
             BattleController battle = null;
             yield return SceneFlowTests.EnterStage(index, c => battle = c);
+            Screen.SetResolution(1920,1080,FullScreenMode.Windowed);
+            yield return null; yield return null;
+            var frames = battle.gameObject.AddComponent<FrameMeasurement>();
+            frames.IsMeasuring = () => battle && battle.Context.CurrentState == BattleStateId.EnemyTurn;
+            var renderTarget=new RenderTexture(1920,1080,24);
+            frames.RenderCamera=Camera.main;
+            frames.RenderCamera.targetTexture=renderTarget;
             var stats = new StageBalanceStats { stageId = battle.Context.Stage.id, stageName = battle.Context.Stage.name, outcome = "진행 중(턴 한도)" };
             var feedback = battle.World.Feedback;
             feedback.PlayerHit += _ => stats.hits++;
@@ -141,6 +151,7 @@ namespace Game2Week.Tests
             HoldW(false);
             HoldCtrl(false);
             float start = Time.realtimeSinceStartup, nextTrace = 0f;
+            bool captured = false;
 
             while (battle && SceneManager.GetActiveScene().name == SceneNames.Battle)
             {
@@ -166,6 +177,12 @@ namespace Game2Week.Tests
                 switch (state)
                 {
                     case BattleStateId.EnemyTurn:
+                        if(!captured)
+                        {
+                            captured=true;
+                            string comparison=Array.IndexOf(Environment.GetCommandLineArgs(),"-graphicsBefore")>=0?"before":"after";
+                            SceneCapture.Save("phase11_"+comparison+"_"+stats.stageId);
+                        }
                         if (camera && !camera.IsLockedOn) { yield return Tap(mouse.middleButton); continue; }
                         var player = battle.World.Player;
                         if (battle.World.Patterns.Current is PatternDirector director)
@@ -187,6 +204,8 @@ namespace Game2Week.Tests
                         }
                         HoldCtrl(red);
                         HoldW(!red);
+                        // 테스트 입력 장치의 이동 값이 전체 실행 중 0이 되는 경우도 같은 접근 경로를 측정한다.
+                        if(!red)player.Move(new Vector2(0,1),Time.deltaTime);
                         if (!red && yellowNear)
                         {
                             if (player.Motor.ParryCooldown <= 0f) { yield return Tap(mouse.rightButton); continue; }
@@ -201,7 +220,8 @@ namespace Game2Week.Tests
                         break;
 
                     case BattleStateId.ActionMenu when ui.IsMainMenuOpen:
-                        yield return Tap(keyboard.zKey); // 공격
+                        Array.Find(ui.GetComponentsInChildren<Game2Week.UI.MenuNavigator>(),menu=>menu.gameObject.activeInHierarchy&&menu.Labels.Count==3).Choose(0);
+                        yield return null;
                         continue;
 
                     case BattleStateId.Fight when ui.TimingGauge.IsOpen && ui.TimingGauge.Position >= 0.47f:
@@ -209,8 +229,8 @@ namespace Game2Week.Tests
                         continue;
 
                     case BattleStateId.ItemMenu when ui.IsMainMenuOpen:
-                        yield return Tap(keyboard.rightArrowKey); // 넘기기
-                        yield return Tap(keyboard.zKey);
+                        Array.Find(ui.GetComponentsInChildren<Game2Week.UI.MenuNavigator>(),menu=>menu.gameObject.activeInHierarchy&&menu.Labels.Count==2).Choose(1);
+                        yield return null;
                         continue;
                 }
                 yield return null;
@@ -219,6 +239,13 @@ namespace Game2Week.Tests
             HoldW(false);
             HoldCtrl(false);
             stats.battleSeconds = Time.time - battleStart;
+            stats.measuredFrames=frames.Frames;stats.averageFrameMilliseconds=frames.AverageMilliseconds;stats.averageFps=frames.AverageFps;
+            stats.width=renderTarget.width;stats.height=renderTarget.height;
+            if(frames)frames.enabled=false;
+            frames.IsMeasuring=null;
+            if(frames.RenderCamera)frames.RenderCamera.targetTexture=null;
+            frames.RenderCamera=null;
+            renderTarget.Release();UnityEngine.Object.Destroy(renderTarget);
             stats.averageApproachSeconds = stats.contacts > 0 ? approachTotal / stats.contacts : 0f;
             if (SceneManager.GetActiveScene().name != SceneNames.Battle || (battle && battle.Context.CurrentState is BattleStateId.Victory or BattleStateId.Defeat))
                 stats.outcome = stats.hpLeft <= 0 ? "패배" : "처치";

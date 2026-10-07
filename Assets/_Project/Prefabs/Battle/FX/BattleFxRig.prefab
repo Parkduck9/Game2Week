@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 685af98c751498f4b879a0208aa3a847, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game2Week::Game2Week.Battle.View.ActionFxModule
-  particleMaterial: {fileID: 2100000, guid: b5525f144a635f94d8cf7fcee1e8cb23, type: 2}
+  particleMaterial: {fileID: 2100000, guid: 47b0b45d4597cdc47a850459d5c6c458, type: 2}
 --- !u!1 &3988094778118494182
 GameObject:
   m_ObjectHideFlags: 0
@@ -92,6 +92,7 @@ MonoBehaviour:
   showSeconds: 3
   heightAboveEnemy: 1.45
   fontSize: 3
+  readableDistance: 7
 --- !u!1 &4792435486217719156
 GameObject:
   m_ObjectHideFlags: 0
@@ -102,6 +103,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1885038917196526325}
   - component: {fileID: 3795936231390389352}
+  - component: {fileID: 6738433065613519890}
   m_Layer: 0
   m_Name: BattleFxRig
   m_TagString: Untagged
@@ -138,3 +140,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73b247931db431246880be869b48981f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game2Week::Game2Week.Battle.View.BattleFxRig
+--- !u!114 &6738433065613519890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4792435486217719156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2faefc5a0923e246bd8b6e25a539a9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game2Week::Game2Week.Battle.View.CombatAccentFxModule
+  material: {fileID: 2100000, guid: 47b0b45d4597cdc47a850459d5c6c458, type: 2}

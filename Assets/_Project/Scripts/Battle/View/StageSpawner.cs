@@ -13,6 +13,9 @@ namespace Game2Week.Battle.View
         [Tooltip("EnemyData에 View 프리팹이 없을 때 쓰는 임시 적")]
         [SerializeField] GameObject fallbackEnemyPrefab;
         [SerializeField] GemView gemPrefab;
+        [SerializeField] ArenaThemeCatalog themeCatalog;
+        Transform decoration;
+        public ArenaTheme ActiveTheme { get; private set; }
 
         readonly Dictionary<string, GemView> gems = new();
 
@@ -24,6 +27,9 @@ namespace Game2Week.Battle.View
         public void Spawn(StageDefinition stage, EnemyData enemyData)
         {
             arena.Build(stage.grid);
+            if(decoration)Destroy(decoration.gameObject);
+            ActiveTheme=themeCatalog?themeCatalog.Find(stage.theme):null;
+            decoration=ArenaDecoration.Build(arena,ActiveTheme);
 
             Player = Instantiate(playerPrefab, arena.CellToWorld(stage.playerStart), Quaternion.identity, arena.transform).transform;
             Player.name = "Player";

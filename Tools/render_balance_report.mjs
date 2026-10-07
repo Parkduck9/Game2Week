@@ -22,6 +22,7 @@ const rows = stages.map(s => {
     <td>${s.dodges} · ${s.parries} · ${s.jumps}</td>
     <td>${s.braces} · <span class="red">${s.redPasses}</span> / <span class="blue">${s.bluePasses}</span></td>
     <td>${s.hpLeft}/${s.hpMax}</td>
+    <td>${(s.averageFrameMilliseconds??0).toFixed(2)}ms · ${(s.averageFps??0).toFixed(1)}fps<br><small>${s.width??0}×${s.height??0} · ${s.measuredFrames??0}프레임</small></td>
     <td>${esc(s.outcome)}<br><small>${s.battleSeconds.toFixed(0)}초</small></td></tr>`;
 }).join('');
 
@@ -40,7 +41,7 @@ th{font-weight:600;font-size:13px;color:var(--muted)}small{color:var(--muted)}.c
 </style></head><body><main>
 <h1>밸런스 측정 리포트</h1>
 <p>측정 ${esc(report.createdAt ?? '')} · 맵 ${stages.length}개 · ${esc(report.note ?? '')}</p>
-<div class="table"><table><thead><tr><th>맵</th><th>피격</th><th>적 접근 성공/턴</th><th>최대 동시 공격 · 체력 단계</th><th>회피 · 쳐내기 · 점프</th><th>정지 자세 · 통과 빨강/파랑</th><th>남은 HP</th><th>결과</th></tr></thead>
+<div class="table"><table><thead><tr><th>맵</th><th>피격</th><th>적 접근 성공/턴</th><th>최대 동시 공격 · 체력 단계</th><th>회피 · 쳐내기 · 점프</th><th>정지 자세 · 통과 빨강/파랑</th><th>남은 HP</th><th>평균 프레임</th><th>결과</th></tr></thead>
 <tbody>${rows}</tbody></table></div>
 <p>원본: ${esc(path.relative(root, source))} · node Tools/render_balance_report.mjs 로 생성</p>
 </main></body></html>

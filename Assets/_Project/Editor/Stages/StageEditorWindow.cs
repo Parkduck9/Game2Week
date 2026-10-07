@@ -332,6 +332,11 @@ namespace Game2Week.EditorTools.Stages
                 EditorGUILayout.LabelField("스테이지", EditorStyles.boldLabel);
                 Field(EditorGUILayout.DelayedTextField("id", stage.id), stage.id, v => model.Edit(s => s.id = v));
                 Field(EditorGUILayout.DelayedTextField("이름", stage.name), stage.name, v => model.Edit(s => s.name = v));
+                var themes=AssetDatabase.FindAssets("t:ArenaTheme").Select(id=>AssetDatabase.LoadAssetAtPath<Game2Week.Data.ArenaTheme>(AssetDatabase.GUIDToAssetPath(id)))
+                    .Where(theme=>theme).OrderBy(theme=>theme.id).ToArray();
+                var themeIds=themes.Select(theme=>theme.id).ToList();if(!themeIds.Contains(stage.theme))themeIds.Insert(0,stage.theme);
+                int themeIndex=EditorGUILayout.Popup("경기장 테마",themeIds.IndexOf(stage.theme),themeIds.ToArray());
+                if(themeIndex>=0)Field(themeIds[themeIndex],stage.theme,v=>model.Edit(s=>s.theme=v));
 
                 EditorGUILayout.Space(6);
                 EditorGUILayout.LabelField("맵 크기", EditorStyles.boldLabel);

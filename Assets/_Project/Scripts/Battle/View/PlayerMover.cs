@@ -34,17 +34,25 @@ namespace Game2Week.Battle.View
         public PlayerActionSettings Settings => settings;
 
         Renderer[] renderers;
+        bool[] visibleRenderers;
 
         /// <summary>무적 시간 깜빡임 (보였다 안 보였다)</summary>
         public void SetVisible(bool visible)
         {
-            renderers ??= GetComponentsInChildren<Renderer>(true);
-            foreach (var r in renderers) if (r) r.enabled = visible;
+            CacheRenderers();
+            for(int i=0;i<renderers.Length;i++)if(renderers[i])renderers[i].enabled=visible&&visibleRenderers[i];
+        }
+        void CacheRenderers()
+        {
+            if(renderers!=null)return;
+            renderers=GetComponentsInChildren<Renderer>(true);visibleRenderers=new bool[renderers.Length];
+            for(int i=0;i<renderers.Length;i++)visibleRenderers[i]=renderers[i].enabled;
         }
 
         public void Init(BattleArena battleArena, PlayerActionSettings actionSettings = null, BattleFeedback battleFeedback = null)
         {
             arena = battleArena;
+            CacheRenderers();
             feedback = battleFeedback;
             settings = actionSettings;
             if (!settings) { settings = ScriptableObject.CreateInstance<PlayerActionSettings>(); ownsSettings = true; }

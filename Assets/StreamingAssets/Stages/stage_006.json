@@ -47,7 +47,7 @@
             "Attack_Stage_1-6"
         ]
     },
-    "theme": "default",
+    "theme": "amber",
     "dialogues": {
         "intro": "",
         "phase2": "",
@@ -57,6 +57,6 @@
     "_tool": {
         "generatedBy": "StageEditor",
         "toolVersion": 1,
-        "checksum": "sha256:9e998ce9ef5bc5ebe33ce0b4249ba92207b2ab0e6144e3086936b908503a2cb7"
+        "checksum": "sha256:54cdcfd89ffe600e982d9d34100a86dd23555db034509080f90ec962530c4677"
     }
 }

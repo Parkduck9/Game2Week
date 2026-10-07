@@ -11,7 +11,7 @@ PrefabInstance:
     - target: {fileID: 3824628414883535883, guid: 36798dc51e7f08d43a07b63b022559e5, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: c791c87149e2ed648b1246778c3a1b03, type: 2}
+      objectReference: {fileID: 2100000, guid: 4d76fc10f1e51c3458eabb5caaa232bc, type: 2}
     - target: {fileID: 5092751627827279224, guid: 36798dc51e7f08d43a07b63b022559e5, type: 3}
       propertyPath: m_Name
       value: EnemyView_TestBlob_Orange

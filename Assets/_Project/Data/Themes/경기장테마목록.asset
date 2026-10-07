@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba0a880066530c14e88664c02711c7b6, type: 3}
+  m_Name: "\uACBD\uAE30\uC7A5\uD14C\uB9C8\uBAA9\uB85D"
+  m_EditorClassIdentifier: Game2Week::Game2Week.Data.ArenaThemeCatalog
+  themes:
+  - {fileID: 11400000, guid: fcc81f86e456d2043b47361491cb8405, type: 2}
+  - {fileID: 11400000, guid: acc0472d14f061d4aa74bcec039fb452, type: 2}
+  - {fileID: 11400000, guid: 96ccd71c507fad64aa263fb0702a9325, type: 2}

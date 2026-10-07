@@ -21,7 +21,7 @@ namespace Game2Week.Tests
                 var s = result.Stage;
                 Assert.IsTrue(result.ChecksumValid, $"{id}: 맵툴로 저장");
                 Assert.AreEqual(StageDefinition.CurrentSchemaVersion, s.schemaVersion, id);
-                Assert.AreEqual(StageThemes.Default, s.theme, id);
+                Assert.IsFalse(string.IsNullOrEmpty(s.theme), id); // 11단계: 실제 테마 연결은 GraphicsTests에서 검사한다.
                 Assert.IsNotNull(s.dialogues, id);
                 float meters = StageGeometry.CellDistance(s.playerStart, s.enemy.position) * s.grid.cellSize;
                 Assert.GreaterOrEqual(meters, StageLimits.RecommendedPlayerEnemyMeters, $"{id}: 시작점-적 {meters:0.0}m");

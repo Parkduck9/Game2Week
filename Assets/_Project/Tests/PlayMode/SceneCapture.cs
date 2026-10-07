@@ -25,6 +25,7 @@ namespace Game2Week.Tests
             }
 
             var rt = new RenderTexture(1280, 720, 24) { antiAliasing = 4 };
+            var previousTarget=cam.targetTexture;
             cam.targetTexture = rt;
             cam.Render();
             cam.Render();
@@ -34,7 +35,7 @@ namespace Game2Week.Tests
             tex.Apply();
             File.WriteAllBytes(Path.Combine(Application.dataPath, $"../Logs/scene_{name}.png"), tex.EncodeToPNG());
             RenderTexture.active = null;
-            cam.targetTexture = null;
+            cam.targetTexture = previousTarget;
             Object.Destroy(rt);
             Object.Destroy(tex);
             if (canvas) canvas.renderMode = mode;

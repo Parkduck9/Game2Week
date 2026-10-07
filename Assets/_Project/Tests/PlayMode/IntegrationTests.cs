@@ -22,6 +22,8 @@ namespace Game2Week.Tests
             var driver = battle.World.Player.GetComponentInChildren<PlayerAnimationDriver>();
             Assert.IsNotNull(driver, "주인공 v2 애니메이션 구동기");
             Assert.IsTrue(driver.IsReady);
+            var visibleRenderer=System.Array.Find(battle.World.Player.GetComponentsInChildren<Renderer>(),renderer=>renderer.enabled);
+            Assert.IsNotNull(visibleRenderer,"실제로 표시하는 외형");
 
             battle.Context.ChangeState(BattleStateId.EnemyTurn);
             yield return null;
@@ -32,9 +34,9 @@ namespace Game2Week.Tests
             battle.Context.ChangeState(BattleStateId.Defeat);
             yield return null; yield return null;
             Assert.AreEqual(PlayerMotion.Fall, driver.Current, "패배 때 쓰러짐 동작");
-            Assert.IsTrue(battle.World.Player.GetComponentInChildren<Renderer>().enabled, "쓰러지는 동안은 보임");
+            Assert.IsTrue(visibleRenderer.enabled, "쓰러지는 동안은 보임");
             yield return new WaitForSeconds(0.6f);
-            Assert.IsFalse(battle.World.Player.GetComponentInChildren<Renderer>().enabled, "쓰러진 뒤 사라짐");
+            Assert.IsFalse(visibleRenderer.enabled, "쓰러진 뒤 사라짐");
             SceneCapture.Save("integration_defeat");
         }
     }

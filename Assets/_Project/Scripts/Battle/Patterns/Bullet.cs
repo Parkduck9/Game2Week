@@ -52,6 +52,7 @@ namespace Game2Week.Battle.Patterns
             deflectTime = 0f;
             OnLaunch(position, flatVelocity);
             gameObject.SetActive(true);
+            if(TryGetComponent<Game2Week.Battle.View.BulletAppearance>(out var appearance))appearance.Show(color);
         }
 
         public void Deactivate()

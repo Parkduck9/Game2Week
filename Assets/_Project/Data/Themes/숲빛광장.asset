@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7216dae734c6f7d4182497c06bff5a73, type: 3}
+  m_Name: "\uC232\uBE5B\uAD11\uC7A5"
+  m_EditorClassIdentifier: Game2Week::Game2Week.Data.ArenaTheme
+  id: grove
+  floor: {r: 0.16, g: 0.29, b: 0.23, a: 1}
+  wall: {r: 0.454, g: 0.5385, b: 0.4995, a: 1}
+  accent: {r: 0.45, g: 0.8, b: 0.5, a: 1}
+  propMaterial: {fileID: 2100000, guid: f75c70ddd926c094f82b1275481d198f, type: 2}
+  propCount: 8
+  checker: 0

@@ -47,7 +47,7 @@
             "Attack_Stage_1-2"
         ]
     },
-    "theme": "default",
+    "theme": "grove",
     "dialogues": {
         "intro": "dlg_stage_002_intro",
         "phase2": "dlg_stage_002_phase2",
@@ -57,6 +57,6 @@
     "_tool": {
         "generatedBy": "StageEditor",
         "toolVersion": 1,
-        "checksum": "sha256:4944ef6b74daa7390bd2b8aa030cb265f82ab8ef4dfb00a9e1b56ce8a03734ad"
+        "checksum": "sha256:dc9baf394d874f3cc3347600c13f6d75e4dfdef342a97d4679d7603f770b46c2"
     }
 }
