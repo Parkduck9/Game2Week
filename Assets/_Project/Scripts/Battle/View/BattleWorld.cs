@@ -81,8 +81,22 @@ namespace Game2Week.Battle.View
         {
             if(cue==ActionCue.Strike)return presentationSettings?presentationSettings.strikeDuration:.7f;
             if(cue!=ActionCue.Retreat)return presentationSettings?presentationSettings.actDuration:1.4f;
-            float gap=presentationSettings?presentationSettings.retreatDistance:4.5f;
-            return FlatDistance(player.transform.position,spawner.Enemy.transform.position)>=gap?0:presentationSettings?presentationSettings.retreatDuration:.9f;
+            var target=RetreatTargetFrom(spawner.Enemy.transform.position,player.transform.position);
+            float travel=FlatDistance(target,spawner.Enemy.transform.position);
+            if(travel<.05f)return 0;
+            return presentationSettings?RetreatPath.Duration(travel,presentationSettings.retreatSpeed,presentationSettings.retreatDuration,presentationSettings.retreatMaxDuration):.9f;
+        }
+        /// <summary>처음 시작점-적 거리 (m) — 후퇴 거리 기준</summary>
+        float StartSeparation=>FlatDistance(spawner.Arena.CellToWorld(stage.playerStart),spawner.Arena.CellToWorld(stage.enemy.position));
+        /// <summary>행동 뒤 후퇴 목표: 처음 시작 거리 × 비율만큼 떨어지게 (이미 충분히 멀면 제자리 — 순간이동 없음)</summary>
+        Vector3 RetreatTargetFrom(Vector3 enemy,Vector3 playerAt)
+        {
+            float minimum=presentationSettings?presentationSettings.retreatDistance:4.5f;
+            float ratio=presentationSettings?presentationSettings.retreatToStartRatio:.8f;
+            float desired=RetreatPath.DesiredSeparation(minimum,StartSeparation,ratio);
+            float separation=FlatDistance(enemy,playerAt);
+            if(RetreatPath.FarEnough(separation,desired))return enemy;
+            return RetreatPath.Target(enemy,playerAt,desired-separation,p=>spawner.Arena.ClampToArena(p,.7f));
         }
         public void BeginPresentation(ActionCue cue)
         {
@@ -92,8 +106,7 @@ namespace Game2Week.Battle.View
             if(direction.sqrMagnitude>.001f)player.transform.rotation=Quaternion.LookRotation(direction);
             if(animationDriver)animationDriver.PlayAction(cue);
             spawner.Enemy.SetJointAction(cue);
-            float distance=presentationSettings?presentationSettings.retreatDistance:4.5f;
-            retreatTarget=FlatDistance(enemyActionStart,playerActionStart)>=distance?enemyActionStart:RetreatPath.Target(enemyActionStart,playerActionStart,distance,p=>spawner.Arena.ClampToArena(p,.7f));
+            retreatTarget=RetreatTargetFrom(enemyActionStart,playerActionStart);
             runTarget=spawner.Arena.ClampToArena(enemyActionStart+player.transform.right*1.2f,.7f);
             if(cue==ActionCue.RunTogether){var runDirection=runTarget-enemyActionStart;if(runDirection.sqrMagnitude>.001f){var facing=Quaternion.LookRotation(runDirection);player.transform.rotation=facing;spawner.Enemy.transform.rotation=facing;}}
         }

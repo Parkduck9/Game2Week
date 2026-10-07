@@ -25,7 +25,12 @@ namespace Game2Week.Tests
             yield return new WaitForSeconds(.13f);Assert.AreEqual(1,impacts);Assert.AreEqual(hp-1,battle.Context.Enemy.CurrentHp);Assert.Greater(battle.CameraDirector.ShakeCount,shakes);Capture("combat_strike_hit");
             yield return new WaitForSeconds(.5f);Assert.AreEqual(1,impacts);Assert.AreEqual(1,driver.Animator.speed);
             battle.Context.NextTurn();yield return new WaitForSeconds(.3f);Assert.AreEqual(BattleStateId.ActionPresentation,battle.Context.CurrentState);Assert.IsNull(battle.World.Patterns.CurrentObject);Capture("combat_retreat");
-            yield return new WaitForSeconds(.75f);Assert.AreEqual(BattleStateId.EnemyTurn,battle.Context.CurrentState);Assert.Less(Vector3.Distance(before,player.transform.position),.01f);Assert.Greater(Vector3.Distance(player.transform.position,battle.Spawner.Enemy.transform.position),3.5f);
+            // 후퇴는 처음 시작 거리 × 0.8까지 (거리 비례 시간, 최대 2초) — 사용자 요청: 행동 뒤 충분히 멀어지게
+            for(float t=0;t<3f&&battle.Context.CurrentState!=BattleStateId.EnemyTurn;t+=Time.deltaTime)yield return null;
+            Assert.AreEqual(BattleStateId.EnemyTurn,battle.Context.CurrentState);Assert.Less(Vector3.Distance(before,player.transform.position),.01f);
+            var stage=battle.Context.Stage;float start=Vector3.Distance(battle.Spawner.Arena.CellToWorld(stage.playerStart),battle.Spawner.Arena.CellToWorld(stage.enemy.position));
+            float gap=Vector3.Distance(player.transform.position,battle.Spawner.Enemy.transform.position);
+            Assert.Greater(gap,start*.6f,$"후퇴 뒤 거리 {gap:0.0}m — 처음 시작 거리 {start:0.0}m의 상당 부분");
         }
         [UnityTest] public IEnumerator 공동행동은둘이함께보여주고적비행은메뉴에서멈춘다()
         {

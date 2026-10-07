@@ -17,7 +17,15 @@ namespace Game2Week.Data
         [Min(0)] public float hoverRange=.15f;
         [Min(0)] public float flightRadius=.8f;
         [Min(0)] public float flightSpeed=.6f;
+        [Tooltip("후퇴 뒤 둘 사이 최소 거리 (m)")]
         [Min(1)] public float retreatDistance=4.5f;
+        [Tooltip("후퇴 최소 시간 (초)")]
         [Min(.1f)] public float retreatDuration=.9f;
+        [Tooltip("후퇴 뒤 둘 사이 거리 = 맵 처음 시작점-적 거리 × 이 비율 (사용자 요청: 행동 뒤 충분히 멀어지게). 경기장 벽에 막히면 가능한 만큼")]
+        [Range(0,1.2f)] public float retreatToStartRatio=.8f;
+        [Tooltip("후퇴 비행 속도 (m/s) — 거리가 길면 시간이 그만큼 늘어난다")]
+        [Min(1)] public float retreatSpeed=12f;
+        [Tooltip("후퇴 최대 시간 (초)")]
+        [Min(.2f)] public float retreatMaxDuration=2f;
     }
 }

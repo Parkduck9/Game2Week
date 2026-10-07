@@ -987,3 +987,18 @@
 
 ### 다음에 할 일
 - 사용자 플레이로 흔들림·공격·함께 하는 행동·적 후퇴의 체감을 확인한다. 조절은 `Assets/_Project/Data/CombatPresentationSettings.asset`에서 한다. 이후 턴은 현재 위치를 유지하므로 첫 턴보다 재접근 시간이 짧다. push는 요청 전까지 하지 않는다.
+
+---
+
+## 2026-10-07 — Claude: 행동 뒤 적 후퇴 거리 늘림 (사용자 피드백)
+
+### 한 일
+- 원인: Codex 전투 연출의 후퇴가 4.5m 고정이고 첫 턴 이후 주인공은 제자리 → 다음 턴 약 1.3초 만에 다시 닿음.
+- 후퇴 뒤 거리 = max(4.5m, 처음 시작점-적 거리 × 0.8) (1-1: 약 14.4m), 시간 = 거리 / 12m/s (0.9~2초). 벽에 막히면 옆이나 주인공 너머 중 가장 멀어지는 방향. `CombatPresentationSettings`에 `retreatToStartRatio`·`retreatSpeed`·`retreatMaxDuration`, `RetreatPath.DesiredSeparation/FarEnough/Duration`.
+- 테스트: EditMode 후퇴 거리·시간·벽, PlayMode 공격→후퇴 뒤 거리 ≥ 시작 거리 60%.
+
+### 검증
+- EditMode 211/211, PlayMode 45/45 (+측정 전용 1).
+
+### 다음에 할 일
+- 사용자: 행동 뒤 거리 체감 확인 — 더 멀게/가깝게는 `CombatPresentationSettings.asset`의 `retreatToStartRatio`(지금 0.8).
