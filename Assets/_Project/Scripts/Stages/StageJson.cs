@@ -16,6 +16,9 @@ namespace Game2Week.Stages
 
         public static string Write(StageDefinition stage)
         {
+            stage.schemaVersion = StageDefinition.CurrentSchemaVersion; // 저장하면 최신 형식으로
+            stage.theme = string.IsNullOrWhiteSpace(stage.theme) ? StageThemes.Default : stage.theme;
+            stage.dialogues ??= new StageDialogues();
             Stamp(stage._tool ??= new StageToolInfo(), () => JsonUtility.ToJson(stage));
             return JsonUtility.ToJson(stage, prettyPrint: true);
         }

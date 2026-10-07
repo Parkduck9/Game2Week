@@ -12,6 +12,8 @@ namespace Game2Week.Battle.View
         [SerializeField, Min(0.5f)] float showSeconds = 3f;
         [SerializeField] float heightAboveEnemy = 1.45f;
         [SerializeField, Min(0.1f)] float fontSize = 3f;
+        [Tooltip("이 거리(m)까지는 원래 크기, 더 멀면 화면에서 같은 크기로 보이게 키운다")]
+        [SerializeField, Min(1f)] float readableDistance = 7f;
 
         BattleFxRig rig;
         TextMeshPro text;
@@ -82,7 +84,11 @@ namespace Game2Week.Battle.View
             var enemy = rig != null && rig.Spawner ? rig.Spawner.Enemy : null;
             if (enemy) text.transform.position = enemy.transform.position + Vector3.up * heightAboveEnemy;
             var cam = Camera.main;
-            if (cam) text.transform.rotation = cam.transform.rotation;
+            if (!cam) return;
+            text.transform.rotation = cam.transform.rotation;
+            // 9단계 넓은 맵: 멀리 있어도 읽히게 기준 거리보다 멀면 거리만큼 키운다 (가까우면 원래 크기)
+            float distance = Vector3.Distance(cam.transform.position, text.transform.position);
+            text.transform.localScale = Vector3.one * Mathf.Max(1f, distance / readableDistance);
         }
     }
 }

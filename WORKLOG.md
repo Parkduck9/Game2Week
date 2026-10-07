@@ -837,3 +837,46 @@
 ### 다음에 할 일
 - 사용자: 에디터에서 주인공 동작 확인 (서기·달리기·회피·점프·쳐내기·정지 자세·피격·쓰러짐).
 - Claude: 9-0 연결 지점 (스테이지 JSON v2 `dialogues`·`theme`, `EnemyMoveSet`, `ISpareCondition`, `DialogueDefinition`, `BattleStateId.Dialogue`) → 9단계 (맵 확대·적별 기술·겹·페이즈).
+---
+
+## 2026-10-07 — Claude: 9단계 맵 확대 · 겹 공격 · 적별 기술 · 체력 단계
+
+### 한 일
+- 8.5단계 커밋 `20cc19e`.
+- 9-0: 스테이지 JSON v2 (`theme`, `dialogues` intro/phase2/spareReady/victory). v1도 읽고 저장하면 v2. 맵툴 경고 "시작점-적 15m 미만". `PatternContext.EnemyInfo`(적 고유 기술·단계 기술·체력 비율), `IBattleWorld.BeginPattern(…, EnemyPatternInfo)`, `BattleFeedback.EnemyPhaseChanged`.
+- 맵 확대 (맵툴 코드 `StageEditorModel`로 저장): 칸 1m, 시작점-적 18~28.6m, 탄막 턴 14~19초.
+- `PatternDirector`/`DirectorPlanner`: 최대 3겹, 소개 턴은 새 패턴 2초 뒤 다른 겹 합류, 후보에 적 기술 추가, `DifficultyProfile.phases`로 체력 단계(겹·간격·탄속).
+- 적 고유 기술 4종(Graph 에셋, Pattern Editor 저장 경로 사용): 테스트 적 고리·양옆 지그재그, 주황 테스트 적 부채꼴 저격·나선 고리. 적 체력 70/90. 1-1도 Director(`Attack_Stage_1-1`).
+- 그래프 탄 수명을 넓은 맵에 맞게 (최대 10초, 진행률로 모양이 정해지는 궤적은 유지). 적 말풍선이 멀리서도 읽히게 거리만큼 크기 조절.
+- 측정 봇: 시작 거리·시간 초과·최대 겹·체력 단계 기록, 맵당 12턴·240초. `Plans/Balance_Report.html` 다시 생성.
+- 테스트: `Stage9Tests` 4개, Director 계획·단계·후보 3개, 실제 전투 적 기술·단계 1개. 좁은 맵·단일 패턴 전제 테스트 10개 갱신 (`BattleTestUtil`). 처치·살려주기 흐름 봇은 피하지 않으므로 체력 유지(밸런스는 측정 봇 담당).
+
+### 검증
+- EditMode 179/179, PlayMode 31/31 (+측정 전용 1). 측정 봇 전체 실행 통과.
+- 측정: 적 접근 평균 5.0~8.1초 (이전 1.5~3.8초), 시간 초과 0, 최대 2~3겹, 단계 전환 확인. **단순 봇은 6/8 맵 패배** (피격 4~5번 = 체력 20).
+
+### 결정 필요
+- 난이도: 사람 플레이로 확인 → 피격 피해(적 공격 4)·주인공 체력(20)·겹 수 조정 여부 (수치는 미결정 항목이라 임의로 바꾸지 않음).
+
+### 다음에 할 일
+- 사용자: 1-1·1-4·1-8 직접 플레이 → 길이·난이도 체감 알려 주기.
+- Claude: 10단계 — 자비 조건(공통 3턴 + 적별 조건, FIGHT 시 0) + 대화 JSON·실행기·Dialogue Editor.
+---
+
+## 2026-10-07 — Claude: 사용자 플레이 피드백 수정 (메뉴 WASD · 탄속 · 예측 조준)
+
+### 사용자 요청
+- 행동 메뉴에서 WASD가 안 되고 방향키만 됨 → A·D로 좌우 이동. 총알이 너무 느림. 옆에서 오는 공격이 원래 위치에 쏴서 아예 안 맞음 → 약간 예측해서 쏘기. "조금 어렵게".
+
+### 한 일
+- 입력: UI 맵 `Navigate`에 WASD 묶음 추가 (W·S 목록 위아래, A·D 좌우). 회귀 테스트 `BattleInputTests.Menu_WASD_MovesLikeArrows`.
+- 탄속: 8개 맵 `DifficultyProfile.speedScale` ×1.5 (1-1 1.5 … 1-8 2.0). 노랑 기본 2.4m/s → 1-1 3.6, 1-8 약 4.8m/s (주인공 이동 3.4).
+- 예측 조준 `AimLead.Predict` (순수 함수): 조준이 고정되는 예고 시간 + 비행 시간 뒤 주인공 위치를 `leadFactor`만큼 반영 (기본 0.7, 최대 2초 앞). `PlayerMover.GroundVelocity`(부드럽게, 이동 속도 이하 — 회피 순간 속도로 튀지 않음) → `PatternContext.PlayerVelocity`. 노랑 패턴(적·측면 모두)과 그래프 패턴(`GraphPatternDefinition.leadFactor`, `PatternTimeline.Advance` 속도 인자 — Pattern Editor 미리보기는 속도 0이라 그대로) 적용.
+- 테스트: `AimLeadTests` 4개.
+
+### 검증
+- EditMode 183/183, PlayMode 33/33 (+측정 전용 1).
+
+### 다음에 할 일
+- 사용자: 다시 플레이 → 탄속·예측 정도 체감 (예측이 너무 정확하면 `leadFactor`를 0.5로, 느리면 speedScale을 더).
+- Claude: 10단계 — 자비 조건 + 대화 시스템.

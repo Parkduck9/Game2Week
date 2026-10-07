@@ -62,6 +62,10 @@ namespace Game2Week.Data
         [Header("공격")]
         [SerializeField] List<AttackPatternData> attackPatterns = new();
         [SerializeField] PatternOrder patternOrder = PatternOrder.Sequential;
+        [Tooltip("적 고유 기술 (9단계) — 맵의 패턴 구성(PatternDirector)에 이 적만의 공격으로 더해진다")]
+        [SerializeField] List<AttackPatternData> signatureMoves = new();
+        [Tooltip("체력 단계 1 이상(체력이 줄면)에 더해지는 기술")]
+        [SerializeField] List<AttackPatternData> phaseMoves = new();
 
         public string DisplayName => displayName;
         public GameObject ViewPrefab => viewPrefab;
@@ -78,5 +82,7 @@ namespace Game2Week.Data
         public int SpareThreshold => spareThreshold;
         public IReadOnlyList<AttackPatternData> AttackPatterns => attackPatterns;
         public PatternOrder PatternOrder => patternOrder;
+        public IReadOnlyList<AttackPatternData> SignatureMoves => signatureMoves;
+        public IReadOnlyList<AttackPatternData> PhaseMoves => phaseMoves;
     }
 }

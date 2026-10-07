@@ -37,7 +37,7 @@ namespace Game2Week.Tests
         /// <summary>노랑 연습 탄을 복제해 원하는 색으로 몸을 가로지르게 쏜다 (스테이지 패턴은 멈춤).</summary>
         static Bullet TakeBullet(BattleController battle)
         {
-            var pattern = (YellowTrainingPattern)battle.World.Patterns.Current;
+            var pattern = BattleTestUtil.FindPattern<YellowTrainingPattern>(battle);
             var clone = Object.Instantiate(pattern.Bullets[0], battle.Spawner.Arena.transform);
             battle.World.Patterns.End();
             return clone;
@@ -166,6 +166,7 @@ namespace Game2Week.Tests
             BattleController battle = null; yield return Enter(c => battle = c);
             var player = battle.Context.Player;
             int hp = player.CurrentHp;
+            BattleTestUtil.MoveNearEnemy(battle, 4f); // 9단계 넓은 맵 — 빨강 탄이 시험 시간 안에 몸까지 오게
 
             battle.World.BeginPattern(red, 4);
             Press(keyboard.leftCtrlKey);

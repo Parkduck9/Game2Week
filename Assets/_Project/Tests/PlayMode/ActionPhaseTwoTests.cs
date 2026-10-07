@@ -33,6 +33,10 @@ namespace Game2Week.Tests
             var local=battle.Spawner.Arena.transform.InverseTransformPoint(pattern.WarningOrigin);
             Assert.Less(local.x,-battle.Spawner.Arena.Size.x*.4f,"두 번째 공격은 왼쪽 경계에서 진입");
             var feedback=battle.World.ThreatFeedback;
+            // 9단계 넓은 맵: 경고음은 가까운 위험에만 — 날아오는 탄 옆으로 옮겨 확인
+            var near=pattern.Bullets[0].transform.position;near.y=battle.World.Player.transform.position.y;
+            battle.World.Player.Teleport(battle.Spawner.Arena.ClampToArena(near+Vector3.right*1.2f,battle.World.Player.Radius));
+            yield return null;yield return null;
             Assert.Greater(feedback.ActiveVoices,0);Assert.LessOrEqual(feedback.ActiveVoices,3);
             var voices=feedback.GetComponentsInChildren<AudioSource>();
             Assert.AreEqual(3,voices.Length);

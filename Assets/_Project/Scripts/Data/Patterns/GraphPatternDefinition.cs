@@ -17,6 +17,8 @@ namespace Game2Week.Data.Patterns
         [Min(1)] public int shotCount = 1;
         [Range(0,360)] public float spreadDegrees = 45f;
         [Min(0)] public float aimRadius = .25f;
+        [Tooltip("예측 조준 비율 (0 = 지금 위치, 1 = 탄이 닿을 때 있을 위치)")]
+        [Range(0,1)] public float leadFactor = .7f;
         public int seed = 2718;
         [Min(.1f)] public float warningSeconds = .85f;
         [Min(.1f)] public float lifetime = 3f;

@@ -60,7 +60,7 @@ namespace Game2Week.Tests
 
             // ↑를 누르고 있으면 적에게 닿는다 (시작 칸 → 적 칸 약 5.5m, 속도 2.8m/s, 턴 8초)
             Press(keyboard.upArrowKey);
-            yield return WaitUntil(() => ctx.CurrentState == BattleStateId.ActionMenu, 6f, "적에게 닿기");
+            yield return WaitUntil(() => ctx.CurrentState == BattleStateId.ActionMenu, 10f, "적에게 닿기"); // 9단계 넓은 맵 18m
             Release(keyboard.upArrowKey);
             yield return null;
             Assert.IsTrue(battle.Ui.IsMainMenuOpen);
@@ -73,6 +73,33 @@ namespace Game2Week.Tests
 
             yield return Tap(keyboard.xKey);
             Assert.AreEqual(BattleStateId.ActionMenu, ctx.CurrentState);
+        }
+
+        /// <summary>사용자 요청: 행동 메뉴에서도 A·D로 좌우 이동 (방향키와 같게), W·S는 목록 위아래.</summary>
+        [UnityTest]
+        public IEnumerator Menu_WASD_MovesLikeArrows()
+        {
+            BattleController battle = null;
+            yield return SceneFlowTests.EnterStage(0, c => battle = c);
+            var ctx = battle.Context;
+            ctx.ChangeState(BattleStateId.ActionMenu);
+            yield return null; yield return null;
+            Assert.IsTrue(battle.Ui.IsMainMenuOpen);
+
+            yield return Tap(keyboard.dKey); // 공격 → 행동
+            yield return Tap(keyboard.zKey);
+            Assert.AreEqual(BattleStateId.Act, ctx.CurrentState, "D = 오른쪽");
+            yield return Tap(keyboard.xKey);
+            Assert.AreEqual(BattleStateId.ActionMenu, ctx.CurrentState);
+
+            ctx.ChangeState(BattleStateId.ItemMenu); yield return null;
+            ctx.ChangeState(BattleStateId.ActionMenu); yield return null; yield return null; // 새로 연 메뉴 (공격부터)
+            yield return Tap(keyboard.dKey); // 공격 → 행동
+            yield return Tap(keyboard.dKey); // 행동 → 자비
+            yield return Tap(keyboard.aKey); // 자비 → 행동
+            yield return Tap(keyboard.zKey);
+            Assert.AreEqual(BattleStateId.Act, ctx.CurrentState, "A = 왼쪽");
+            Assert.IsTrue(battle.Ui.IsListMenuOpen);
         }
 
         [UnityTest]

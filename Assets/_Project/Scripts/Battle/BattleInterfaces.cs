@@ -53,8 +53,8 @@ namespace Game2Week.Battle
         /// <summary>보석을 먹는 연출 + 숨기기.</summary>
         void CollectGem(string gemId);
 
-        /// <summary>탄막 패턴 시작. 탄 한 발 데미지를 함께 준다. pattern이 null이면 탄막 없음.</summary>
-        void BeginPattern(Data.AttackPatternData pattern, int damagePerHit);
+        /// <summary>탄막 패턴 시작. 탄 한 발 데미지와 적 정보(고유 기술·체력 비율, 9단계)를 함께 준다. pattern이 null이면 탄막 없음.</summary>
+        void BeginPattern(Data.AttackPatternData pattern, int damagePerHit, Patterns.EnemyPatternInfo enemy = null);
 
         /// <summary>지난 호출 이후 주인공이 맞은 데미지 합 (무적 시간 중엔 안 맞음).</summary>
         int ConsumePlayerDamage();

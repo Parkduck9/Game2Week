@@ -1,4 +1,4 @@
-// 자동 플레이 측정 리포트 JSON → HTML (5단계). 측정: BalanceMeasurementTests.MeasureAllStages
+// 자동 플레이 측정 리포트 JSON → HTML (5단계, 9단계: 시작 거리·시간 초과·겹·체력 단계). 측정: BalanceMeasurementTests.MeasureAllStages
 // 사용: node Tools/render_balance_report.mjs [Logs/balance_report.json] → Plans/Balance_Report.html
 import fs from 'node:fs';
 import path from 'node:path';
@@ -17,7 +17,8 @@ const rows = stages.map(s => {
   return `<tr>
     <td><b>${esc(s.stageName)}</b><br><small>${esc(s.stageId)}</small></td>
     <td>${bar(s.hits, 'hits', 'hit')}<small>턴당 ${(s.hits / turns).toFixed(1)}</small></td>
-    <td>${s.contacts}/${s.enemyTurns}<br><small>평균 ${s.averageApproachSeconds.toFixed(1)}초</small></td>
+    <td>${s.contacts}/${s.enemyTurns}<br><small>평균 ${s.averageApproachSeconds.toFixed(1)}초 · 시작 거리 ${(s.startDistance ?? 0).toFixed(0)}m · 시간 초과 ${s.timeouts ?? 0}</small></td>
+    <td>${s.maxLayers ?? 0}겹 · 단계 ${s.maxPhase ?? 0}</td>
     <td>${s.dodges} · ${s.parries} · ${s.jumps}</td>
     <td>${s.braces} · <span class="red">${s.redPasses}</span> / <span class="blue">${s.bluePasses}</span></td>
     <td>${s.hpLeft}/${s.hpMax}</td>
@@ -39,7 +40,7 @@ th{font-weight:600;font-size:13px;color:var(--muted)}small{color:var(--muted)}.c
 </style></head><body><main>
 <h1>밸런스 측정 리포트</h1>
 <p>측정 ${esc(report.createdAt ?? '')} · 맵 ${stages.length}개 · ${esc(report.note ?? '')}</p>
-<div class="table"><table><thead><tr><th>맵</th><th>피격</th><th>적 접근 성공/턴</th><th>회피 · 쳐내기 · 점프</th><th>정지 자세 · 통과 빨강/파랑</th><th>남은 HP</th><th>결과</th></tr></thead>
+<div class="table"><table><thead><tr><th>맵</th><th>피격</th><th>적 접근 성공/턴</th><th>최대 동시 공격 · 체력 단계</th><th>회피 · 쳐내기 · 점프</th><th>정지 자세 · 통과 빨강/파랑</th><th>남은 HP</th><th>결과</th></tr></thead>
 <tbody>${rows}</tbody></table></div>
 <p>원본: ${esc(path.relative(root, source))} · node Tools/render_balance_report.mjs 로 생성</p>
 </main></body></html>

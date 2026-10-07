@@ -40,6 +40,8 @@ namespace Game2Week.Stages
         public const float MinCellSize = 0.25f;
         public const float MaxCellSize = 2f;
         public const float MinPlayerEnemyDistance = 4f;
+        /// <summary>시작점-적 권장 최소 거리 (m) — 이동 3.4m/s 기준 직선 약 4.4초</summary>
+        public const float RecommendedPlayerEnemyMeters = 15f;
         public const float MinTurnDuration = 2f;
         public const float MaxTurnDuration = 60f;
     }
@@ -70,7 +72,7 @@ namespace Game2Week.Stages
                 return issues;
             }
 
-            if (stage.schemaVersion != StageDefinition.CurrentSchemaVersion)
+            if (stage.schemaVersion < StageDefinition.MinSupportedSchemaVersion || stage.schemaVersion > StageDefinition.CurrentSchemaVersion)
                 Error($"지원하지 않는 schemaVersion: {stage.schemaVersion}");
             if (!IsValidId(stage.id)) Error($"스테이지 id는 영문 소문자·숫자·_ 만 가능: \"{stage.id}\"");
             if (string.IsNullOrWhiteSpace(stage.name)) Warn("스테이지 이름이 비어 있음");
@@ -106,6 +108,13 @@ namespace Game2Week.Stages
 
                 if (StageGeometry.CellDistance(stage.playerStart, stage.enemy.position) < StageLimits.MinPlayerEnemyDistance)
                     Error($"주인공 시작점과 적은 {StageLimits.MinPlayerEnemyDistance}칸 이상 떨어져야 함", stage.enemy.position);
+                else
+                {
+                    // 9단계: 적에게 닿는 시간이 너무 짧으면 패턴을 못 보고 턴이 끝난다
+                    float meters = StageGeometry.CellDistance(stage.playerStart, stage.enemy.position) * grid.cellSize;
+                    if (meters < StageLimits.RecommendedPlayerEnemyMeters)
+                        Warn($"주인공 시작점과 적 거리 {meters:0.#}m — {StageLimits.RecommendedPlayerEnemyMeters}m 이상 권장 (너무 빨리 닿음)", stage.enemy.position);
+                }
             }
 
             var gemIds = new HashSet<string>();

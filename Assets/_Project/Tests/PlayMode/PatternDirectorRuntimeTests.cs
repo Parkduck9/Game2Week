@@ -34,27 +34,34 @@ namespace Game2Week.Tests
 
             var director = (PatternDirector)battle.World.Patterns.Current;
             Assert.AreEqual(0, director.Plan.Primary, "첫 턴은 새 패턴(포물선)");
-            Assert.AreEqual(-1, director.Plan.Secondary);
-            Assert.AreEqual(1, director.ActiveObjects.Count);
+            Assert.IsTrue(director.Plan.IsIntroTurn, "소개 턴");
+            Assert.AreEqual(1, director.ActiveObjects.Count, "소개 동안은 새 패턴 혼자");
             var state = director.State;
             yield return new WaitForSeconds(PatternDirector.IntroduceSeconds + 0.2f);
             Assert.IsTrue(state.Introduced);
+            Assert.AreEqual(1, director.ActiveObjects.Count, "소개 직후에도 아직 다른 겹은 대기");
+            if (director.Plan.Secondary >= 0)
+            {
+                yield return new WaitForSeconds(director.LayerStartTime(1) - director.Elapsed + 0.3f);
+                Assert.GreaterOrEqual(director.ActiveObjects.Count, 2, "소개 뒤 같은 턴 안에 다른 겹 합류 (9단계)");
+            }
 
-            // 두 번째 패턴이 계획된 턴이 나올 때까지 (셔플 백, 동시 상한 2)
+            // 소개 뒤 턴: 셔플 백 + 겹 (동시 상한 2)
             for (int turn = 0; turn < 8; turn++)
             {
                 yield return NextEnemyTurn(battle);
                 director = (PatternDirector)battle.World.Patterns.Current;
                 Assert.AreSame(state, director.State, "턴이 바뀌어도 같은 전투 기록");
+                Assert.IsFalse(director.Plan.IsIntroTurn);
                 if (director.Plan.Secondary >= 0) break;
             }
             Assert.GreaterOrEqual(director.Plan.Secondary, 0, "8턴 안에 겹치는 턴이 있어야 함");
-            var patterns = director.Encounter.All();
+            var patterns = director.CandidatePatterns;
             Assert.IsTrue(ColorCombinationRules.CanOverlap(
                 PatternDirector.ColorOf(patterns[director.Plan.Primary]), PatternDirector.ColorOf(patterns[director.Plan.Secondary])));
 
-            yield return new WaitForSeconds(director.Encounter.profile.secondPatternDelay + 0.3f);
-            Assert.AreEqual(2, director.ActiveObjects.Count, "두 번째 패턴이 늦게 겹침");
+            yield return new WaitForSeconds(director.LayerStartTime(1) + 0.3f);
+            Assert.GreaterOrEqual(director.ActiveObjects.Count, 2, "두 번째 패턴이 늦게 겹침");
             SceneCapture.Save("director_stage5_overlap");
 
             var children = new System.Collections.Generic.List<GameObject>(director.ActiveObjects);
@@ -62,6 +69,37 @@ namespace Game2Week.Tests
             yield return null;
             Assert.IsNull(battle.World.Patterns.CurrentObject);
             foreach (var go in children) Assert.IsTrue(go == null, "턴이 끝나면 하위 패턴 정리");
+        }
+
+        /// <summary>9단계: 적 고유 기술이 후보에 들어가고, 체력이 줄면 단계 기술·알림이 더해진다.</summary>
+        [UnityTest]
+        public IEnumerator EnemyMoves_AreCandidates_AndPhaseAddsMovesWhenHurt()
+        {
+            BattleController battle = null;
+            yield return SceneFlowTests.EnterStage(0, c => battle = c);
+            var enemyData = battle.Context.Enemy.Data;
+            Assert.Greater(enemyData.SignatureMoves.Count, 0, "적 고유 기술");
+            Assert.Greater(enemyData.PhaseMoves.Count, 0, "체력 단계 기술");
+            int phaseEvents = 0;
+            battle.World.Feedback.EnemyPhaseChanged += _ => phaseEvents++;
+
+            battle.Context.ChangeState(BattleStateId.EnemyTurn);
+            yield return null;
+            var director = (PatternDirector)battle.World.Patterns.Current;
+            Assert.AreEqual(0, director.Phase);
+            CollectionAssert.IsSubsetOf(enemyData.SignatureMoves, director.CandidatePatterns, "1-1도 적 고유 기술을 함께 쓴다");
+            CollectionAssert.IsNotSubsetOf(enemyData.PhaseMoves, director.CandidatePatterns);
+            Assert.GreaterOrEqual(director.Plan.LayerCount, 2, "한 턴에 두 겹 이상");
+
+            battle.Context.Enemy.TakeDamage(battle.Context.Enemy.MaxHp * 6 / 10);
+            yield return NextEnemyTurn(battle);
+            director = (PatternDirector)battle.World.Patterns.Current;
+            Assert.AreEqual(1, director.Phase, "체력 50% 이하 → 단계 1");
+            CollectionAssert.IsSubsetOf(enemyData.PhaseMoves, director.CandidatePatterns, "단계 기술 추가");
+            Assert.AreEqual(1, phaseEvents, "단계가 오른 턴에 한 번 알림");
+            yield return NextEnemyTurn(battle);
+            Assert.AreEqual(1, phaseEvents, "같은 단계에서는 다시 알리지 않음");
+            battle.Context.ChangeState(BattleStateId.ItemMenu);
         }
 
         [UnityTest]

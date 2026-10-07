@@ -40,16 +40,31 @@ namespace Game2Week.Battle.Patterns.Trajectories
             snapshot=Instantiate(definition);snapshot.hideFlags=HideFlags.HideAndDontSave;
             if(!Mathf.Approximately(intervalScale,1f))ScaleCurve(snapshot.interval,intervalScale);
             snapshot.speed*=speedScale;
+            snapshot.lifetime=ReachLifetime(snapshot,value);
             context=value;trajectory=GraphTrajectory.Create(snapshot);timeline=new PatternTimeline(snapshot);
-            timeline.Advance(0,Local(value.Enemy.position),Local(value.Player.position),value.Arena.Size,shots);
+            timeline.Advance(0,Local(value.Enemy.position),Local(value.Player.position),value.Arena.Size,shots,
+                value.Arena.transform.InverseTransformDirection(value.PlayerVelocity));
             DrawWarnings();
+        }
+        /// <summary>넓은 맵(9단계)에서도 탄이 턴 시작 때 주인공 자리까지 닿게 수명을 늘린다 (최대 이 초)</summary>
+        public const float MaxReachLifetime=10f;
+        /// <summary>수명 = max(에셋 수명, (적-주인공 거리 또는 경기장 너비 + 2m) / 탄속), 최대 MaxReachLifetime</summary>
+        public static float ReachLifetime(GraphPatternDefinition d,PatternContext c)=>
+            ReachLifetime(d,PatternContext.FlatDistance(c.Enemy.position,c.Player.position),c.Arena.Size.x);
+        public static float ReachLifetime(GraphPatternDefinition d,float enemyToPlayer,float arenaWidth)
+        {
+            // 진행률(수명 비율)로 모양이 정해지는 궤적은 수명을 바꾸면 모양이 달라지므로 그대로 (Pattern Editor 미리보기와 같게)
+            if(d.trajectory is TrajectoryKind.Parabola or TrajectoryKind.Spiral or TrajectoryKind.Bezier)return d.lifetime;
+            float reach=Mathf.Max(enemyToPlayer,arenaWidth)+2f;
+            return Mathf.Clamp(reach/Mathf.Max(.1f,d.speed),d.lifetime,Mathf.Max(d.lifetime,MaxReachLifetime));
         }
         Vector3 Local(Vector3 world)=>context.Arena.transform.InverseTransformPoint(world);
         Vector3 World(Vector3 local)=>context.Arena.transform.TransformPoint(local);
         public void Tick(float dt)
         {
             if(context==null||dt<=0)return;
-            shots.Clear();timeline.Advance(dt,Local(context.Enemy.position),Local(context.Player.position),context.Arena.Size,shots);
+            shots.Clear();timeline.Advance(dt,Local(context.Enemy.position),Local(context.Player.position),context.Arena.Size,shots,
+                context.Arena.transform.InverseTransformDirection(context.PlayerVelocity));
             foreach(var b in bullets)if(b.Active)
             {
                 if(b.Tick(dt,context)){b.Deactivate();context.ReportHit();}

@@ -13,7 +13,13 @@ MonoBehaviour:
   m_Name: Profile_1-6
   m_EditorClassIdentifier: Game2Week::Game2Week.Data.Patterns.DifficultyProfile
   referenceInterval: 0.8
-  speedScale: 1.16
+  speedScale: 1.74
   maxSimultaneous: 2
-  liveThreatCap: 12
+  liveThreatCap: 14
   secondPatternDelay: 1.6
+  thirdPatternDelay: 3.2
+  phases:
+  - hpBelow: 0.6
+    extraLayers: 1
+    intervalMultiplier: 0.88
+    speedMultiplier: 1.05

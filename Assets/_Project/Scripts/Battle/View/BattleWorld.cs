@@ -106,12 +106,12 @@ namespace Game2Week.Battle.View
             gem.Hide();
         }
 
-        public void BeginPattern(AttackPatternData pattern, int damagePerHit)
+        public void BeginPattern(AttackPatternData pattern, int damagePerHit, EnemyPatternInfo enemyInfo = null)
         {
             pendingDamage = 0;
             var enemy = spawner.Enemy;
             var context = new PatternContext(spawner.Arena, enemy ? enemy.transform : spawner.Arena.transform, enemy,
-                player.transform, player.Radius, damagePerHit, OnPlayerHit, player, hitRule, encounterMemory, feedback);
+                player.transform, player.Radius, damagePerHit, OnPlayerHit, player, hitRule, encounterMemory, feedback, enemyInfo);
             hitRule.ResetCounts();
             patternRunner.Begin(pattern, context, spawner.Arena.transform);
         }

@@ -62,10 +62,15 @@ namespace Game2Week.Tests
             int acts = 0;
             bool holdingUp = false;
             float start = Time.realtimeSinceStartup;
+            // 9단계: 이 봇은 피하지 않고 직진만 하므로(결말 흐름 검사), 넓은 맵·겹 공격에서 살아남게 처치·살려주기 길은 체력을 채우고
+            // 처치 길은 적 체력을 공격 한 번 분량으로 줄인다. 회피 실력·밸런스는 BalanceMeasurementTests가 맡는다.
+            if (route == Route.Kill) battle.Context.Enemy.TakeDamage(battle.Context.Enemy.MaxHp - 5);
 
             while (SceneManager.GetActiveScene().name == SceneNames.Battle && battle)
             {
                 if (Time.realtimeSinceStartup - start > timeoutSeconds) Assert.Fail($"{route}: 시간 초과 (상태 {battle.Context.CurrentState})");
+                if (route != Route.Defeat && battle.Context.Player.CurrentHp < battle.Context.Player.MaxHp)
+                    battle.Context.Player.Heal(battle.Context.Player.MaxHp);
                 var ui = battle.Ui;
                 var state = battle.Context.CurrentState;
 

@@ -41,14 +41,16 @@ namespace Game2Week.Tests
             battle.World.ShowGems(spawner.Gems.Keys.ToList()); // 확인용: 모든 보석 표시
             yield return new WaitForSeconds(1f);
             Assert.That(Vector3.Distance(spawner.Arena.CellToWorld(stage.playerStart), spawner.Player.position), Is.LessThan(0.01f));
-            var pattern = battle.World.Patterns.CurrentObject ? battle.World.Patterns.CurrentObject.GetComponent<Game2Week.Battle.Patterns.YellowTrainingPattern>() : null;
+            // 9단계부터 1-1도 PatternDirector — 첫 턴의 주 공격은 노랑 직선 조작 시험
+            var pattern = BattleTestUtil.FindPattern<Game2Week.Battle.Patterns.YellowTrainingPattern>(battle);
             Assert.IsNotNull(pattern, "stage_001 → 노랑 직선 조작 시험");
             Assert.Greater(pattern.ActiveBullets, 0, "첫 물결 발사됨");
             yield return new WaitForSeconds(0.5f);
             SceneCapture.Save("battle_2_EnemyTurn");
 
-            // 가만히 있으면 탄에 맞는다 (적 바로 아래 = 탄 방향 하나와 일치)
-            yield return new WaitForSeconds(2.5f);
+            // 가만히 있으면 탄에 맞는다 — 넓은 맵이라 적 4m 앞으로 옮겨 다음 조준을 받는다
+            BattleTestUtil.MoveNearEnemy(battle, 4f);
+            yield return new WaitForSeconds(4f);
             Assert.Less(battle.Context.Player.CurrentHp, battle.Context.Player.MaxHp, "탄에 맞아 HP 감소");
 
             battle.Context.ChangeState(BattleStateId.ActionMenu);
@@ -73,7 +75,7 @@ namespace Game2Week.Tests
             SceneCapture.Save("battle_6_Defeat");
         }
 
-        /// <summary>에셋 연결 검증: 1-2 주황 적·노랑 사인파·8×9m 경기장.</summary>
+        /// <summary>에셋 연결 검증: 1-2 주황 적·노랑 사인파·스테이지 데이터대로의 경기장 (9단계부터 21×24m).</summary>
         [UnityTest]
         public IEnumerator Stage2_FromAssetsOnly_Works()
         {
@@ -85,7 +87,7 @@ namespace Game2Week.Tests
             yield return SceneFlowTests.WaitForBattle(c => battle = c);
 
             Assert.AreEqual("stage_002", battle.Context.Stage.id);
-            Assert.AreEqual(new Vector2(8f, 9f), battle.Spawner.Arena.Size);
+            Assert.AreEqual(new Vector2(21f, 24f), battle.Spawner.Arena.Size);
             Assert.AreEqual("주황 테스트 적", battle.Context.Enemy.Data.DisplayName);
             Assert.AreEqual(3, battle.Context.Enemy.Data.Acts.Count);
 

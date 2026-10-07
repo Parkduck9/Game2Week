@@ -39,7 +39,9 @@ namespace Game2Week.Battle
             var line = Context.Enemy.NextEnemyTurnLine();
             Context.Ui.ShowTurnHud(string.IsNullOrEmpty(line) ? BattleTexts.TurnHint : $"{Context.Enemy.Data.DisplayName}: \"{line}\"   ·   {BattleTexts.TurnHint}");
             if (!string.IsNullOrEmpty(line)) Context.Events.RaiseEnemySpoke(line);
-            Context.World.BeginPattern(Context.NextPattern(), BattleFormulas.BulletDamage(Context.Enemy.Data.Attack, Context.Player.Data.Defense));
+            var enemy = Context.Enemy;
+            var enemyInfo = new Patterns.EnemyPatternInfo(enemy.Data.SignatureMoves, enemy.Data.PhaseMoves, () => enemy.MaxHp > 0 ? (float)enemy.CurrentHp / enemy.MaxHp : 1f);
+            Context.World.BeginPattern(Context.NextPattern(), BattleFormulas.BulletDamage(enemy.Data.Attack, Context.Player.Data.Defense), enemyInfo);
             Context.Input?.EnablePlayer();
         }
 

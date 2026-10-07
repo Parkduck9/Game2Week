@@ -1,21 +1,21 @@
 {
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "id": "stage_001",
     "name": "1-1 첫 만남",
     "grid": {
-        "width": 12,
-        "depth": 14,
-        "cellSize": 0.5
+        "width": 20,
+        "depth": 23,
+        "cellSize": 1.0
     },
     "playerStart": {
-        "x": 6,
-        "z": 1
+        "x": 10,
+        "z": 2
     },
     "enemy": {
         "enemyId": "Enemy_Test",
         "position": {
-            "x": 6,
-            "z": 12
+            "x": 10,
+            "z": 20
         }
     },
     "gems": [
@@ -23,8 +23,8 @@
             "id": "gem_01",
             "type": "heal",
             "position": {
-                "x": 2,
-                "z": 6
+                "x": 4,
+                "z": 10
             },
             "spawnChance": 0.25
         },
@@ -32,8 +32,8 @@
             "id": "gem_02",
             "type": "attack",
             "position": {
-                "x": 9,
-                "z": 5
+                "x": 15,
+                "z": 8
             },
             "spawnChance": 0.25
         },
@@ -41,8 +41,8 @@
             "id": "gem_03",
             "type": "spare",
             "position": {
-                "x": 6,
-                "z": 8
+                "x": 10,
+                "z": 13
             },
             "spawnChance": 0.25
         }
@@ -51,14 +51,21 @@
         "maxPerTurn": 1
     },
     "enemyTurn": {
-        "duration": 8.0,
+        "duration": 14.0,
         "patterns": [
-            "Pattern_YellowTraining"
+            "Attack_Stage_1-1"
         ]
+    },
+    "theme": "default",
+    "dialogues": {
+        "intro": "",
+        "phase2": "",
+        "spareReady": "",
+        "victory": ""
     },
     "_tool": {
         "generatedBy": "StageEditor",
         "toolVersion": 1,
-        "checksum": "sha256:125952798ce81a6b1d9c42f1381bd58688575cbfec78d7a3b480736d03964386"
+        "checksum": "sha256:018cc7a3103c33f625af51f2798492843852fc2e57ea0ef88aae903741d3c61f"
     }
 }

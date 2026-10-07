@@ -1,21 +1,21 @@
 {
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "id": "stage_005",
     "name": "1-5 결정의 방",
     "grid": {
-        "width": 18,
-        "depth": 18,
-        "cellSize": 0.5
+        "width": 25,
+        "depth": 25,
+        "cellSize": 1.0
     },
     "playerStart": {
-        "x": 14,
-        "z": 2
+        "x": 20,
+        "z": 3
     },
     "enemy": {
         "enemyId": "Enemy_Test2",
         "position": {
-            "x": 3,
-            "z": 15
+            "x": 4,
+            "z": 21
         }
     },
     "gems": [
@@ -23,8 +23,8 @@
             "id": "gem_01",
             "type": "attack",
             "position": {
-                "x": 9,
-                "z": 9
+                "x": 13,
+                "z": 13
             },
             "spawnChance": 0.30000001192092898
         },
@@ -32,8 +32,8 @@
             "id": "gem_02",
             "type": "heal",
             "position": {
-                "x": 15,
-                "z": 12
+                "x": 21,
+                "z": 17
             },
             "spawnChance": 0.30000001192092898
         }
@@ -42,14 +42,21 @@
         "maxPerTurn": 2
     },
     "enemyTurn": {
-        "duration": 9.0,
+        "duration": 17.0,
         "patterns": [
             "Attack_Stage_1-5"
         ]
     },
+    "theme": "default",
+    "dialogues": {
+        "intro": "",
+        "phase2": "",
+        "spareReady": "",
+        "victory": ""
+    },
     "_tool": {
         "generatedBy": "StageEditor",
         "toolVersion": 1,
-        "checksum": "sha256:e412d2af5be647adfc41a8bbdb734291b5b32de297fcf919566c9b96085c40e7"
+        "checksum": "sha256:61c78f03995a78a8208e32e9535ed89f4b4a22cff8a53f40e5e8910e1ed618c7"
     }
 }

@@ -26,7 +26,8 @@ namespace Game2Week.Battle.Patterns.Trajectories
         public float NextShotTime=>nextShot;
         public PatternTimeline(GraphPatternDefinition definition)
         {d=definition;random=new System.Random(d.seed);nextShot=d.warningSeconds;nextWarning=0;}
-        public void Advance(float delta,Vector3 enemy,Vector3 target,Vector2 arena,List<PatternShot> output)
+        /// <param name="targetVelocity">주인공 속도 (경기장 로컬). 미리보기처럼 모르면 0 → 예측 없음</param>
+        public void Advance(float delta,Vector3 enemy,Vector3 target,Vector2 arena,List<PatternShot> output,Vector3 targetVelocity=default)
         {
             if(delta<0||!PatternGraphRules.Finite(delta))throw new ArgumentOutOfRangeException(nameof(delta));
             float end=Time+delta;
@@ -40,7 +41,8 @@ namespace Game2Week.Battle.Patterns.Trajectories
                     if(origin==ShotOrigin.Left||origin==ShotOrigin.Right)
                         fixedOrigin=new Vector3((origin==ShotOrigin.Left?-1:1)*(arena.x*.5f-.45f),0,Mathf.Clamp(target.z+1.2f,-arena.y*.5f+.5f,arena.y*.5f-.5f));
                     fixedOrigin.y=d.height;
-                    fixedTarget=target+WaveTrajectory.AimOffset(random,d.aimRadius);fixedTarget.y=d.height;
+                    var predicted=AimLead.Predict(fixedOrigin,target,targetVelocity,d.speed,d.warningSeconds,d.leadFactor);
+                    fixedTarget=predicted+WaveTrajectory.AimOffset(random,d.aimRadius);fixedTarget.y=d.height;
                     fixedTarget.x=Mathf.Clamp(fixedTarget.x,-arena.x*.5f+.35f,arena.x*.5f-.35f);
                     fixedTarget.z=Mathf.Clamp(fixedTarget.z,-arena.y*.5f+.35f,arena.y*.5f-.35f);
                     WarningActive=true;

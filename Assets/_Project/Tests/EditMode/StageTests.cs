@@ -20,6 +20,7 @@ namespace Game2Week.Tests
         static StageDefinition ValidStage()
         {
             var stage = new StageDefinition { id = "stage_001", name = "테스트" };
+            stage.grid.cellSize = 1.5f; // 시작점-적 11칸 = 16.5m (9단계 권장 거리 경고 없음)
             stage.gems.Add(new StageGem { id = "gem_01", type = GemTypes.Heal, position = new GridPoint(3, 6) });
             stage.gems.Add(new StageGem { id = "gem_02", type = GemTypes.Spare, position = new GridPoint(9, 8) });
             stage.enemyTurn.patterns.Add("Pattern_Test");

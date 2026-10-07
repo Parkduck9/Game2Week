@@ -1,21 +1,21 @@
 {
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "id": "stage_008",
     "name": "1-8 중심의 결정",
     "grid": {
-        "width": 22,
-        "depth": 22,
-        "cellSize": 0.5
+        "width": 40,
+        "depth": 40,
+        "cellSize": 1.0
     },
     "playerStart": {
-        "x": 18,
-        "z": 2
+        "x": 33,
+        "z": 4
     },
     "enemy": {
         "enemyId": "Enemy_Test2",
         "position": {
-            "x": 11,
-            "z": 11
+            "x": 20,
+            "z": 20
         }
     },
     "gems": [
@@ -23,8 +23,8 @@
             "id": "gem_01",
             "type": "attack",
             "position": {
-                "x": 16,
-                "z": 7
+                "x": 29,
+                "z": 13
             },
             "spawnChance": 0.25
         },
@@ -32,8 +32,8 @@
             "id": "gem_02",
             "type": "heal",
             "position": {
-                "x": 5,
-                "z": 11
+                "x": 9,
+                "z": 20
             },
             "spawnChance": 0.25
         },
@@ -41,8 +41,8 @@
             "id": "gem_03",
             "type": "spare",
             "position": {
-                "x": 11,
-                "z": 17
+                "x": 20,
+                "z": 31
             },
             "spawnChance": 0.25
         }
@@ -51,14 +51,21 @@
         "maxPerTurn": 1
     },
     "enemyTurn": {
-        "duration": 8.0,
+        "duration": 15.0,
         "patterns": [
             "Attack_Stage_1-8"
         ]
     },
+    "theme": "default",
+    "dialogues": {
+        "intro": "",
+        "phase2": "",
+        "spareReady": "",
+        "victory": ""
+    },
     "_tool": {
         "generatedBy": "StageEditor",
         "toolVersion": 1,
-        "checksum": "sha256:14fbaae44978a4114354749a44158b737712cb036ecda7c67701f5f5c22ae944"
+        "checksum": "sha256:b7363047e53403b49f930eb0b34e9103d27ddb4933b1390c91578f16809037a3"
     }
 }

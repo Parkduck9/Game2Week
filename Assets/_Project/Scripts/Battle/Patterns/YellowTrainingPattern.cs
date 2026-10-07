@@ -18,6 +18,8 @@ namespace Game2Week.Battle.Patterns
         [SerializeField] bool alternateSideOrigins;
         [SerializeField] float warningWaveAmplitude;
         [SerializeField] float warningWaveFrequency = .65f;
+        [Tooltip("예측 조준 비율 (0 = 지금 위치, 1 = 탄이 닿을 때 있을 위치)")]
+        [SerializeField, Range(0f, 1f)] float leadFactor = 0.7f;
         readonly List<Bullet> bullets = new();
         PatternContext context;
         LineRenderer warning;
@@ -66,7 +68,9 @@ namespace Game2Week.Battle.Patterns
                     Mathf.Clamp(playerLocal.z + 1.2f,-context.Arena.Size.y*.5f+.5f,context.Arena.Size.y*.5f-.5f));
                 origin = context.Arena.transform.TransformPoint(local);
             }
-            var aim = context.Player.position + WaveTrajectory.AimOffset(random,aimRandomRadius);
+            // 예측 조준: 예고가 끝나 발사될 때 + 날아가는 동안 주인공이 갈 자리
+            var predicted = AimLead.Predict(origin, context.Player.position, context.PlayerVelocity, speed, warningDuration, leadFactor);
+            var aim = predicted + WaveTrajectory.AimOffset(random,aimRandomRadius);
             target = context.Arena.ClampToArena(new Vector3(aim.x, origin.y, aim.z),.35f);
             var forward = (target-origin).normalized;
             float time = Vector3.Distance(origin,target) / speed;

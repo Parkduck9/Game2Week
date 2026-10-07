@@ -79,9 +79,12 @@ namespace Game2Week.Tests
             public int PendingDamage;
             public bool PatternRunning;
 
-            public void BeginPattern(AttackPatternData pattern, int damagePerHit)
+            public Battle.Patterns.EnemyPatternInfo EnemyInfo;
+
+            public void BeginPattern(AttackPatternData pattern, int damagePerHit, Battle.Patterns.EnemyPatternInfo enemy = null)
             {
                 Pattern = pattern;
+                EnemyInfo = enemy;
                 DamagePerHit = damagePerHit;
                 PatternRunning = true;
             }

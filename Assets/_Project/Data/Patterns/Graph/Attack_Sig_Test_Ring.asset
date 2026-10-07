@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02178c6dab15cd6468e439a991232290, type: 3}
+  m_Name: Attack_Sig_Test_Ring
+  m_EditorClassIdentifier: Game2Week::Game2Week.Data.AttackPatternData
+  displayName: Sig_Test_Ring
+  patternPrefab: {fileID: 1620947720747154319, guid: 4b64b4ca72e9fdf48bbdb9302e686496, type: 3}

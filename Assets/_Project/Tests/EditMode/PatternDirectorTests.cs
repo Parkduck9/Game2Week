@@ -3,10 +3,12 @@ using System.Linq;
 using Game2Week.Battle;
 using Game2Week.Battle.Patterns;
 using Game2Week.Battle.Patterns.Director;
+using Game2Week.Data;
 using Game2Week.Data.Patterns;
 using Game2Week.Stages;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEngine;
 
 namespace Game2Week.Tests
 {
@@ -17,19 +19,80 @@ namespace Game2Week.Tests
         static readonly AttackColor Y = AttackColor.Yellow, R = AttackColor.Red, B = AttackColor.Blue;
 
         [Test]
-        public void NewPattern_ComesFirstAndAlone_UntilIntroduced()
+        public void NewPattern_IsPrimary_InIntroTurns_OtherLayersJoinLater()
         {
             var s = NewState();
             var colors = new[] { Y, Y, Y };
             for (int i = 0; i < 3; i++)
             {
                 var plan = DirectorPlanner.PlanTurn(s, colors, 2);
-                Assert.AreEqual(0, plan.Primary, "소개 전에는 새 패턴 먼저");
-                Assert.AreEqual(-1, plan.Secondary, "소개는 단독");
+                Assert.AreEqual(0, plan.Primary, "소개 전에는 새 패턴이 주 공격");
+                Assert.IsTrue(plan.IsIntroTurn, "소개 턴 — 다른 겹은 소개 뒤에 합류 (9단계)");
+                Assert.AreEqual(2, plan.LayerCount);
             }
             s.Introduced = true;
             var after = DirectorPlanner.PlanTurn(s, colors, 2);
             Assert.GreaterOrEqual(after.Primary, 0);
+            Assert.IsFalse(after.IsIntroTurn);
+            var lone = NewState();
+            Assert.IsFalse(DirectorPlanner.PlanTurn(lone, new[] { Y }, 3).IsIntroTurn, "패턴이 하나면 소개 턴 구분 없음");
+        }
+
+        [Test]
+        public void ThreeLayers_AllPairsColorCompatible_AndDistinct()
+        {
+            var colors = new[] { Y, R, B, Y, Y };
+            var s = NewState(5); s.Introduced = true;
+            for (int i = 0; i < 80; i++)
+            {
+                var plan = DirectorPlanner.PlanTurn(s, colors, 3);
+                Assert.LessOrEqual(plan.LayerCount, 3);
+                CollectionAssert.AllItemsAreUnique(plan.Layers);
+                for (int a = 0; a < plan.LayerCount; a++)
+                    for (int b = a + 1; b < plan.LayerCount; b++)
+                        Assert.IsTrue(ColorCombinationRules.CanOverlap(colors[plan.Layers[a]], colors[plan.Layers[b]]), "빨강·파랑 동시 금지");
+            }
+            var yellow = NewState(); yellow.Introduced = true;
+            Assert.AreEqual(3, DirectorPlanner.PlanTurn(yellow, new[] { Y, Y, Y, Y }, 3).LayerCount, "가능하면 3겹 모두");
+        }
+
+        [Test]
+        public void Profile_Phases_AddLayers_AndScale()
+        {
+            var p = ScriptableObject.CreateInstance<DifficultyProfile>();
+            try
+            {
+                p.referenceInterval = 1.4f; p.speedScale = 1f; p.maxSimultaneous = 2;
+                p.phases = new List<DifficultyPhase>
+                {
+                    new() { hpBelow = 0.6f, extraLayers = 1, intervalMultiplier = 0.9f, speedMultiplier = 1.1f },
+                    new() { hpBelow = 0.3f, extraLayers = 1, intervalMultiplier = 0.5f, speedMultiplier = 1f },
+                };
+                Assert.AreEqual(0, p.PhaseFor(1f));
+                Assert.AreEqual(1, p.PhaseFor(0.6f));
+                Assert.AreEqual(2, p.PhaseFor(0.1f));
+                Assert.AreEqual(2, p.LayersFor(0));
+                Assert.AreEqual(3, p.LayersFor(1));
+                Assert.AreEqual(DifficultyProfile.MaxLayers, p.LayersFor(2), "상한 3");
+                var (interval, speed) = p.ScalesFor(2);
+                Assert.AreEqual(0.45f, interval, 1e-4f);
+                Assert.AreEqual(1.1f, speed, 1e-4f);
+            }
+            finally { Object.DestroyImmediate(p); }
+        }
+
+        [Test]
+        public void Candidates_AddEnemyMoves_AndPhaseMovesOnlyWhenHurt()
+        {
+            var e = AssetDatabase.LoadAssetAtPath<PatternEncounterData>("Assets/_Project/Data/Patterns/Director/Encounter_1-2.asset");
+            var enemy = AssetDatabase.LoadAssetAtPath<EnemyData>("Assets/_Project/Data/Enemies/Enemy_Test2.asset");
+            var info = new EnemyPatternInfo(enemy.SignatureMoves, enemy.PhaseMoves, () => 1f);
+            var calm = PatternDirector.BuildCandidates(e, info, 0);
+            Assert.AreSame(e.newPattern, calm[0], "0번은 맵의 새 패턴 그대로");
+            CollectionAssert.IsSubsetOf(enemy.SignatureMoves, calm);
+            CollectionAssert.IsNotSubsetOf(enemy.PhaseMoves, calm);
+            CollectionAssert.IsSubsetOf(enemy.PhaseMoves, PatternDirector.BuildCandidates(e, info, 1));
+            CollectionAssert.AllItemsAreUnique(PatternDirector.BuildCandidates(e, info, 1));
         }
 
         [Test]
@@ -70,11 +133,10 @@ namespace Game2Week.Tests
             var repo = new StageRepository(StageRepository.DefaultDirectory);
             var ids = repo.LoadIndex().stages;
             Assert.AreEqual(8, ids.Count);
-            Assert.AreEqual("Pattern_YellowTraining", repo.LoadStage(ids[0]).Stage.enemyTurn.patterns.Single());
 
             float lastInterval = DifficultyProfile.BaseReferenceInterval + 0.01f;
-            var seen = new HashSet<string> { "Pattern_YellowTraining" };
-            for (int n = 2; n <= 8; n++)
+            var seen = new HashSet<string>();
+            for (int n = 1; n <= 8; n++)
             {
                 Assert.AreEqual($"Attack_Stage_1-{n}", repo.LoadStage(ids[n - 1]).Stage.enemyTurn.patterns.Single());
                 var e = AssetDatabase.LoadAssetAtPath<PatternEncounterData>($"Assets/_Project/Data/Patterns/Director/Encounter_1-{n}.asset");
@@ -85,8 +147,10 @@ namespace Game2Week.Tests
                 seen.Add(e.newPattern.name);
                 Assert.Less(e.profile.referenceInterval, lastInterval, "발사 간격은 단계마다 줄어든다");
                 lastInterval = e.profile.referenceInterval;
-                Assert.AreEqual(n >= 5 ? 2 : 1, e.profile.maxSimultaneous);
+                Assert.AreEqual(n >= 7 ? 3 : 2, e.profile.maxSimultaneous, "9단계: 처음부터 2겹, 7·8은 3겹");
+                Assert.Greater(e.profile.phases.Count, 0, "체력 단계");
             }
+            Assert.AreEqual("Pattern_YellowTraining", AssetDatabase.LoadAssetAtPath<PatternEncounterData>("Assets/_Project/Data/Patterns/Director/Encounter_1-1.asset").newPattern.name);
             Assert.AreEqual(0.65f, lastInterval, 1e-4f);
         }
 

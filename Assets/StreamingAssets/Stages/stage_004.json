@@ -1,21 +1,21 @@
 {
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "id": "stage_004",
     "name": "1-4 넓은 들판",
     "grid": {
-        "width": 24,
-        "depth": 20,
-        "cellSize": 0.5
+        "width": 34,
+        "depth": 28,
+        "cellSize": 1.0
     },
     "playerStart": {
-        "x": 12,
-        "z": 1
+        "x": 17,
+        "z": 2
     },
     "enemy": {
         "enemyId": "Enemy_Test2",
         "position": {
-            "x": 12,
-            "z": 18
+            "x": 17,
+            "z": 26
         }
     },
     "gems": [
@@ -23,8 +23,8 @@
             "id": "gem_01",
             "type": "heal",
             "position": {
-                "x": 5,
-                "z": 8
+                "x": 7,
+                "z": 12
             },
             "spawnChance": 0.25
         },
@@ -32,8 +32,8 @@
             "id": "gem_02",
             "type": "attack",
             "position": {
-                "x": 19,
-                "z": 11
+                "x": 27,
+                "z": 16
             },
             "spawnChance": 0.25
         },
@@ -41,8 +41,8 @@
             "id": "gem_03",
             "type": "spare",
             "position": {
-                "x": 12,
-                "z": 13
+                "x": 17,
+                "z": 19
             },
             "spawnChance": 0.25
         }
@@ -51,14 +51,21 @@
         "maxPerTurn": 1
     },
     "enemyTurn": {
-        "duration": 10.0,
+        "duration": 17.0,
         "patterns": [
             "Attack_Stage_1-4"
         ]
     },
+    "theme": "default",
+    "dialogues": {
+        "intro": "",
+        "phase2": "",
+        "spareReady": "",
+        "victory": ""
+    },
     "_tool": {
         "generatedBy": "StageEditor",
         "toolVersion": 1,
-        "checksum": "sha256:7b5ced75444342c9f032ef089f2586add7323be750e9e87a680af9d54206833f"
+        "checksum": "sha256:87768fbe9f994a1e11f8e8dc152af3fd038f92474cc88e4d6fe86863c67ed486"
     }
 }

@@ -36,5 +36,8 @@ namespace Game2Week.Battle
         public void RaiseColorPassed(AttackColor color, Vector3 at) => ColorPassed?.Invoke(color, at);
         public void RaiseBulletFired(AttackColor color, Vector3 at) => BulletFired?.Invoke(color, at);
         public void RaiseWarningStarted(AttackColor color, Vector3 at) => WarningStarted?.Invoke(color, at);
+        /// <summary>적 체력 단계가 올라간 턴의 시작 (1 = 첫 단계 전환). 대화·연출이 구독 (9단계)</summary>
+        public event Action<int> EnemyPhaseChanged;
+        public void RaiseEnemyPhaseChanged(int phase) => EnemyPhaseChanged?.Invoke(phase);
     }
 }

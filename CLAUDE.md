@@ -69,7 +69,8 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 - 쳐내기는 오른손으로 왼쪽에서 오는 탄을 오른쪽 어깨 뒤로, 오른쪽 탄을 왼쪽 어깨 뒤로 흘린다. 입력 방향으로 이동을 계속한다. 적에게 단순 반사하는 방식이나 강제 뒤 밀림이 아니다. 점프는 후속 답변으로 포함이 확정됐고, 록온 가운데 버튼/점프 Space는 기본안이다.
 
 ### 5~8단계 결과로 생긴 규칙 (2026-10-06 합침)
-- 맵 패턴은 `PatternDirector` + `PatternEncounterData`/`DifficultyProfile`(`Data/Patterns/Director/`)로 누적 — 새 패턴은 `IDirectablePattern` 구현(색·난이도 배율). 1-1만 단일 패턴.
+- 맵 패턴은 `PatternDirector` + `PatternEncounterData`/`DifficultyProfile`(`Data/Patterns/Director/`)로 누적 — 새 패턴은 `IDirectablePattern` 구현(색·난이도 배율). 9단계부터 1-1 포함 8개 맵 모두 Director, 한 턴 최대 3겹, 적 고유 기술은 `EnemyData.signatureMoves`/`phaseMoves`, 체력 단계는 `DifficultyProfile.phases`.
+- 맵은 칸 1m·시작점-적 15m 이상 (맵툴 경고). 스테이지 JSON v2 (`theme`·`dialogues`). 테스트에서 하위 패턴은 `BattleTestUtil.FindPattern`, 탄을 맞히려면 `MoveNearEnemy`.
 - 월드 사건은 `BattleFeedback`, 이펙트는 `BattleFxRig` 프리팹 아래 `IBattleFxModule`(씬 수정 없이), 소리는 `BattleAudio`·`UiSoundSet`·`SceneBgm` + `AudioRouting`(믹서 선택). 씬 전환은 `SceneLoader`(페이드 0.25초, `FadeSeconds`).
 - 이름·버전은 `Data/ProductInfo.asset` 한 곳 (회사 `DefaultCompany`는 세이브 경로라 확정 전까지 유지). 폰트는 정적 아틀라스 — 새 한글 문구는 `FontCoverageTests`가 검사.
 - 주인공 동작 클립은 glb 안 클립이 아니라 `Tools ▸ Heroine ▸ 동작 클립 다시 만들기`(`HeroineClipAuthoring`)가 만든 `Art/Characters/Heroine/Clips/Heroine_*.anim` — 동작을 고칠 땐 이 도구의 자세 함수를 고치고 다시 실행 (2026-10-07, glb 클립은 T자 자세 버그).
@@ -89,7 +90,7 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 
 ## 확정된 결정 (사용자 승인됨)
 - Unity 6 · 3D(URP) · **New Input System** · Cinemachine(카메라 연출)
-- 조작: 방향키 / 확인 Z·Enter / 취소 X·Shift
+- 조작: 방향키 / 확인 Z·Enter / 취소 X·Shift (메뉴도 WASD 가능, 2026-10-07 사용자 요청)
 - 메뉴: 적에게 닿았을 때 FIGHT · ACT · MERCY / 못 닿았을 때 ITEM · 넘기기 — **명칭은 임시**
 - 테스트 적 외형: Primitive/로우폴리 도형 조합 임시 모양
 - FIGHT = 움직이는 게이지 Timing Attack

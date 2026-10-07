@@ -65,7 +65,7 @@ namespace Game2Week.Tests
             var player = battle.World.Player;
             PressAndRelease(mouse.middleButton); yield return null; yield return null;
             yield return new WaitForSeconds(.85f);
-            var pattern = (YellowTrainingPattern)battle.World.Patterns.Current;
+            var pattern = BattleTestUtil.FindPattern<YellowTrainingPattern>(battle);
             Assert.Greater(pattern.Bullets.Count, 0);
             var source = pattern.Bullets[0];
             var clone = Object.Instantiate(source, battle.Spawner.Arena.transform);

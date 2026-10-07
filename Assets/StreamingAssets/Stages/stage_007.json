@@ -1,21 +1,21 @@
 {
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "id": "stage_007",
     "name": "1-7 긴 접근",
     "grid": {
-        "width": 12,
-        "depth": 28,
-        "cellSize": 0.5
+        "width": 14,
+        "depth": 33,
+        "cellSize": 1.0
     },
     "playerStart": {
-        "x": 3,
+        "x": 4,
         "z": 2
     },
     "enemy": {
         "enemyId": "Enemy_Test2",
         "position": {
-            "x": 8,
-            "z": 25
+            "x": 10,
+            "z": 30
         }
     },
     "gems": [
@@ -23,8 +23,8 @@
             "id": "gem_01",
             "type": "heal",
             "position": {
-                "x": 8,
-                "z": 9
+                "x": 10,
+                "z": 11
             },
             "spawnChance": 0.25
         },
@@ -32,8 +32,8 @@
             "id": "gem_02",
             "type": "spare",
             "position": {
-                "x": 3,
-                "z": 18
+                "x": 4,
+                "z": 22
             },
             "spawnChance": 0.25
         }
@@ -42,14 +42,21 @@
         "maxPerTurn": 1
     },
     "enemyTurn": {
-        "duration": 10.0,
+        "duration": 19.0,
         "patterns": [
             "Attack_Stage_1-7"
         ]
     },
+    "theme": "default",
+    "dialogues": {
+        "intro": "",
+        "phase2": "",
+        "spareReady": "",
+        "victory": ""
+    },
     "_tool": {
         "generatedBy": "StageEditor",
         "toolVersion": 1,
-        "checksum": "sha256:ad2ca21e7a386917bb4d5afe1f24451121f53739e8f8c17eced121d568c3a7e0"
+        "checksum": "sha256:16fef07d8af2941d744ca12cf75d1ce469b8b36ef6fd33ff2df70cb6a5d5a396"
     }
 }

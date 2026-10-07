@@ -9,7 +9,9 @@ namespace Game2Week.Stages
     [Serializable]
     public sealed class StageDefinition
     {
-        public const int CurrentSchemaVersion = 1;
+        /// <summary>2 (9-0단계): theme·dialogues 추가. 1은 읽을 때 기본값으로 채워지고 저장하면 2가 된다.</summary>
+        public const int CurrentSchemaVersion = 2;
+        public const int MinSupportedSchemaVersion = 1;
 
         public int schemaVersion = CurrentSchemaVersion;
         public string id = "stage_001";
@@ -20,7 +22,26 @@ namespace Game2Week.Stages
         public List<StageGem> gems = new();
         public StageGemRules gemRules = new();
         public StageEnemyTurn enemyTurn = new();
+        /// <summary>경기장 꾸밈 테마 이름 (11단계 그래픽이 읽음). 비우면 기본.</summary>
+        public string theme = StageThemes.Default;
+        /// <summary>이 스테이지의 대화 파일 id (10단계 대화 시스템이 읽음). 비우면 적 데이터의 대화 사용.</summary>
+        public StageDialogues dialogues = new();
         public StageToolInfo _tool = new();
+    }
+
+    public static class StageThemes
+    {
+        public const string Default = "default";
+    }
+
+    /// <summary>상황별 대화 파일 id (Assets/StreamingAssets/Dialogues/&lt;id&gt;.json). 빈 문자열 = 없음.</summary>
+    [Serializable]
+    public sealed class StageDialogues
+    {
+        public string intro = string.Empty;
+        public string phase2 = string.Empty;
+        public string spareReady = string.Empty;
+        public string victory = string.Empty;
     }
 
     [Serializable]

@@ -1,9 +1,10 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Game2Week.Battle;
 using Game2Week.Battle.Patterns;
+using Game2Week.Battle.Patterns.Director;
 using Game2Week.Battle.View;
 using Game2Week.Core;
 using Game2Week.Flow;
@@ -22,8 +23,8 @@ namespace Game2Week.Tests
     public sealed class StageBalanceStats
     {
         public string stageId, stageName, outcome;
-        public int enemyTurns, contacts, hits, dodges, jumps, parries, braces, redPasses, bluePasses, hpLeft, hpMax;
-        public float averageApproachSeconds, battleSeconds;
+        public int enemyTurns, contacts, timeouts, hits, dodges, jumps, parries, braces, redPasses, bluePasses, hpLeft, hpMax, maxLayers, maxPhase;
+        public float averageApproachSeconds, startDistance, battleSeconds;
     }
 
     [Serializable]
@@ -91,7 +92,7 @@ namespace Game2Week.Tests
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "-runBalance") < 0) Assert.Ignore("전체 측정은 -runBalance로 실행");
             var report = new BalanceReport { createdAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm") };
             int count = new StageRepository(StageRepository.DefaultDirectory).LoadIndex().stages.Count;
-            for (int i = 0; i < count; i++) yield return Measure(i, 8, 90f, report);
+            for (int i = 0; i < count; i++) yield return Measure(i, 12, 240f, report);
             Write(report, "balance_report.json");
             Assert.AreEqual(count, report.stages.Count);
         }
@@ -129,9 +130,10 @@ namespace Game2Week.Tests
             {
                 if (id == BattleStateId.EnemyTurn) { stats.enemyTurns++; turnStart = Time.time; }
                 else if (id == BattleStateId.ActionMenu && turnStart > 0f) { stats.contacts++; approachTotal += Time.time - turnStart; turnStart = 0f; }
-                else if (id == BattleStateId.ItemMenu) turnStart = 0f;
+                else if (id == BattleStateId.ItemMenu && turnStart > 0f) { stats.timeouts++; turnStart = 0f; }
             };
             stats.hpMax = battle.Context.Player.MaxHp;
+            stats.startDistance = Vector3.Distance(battle.World.Player.transform.position, battle.Spawner.Enemy.transform.position);
 
             Time.timeScale = SpeedUp;
             var camera = battle.CameraDirector;
@@ -165,6 +167,11 @@ namespace Game2Week.Tests
                     case BattleStateId.EnemyTurn:
                         if (camera && !camera.IsLockedOn) { yield return Tap(mouse.middleButton); continue; }
                         var player = battle.World.Player;
+                        if (battle.World.Patterns.Current is PatternDirector director)
+                        {
+                            stats.maxLayers = Mathf.Max(stats.maxLayers, director.ActivePatterns.Count);
+                            stats.maxPhase = Mathf.Max(stats.maxPhase, director.Phase);
+                        }
                         threats.Clear();
                         if (battle.World.Patterns.Current is IThreatSource source) source.CollectThreats(threats);
                         bool red = false, yellowNear = false;
@@ -216,7 +223,7 @@ namespace Game2Week.Tests
                 stats.outcome = stats.hpLeft <= 0 ? "패배" : "처치";
             Time.timeScale = 1f;
             report.stages.Add(stats);
-            Debug.Log($"[Balance] {stats.stageId}: 턴 {stats.enemyTurns}, 접근 {stats.contacts} (평균 {stats.averageApproachSeconds:0.0}초), 피격 {stats.hits}, 회피 {stats.dodges}, 쳐내기 {stats.parries}, 자세 {stats.braces}, 통과 빨강 {stats.redPasses}/파랑 {stats.bluePasses}, {stats.outcome}");
+            Debug.Log($"[Balance] {stats.stageId}: 턴 {stats.enemyTurns}, 접근 {stats.contacts} (평균 {stats.averageApproachSeconds:0.0}초, 시간 초과 {stats.timeouts}), 최대 겹 {stats.maxLayers}, 단계 {stats.maxPhase}, 피격 {stats.hits}, 회피 {stats.dodges}, 쳐내기 {stats.parries}, 자세 {stats.braces}, 통과 빨강 {stats.redPasses}/파랑 {stats.bluePasses}, {stats.outcome}");
         }
     }
 }

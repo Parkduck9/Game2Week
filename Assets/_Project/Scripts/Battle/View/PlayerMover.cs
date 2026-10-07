@@ -9,6 +9,8 @@ namespace Game2Week.Battle.View
         [SerializeField, Min(0.05f)] float radius = 0.22f;
         [SerializeField] float turnSpeed = 720f;
         [SerializeField] Transform model;
+        /// <summary>GroundVelocity가 실제 속도를 따라가는 빠르기 (1/초)</summary>
+        const float VelocitySmoothing = 8f;
 
         BattleArena arena;
         PlayerActionSettings settings;
@@ -27,6 +29,8 @@ namespace Game2Week.Battle.View
         public bool CanContactEnemy => Motor.IsGrounded && !Motor.Dodging;
         /// <summary>마지막 이동에서 실제로 움직인 수평 속도 (m/s) — 벽에 막히면 입력이 있어도 0에 가깝다</summary>
         public float GroundSpeed { get; private set; }
+        /// <summary>최근 수평 이동 속도 벡터 (부드럽게, 이동 속도 이하로 제한) — 탄 예측 조준용. 회피 순간 속도로 튀지 않는다.</summary>
+        public Vector3 GroundVelocity { get; private set; }
         public PlayerActionSettings Settings => settings;
 
         Renderer[] renderers;
@@ -59,6 +63,7 @@ namespace Game2Week.Battle.View
             Motor.Reset();
             ParrySuccesses = 0;
             GroundSpeed = 0f;
+            GroundVelocity = Vector3.zero;
             if (model) model.localPosition = modelBase;
         }
 
@@ -81,6 +86,11 @@ namespace Game2Week.Battle.View
             }
             var moved = transform.position - PreviousPosition; moved.y = 0f;
             GroundSpeed = dt > 0f ? moved.magnitude / dt : 0f;
+            if (dt > 0f)
+            {
+                var raw = Vector3.ClampMagnitude(moved / dt, settings.moveSpeed);
+                GroundVelocity = Vector3.Lerp(GroundVelocity, raw, 1f - Mathf.Exp(-VelocitySmoothing * dt));
+            }
             if (Motor.Bracing && facing == null) return; // 자세 중에는 방향 유지
             var dir = facing ?? new Vector3(worldInput.x, 0f, worldInput.y);
             dir.y = 0f;
@@ -100,6 +110,7 @@ namespace Game2Week.Battle.View
             var position = transform.position; position.y = groundY; transform.position = position;
             PreviousPosition = position;
             GroundSpeed = 0f;
+            GroundVelocity = Vector3.zero;
         }
         void OnDestroy() { if (ownsSettings && settings) Destroy(settings); }
     }
