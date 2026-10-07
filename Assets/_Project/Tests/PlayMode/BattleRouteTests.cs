@@ -60,7 +60,6 @@ namespace Game2Week.Tests
             yield return SceneFlowTests.WaitForBattle(c => battle = c);
 
             int acts = 0;
-            bool holdingUp = false;
             float start = Time.realtimeSinceStartup;
             // 9단계: 이 봇은 피하지 않고 직진만 하므로(결말 흐름 검사), 넓은 맵·겹 공격에서 살아남게 처치·살려주기 길은 체력을 채우고
             // 처치 길은 적 체력을 공격 한 번 분량으로 줄인다. 회피 실력·밸런스는 BalanceMeasurementTests가 맡는다.
@@ -73,14 +72,6 @@ namespace Game2Week.Tests
                     battle.Context.Player.Heal(battle.Context.Player.MaxHp);
                 var ui = battle.Ui;
                 var state = battle.Context.CurrentState;
-
-                if (state != BattleStateId.EnemyTurn && holdingUp)
-                {
-                    Release(keyboard.upArrowKey);
-                    holdingUp = false;
-                    yield return null;
-                    continue;
-                }
 
                 if (ui.Dialogue.IsWaitingForInput)
                 {
@@ -96,11 +87,6 @@ namespace Game2Week.Tests
                         {
                             var direction = battle.Spawner.Enemy.transform.position - battle.World.Player.transform.position;
                             battle.World.Player.Move(new Vector2(direction.x, direction.z).normalized, Time.deltaTime);
-                        }
-                        if (route != Route.Defeat && !holdingUp)
-                        {
-                            Press(keyboard.upArrowKey);
-                            holdingUp = true;
                         }
                         break;
 
@@ -132,7 +118,6 @@ namespace Game2Week.Tests
                 yield return null;
             }
 
-            if (holdingUp) Release(keyboard.upArrowKey);
             yield return SceneFlowTests.WaitForScene(SceneNames.Result);
         }
 

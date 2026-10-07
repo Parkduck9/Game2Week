@@ -1,9 +1,15 @@
 namespace Game2Week.Battle.View.Animation
 {
-    public enum PlayerMotion { Idle, Run, Dodge, Jump, Land, ParryLeft, ParryRight, Brace, Hit, Fall, Strafe, Stop, HitStrong, Victory, Spare, Talk, Nod, Surprise }
+    public enum PlayerMotion { Idle, Run, Dodge, Jump, Land, ParryLeft, ParryRight, Brace, Hit, Fall, Strafe, Stop, HitStrong, Victory, Spare, Talk, Nod, Surprise, Strike, Cheer, Play, RunTogether }
     /// <summary>판정과 무관한 표현 우선순위. 실제 이동 속도를 사용한다.</summary>
     public static class PlayerAnimationMap
     {
+        public static PlayerMotion ForAction(ActionCue cue)=>cue switch
+        {
+            ActionCue.Strike=>PlayerMotion.Strike,ActionCue.Cheer=>PlayerMotion.Cheer,
+            ActionCue.Play=>PlayerMotion.Play,ActionCue.RunTogether=>PlayerMotion.RunTogether,
+            ActionCue.Retreat=>PlayerMotion.Idle,_=>PlayerMotion.Talk,
+        };
         public static bool TryPose(string id,out PlayerMotion motion)
         {
             switch((id??string.Empty).ToLowerInvariant())

@@ -205,7 +205,7 @@ namespace Game2Week.Tests
                         HoldCtrl(red);
                         HoldW(!red);
                         // 테스트 입력 장치의 이동 값이 전체 실행 중 0이 되는 경우도 같은 접근 경로를 측정한다.
-                        if(!red)player.Move(new Vector2(0,1),Time.deltaTime);
+                        if(!red){var toward=battle.Spawner.Enemy.transform.position-player.transform.position;player.Move(new Vector2(toward.x,toward.z).normalized,Time.deltaTime);}
                         if (!red && yellowNear)
                         {
                             if (player.Motor.ParryCooldown <= 0f) { yield return Tap(mouse.rightButton); continue; }

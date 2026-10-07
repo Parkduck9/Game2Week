@@ -65,7 +65,14 @@ namespace Game2Week.Battle
             RefreshSpare();
         }
         public void RefreshSpare() => Events.RaiseSpareChanged(Enemy.Spare.UsesRule ? BattleTexts.SpareHearts(Enemy.Spare) : string.Empty);
-        public void NextTurn()
+        public ActionPresentationRequest PendingPresentation {get;private set;}
+        public void PlayPresentation(ActionCue cue,Action impact,Action finished,bool pauseImpact=true)
+        {
+            if(!(World is IActionPresentationWorld)){impact?.Invoke();finished?.Invoke();return;}
+            PendingPresentation=new ActionPresentationRequest{cue=cue,impact=impact,finished=finished,pauseImpact=pauseImpact};ChangeState(BattleStateId.ActionPresentation);
+        }
+        public void NextTurn()=>PlayPresentation(ActionCue.Retreat,null,StartNextTurn);
+        void StartNextTurn()
         {
             if (Dialogues != null) Dialogues.NextTurn(); else ChangeState(BattleStateId.EnemyTurn);
         }

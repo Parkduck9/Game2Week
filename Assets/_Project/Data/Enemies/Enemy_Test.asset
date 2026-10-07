@@ -34,12 +34,20 @@ MonoBehaviour:
       \uAE30\uBED0 \uBCF4\uC778\uB2E4."
     spareProgress: 1
     spareFlags: []
+    motion: 1
   - displayName: "\uB9D0 \uAC78\uAE30"
     resultText: "* \uB0A0\uC528 \uC774\uC57C\uAE30\uB97C \uAEBC\uB0C8\uB2E4.\n* \uD14C\uC2A4\uD2B8
       \uC801\uC774 \uACE0\uAC1C\uB97C \uB044\uB355\uC778\uB2E4."
     spareProgress: 1
     spareFlags:
     - listened
+    motion: 0
+  - displayName: "\uAC19\uC774 \uB180\uAE30"
+    resultText: "* \uD568\uAED8 \uD1B5\uD1B5 \uB6F0\uBA70 \uB180\uC558\uB2E4.\n*
+      \uC870\uAE08 \uB354 \uD3B8\uD574 \uBCF4\uC778\uB2E4."
+    spareProgress: 0
+    spareFlags: []
+    motion: 2
   spareThreshold: 2
   spareRule:
     enabled: 1

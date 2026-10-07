@@ -21,6 +21,7 @@ namespace Game2Week.Battle
         Victory,
         Defeat,
         Dialogue,
+        ActionPresentation,
     }
 
     public enum BattleOutcome

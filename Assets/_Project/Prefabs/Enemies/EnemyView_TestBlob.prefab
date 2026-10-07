@@ -371,6 +371,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8162945362300862098}
   - component: {fileID: 9109255891687370104}
+  - component: {fileID: 8868859745113109121}
   m_Layer: 0
   m_Name: EnemyView_TestBlob
   m_TagString: Untagged
@@ -414,6 +415,18 @@ MonoBehaviour:
   hitShake: 0.08
   endDuration: 1
   contactRadius: 0.55
+--- !u!114 &8868859745113109121
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5092751627827279224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ecf59c9ee813a4e40b165e0dc17ad0d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game2Week::Game2Week.Battle.View.EnemyFlight
 --- !u!1 &5153028518613427597
 GameObject:
   m_ObjectHideFlags: 0

@@ -80,8 +80,18 @@ namespace Game2Week.Battle.View
             var dir = Quaternion.Euler(0f, yaw, 0f) * new Vector3(move.x, 0f, move.y);
             return new Vector2(dir.x, dir.z);
         }
+        public float LastShakeForce {get;private set;}
+        public int ShakeCount {get;private set;}
         void LateUpdate()
         {
+            if(followEnemy&&followPlayer&&!dialogueCameraMoved)
+            {
+                var middle=(followEnemy.position+followPlayer.position)*.5f+Vector3.up*.9f;
+                var between=followEnemy.position-followPlayer.position;between.y=0;
+                var right=Vector3.Cross(Vector3.up,between.normalized);
+                if(Current==BattleShot.AttackCloseUp)Place(Current,middle+right*Mathf.Max(3.2f,between.magnitude*.85f+1.1f)+Vector3.up*.75f-between.normalized*.7f,middle,48);
+                else if(Current==BattleShot.EnemyFocus)Place(Current,followEnemy.position+new Vector3(.9f,1.3f,-3.2f),followEnemy.position+Vector3.up*.6f,35);
+            }
             bool controlling = followPlayer && actionInput && actionInput.CurrentMode == InputReader.Mode.Player && Current == BattleShot.Overview && Time.timeScale > 0f;
             Cursor.lockState = controlling ? CursorLockMode.Locked : CursorLockMode.None;
             Cursor.visible = !controlling;
@@ -154,6 +164,7 @@ namespace Game2Week.Battle.View
 
         public void Shake(float force = 1f)
         {
+            LastShakeForce=force;ShakeCount++;
             if (!impulse) return;
             var dir = UnityEngine.Random.insideUnitCircle.normalized;
             impulse.GenerateImpulse(new Vector3(dir.x, dir.y * 0.5f, 0f) * (force * shakeAmplitude));

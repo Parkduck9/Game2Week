@@ -1,4 +1,5 @@
 using UnityEngine;
+using Game2Week.Data;
 using Game2Week.Battle.View.Animation;
 
 namespace Game2Week.Battle.View
@@ -27,6 +28,17 @@ namespace Game2Week.Battle.View
         [Tooltip("적에게 닿았다고 판정하는 반지름 (m)")]
         [SerializeField, Min(0.1f)] float contactRadius = 0.55f;
 
+        CombatPresentationSettings motionSettings;
+        ActionCue? jointAction;
+        float jointProgress,recoilLeft;
+        Vector3 recoilDirection;
+        bool actionHold;
+        public void ConfigureMotion(CombatPresentationSettings value)=>motionSettings=value;
+        public void SetJointAction(ActionCue cue){jointAction=cue;jointProgress=0;ClearDialoguePose();}
+        public void SetJointProgress(float value)=>jointProgress=value;
+        public void ClearJointAction()=>jointAction=null;
+        public void HoldAction(bool value)=>actionHold=value;
+        public void Recoil(Vector3 away){away.y=0;recoilDirection=transform.InverseTransformDirection(away.normalized);recoilLeft=.28f;}
         State state;
         Vector3 baseLocalPos;
         Vector3 baseScale;
@@ -68,6 +80,8 @@ namespace Game2Week.Battle.View
         {
             flash = 1f;
             shake = 1f;
+            for(int i=0;i<flashRenderers.Length;i++)
+            {flashRenderers[i].GetPropertyBlock(block);block.SetColor(BaseColorId,Color.white);flashRenderers[i].SetPropertyBlock(block);}
         }
 
         public void PlayAttack(){attack=1f;warning=0;}
@@ -85,7 +99,8 @@ namespace Game2Week.Battle.View
         void Update()
         {
             float dt = Time.deltaTime;
-            if(dt<=0)return;
+            if(dt<=0||actionHold)return;
+            recoilLeft=Mathf.Max(0,recoilLeft-dt);
             warning=Mathf.Max(0,warning-dt);phase=Mathf.Max(0,phase-dt);
             CurrentMotion=EnemyMotionMap.Resolve(state==State.Defeated,state==State.Spared,shake>0,phase>0,warning>0,attack>0,relaxed,dialoguePose);
             time += dt;
@@ -100,6 +115,8 @@ namespace Game2Week.Battle.View
                     float hop = Mathf.Sin(attack * Mathf.PI) * 0.25f;
                     var offset = shake > 0f ? Random.insideUnitSphere * hitShake * shake : Vector3.zero;
                     body.localPosition = baseLocalPos + new Vector3(offset.x, bob + hop, offset.z);
+                    if(motionSettings)body.localPosition+=new Vector3(Mathf.Sin(time*1.7f)*motionSettings.hoverRange,motionSettings.hoverHeight+Mathf.Sin(time*2.4f)*motionSettings.hoverRange,Mathf.Cos(time*1.3f)*motionSettings.hoverRange*.4f);
+                    if(recoilLeft>0)body.localPosition+=recoilDirection*(motionSettings?motionSettings.recoilDistance:.3f)*Mathf.Sin(recoilLeft/.28f*Mathf.PI);
                     float squash = 1f + Mathf.Sin(time * idleBobSpeed) * 0.03f;
                     body.localScale = Vector3.Scale(baseScale, new Vector3(1f / squash, squash, 1f / squash));
                     body.localRotation=baseRotation;
@@ -112,6 +129,13 @@ namespace Game2Week.Battle.View
                         case EnemyMotion.Talk:body.localRotation=baseRotation*Quaternion.Euler(5*wave,8*wave,0);break;
                         case EnemyMotion.Nod:body.localRotation=baseRotation*Quaternion.Euler(18*Mathf.Abs(wave),0,0);break;
                         case EnemyMotion.Surprise:body.localPosition+=Vector3.up*.12f;body.localScale=Vector3.Scale(baseScale,new Vector3(.9f,1.15f,.9f));break;
+                    }
+                    if(jointAction.HasValue)
+                    {
+                        float bounce=Mathf.Abs(Mathf.Sin(jointProgress*Mathf.PI*4));
+                        if(jointAction==ActionCue.Play||jointAction==ActionCue.RunTogether)body.localPosition+=Vector3.up*bounce*.25f;
+                        if(jointAction==ActionCue.Cheer||jointAction==ActionCue.Talk)body.localRotation=baseRotation*Quaternion.Euler(15*Mathf.Sin(jointProgress*Mathf.PI*4),0,0);
+                        if(jointAction==ActionCue.Retreat)body.localRotation=baseRotation*Quaternion.Euler(-12*Mathf.Sin(jointProgress*Mathf.PI),0,8*Mathf.Sin(jointProgress*Mathf.PI*2));
                     }
                     break;
 

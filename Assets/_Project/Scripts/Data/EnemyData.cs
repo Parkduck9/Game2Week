@@ -20,6 +20,9 @@ namespace Game2Week.Data
         [SerializeField, Min(0)] int spareProgress = 1;
         [SerializeField] List<string> spareFlags = new();
 
+        [SerializeField] Battle.ActionCue motion=Battle.ActionCue.Talk;
+        public Battle.ActionCue Motion=>motion;
+
         public ActOption() { }
 
         public ActOption(string displayName, string resultText, int spareProgress)

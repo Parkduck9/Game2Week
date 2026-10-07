@@ -19,6 +19,7 @@ namespace Game2Week.Battle.View
             value.Feedback.PlayerParried+=Parry;value.Feedback.PlayerDodged+=Dodge;
             value.Feedback.WarningStarted+=Warning;value.Feedback.EnemyPhaseChanged+=Phase;
             value.Feedback.ColorPassed+=Passed;
+            value.Events.EnemyDamaged+=Strike;
             value.Events.BattleEnded+=Ended;value.Events.StateChanged+=StateChanged;
         }
         void Unbind()
@@ -27,7 +28,16 @@ namespace Game2Week.Battle.View
             rig.Feedback.PlayerParried-=Parry;rig.Feedback.PlayerDodged-=Dodge;
             rig.Feedback.WarningStarted-=Warning;rig.Feedback.EnemyPhaseChanged-=Phase;
             rig.Feedback.ColorPassed-=Passed;
+            rig.Events.EnemyDamaged-=Strike;
             rig.Events.BattleEnded-=Ended;rig.Events.StateChanged-=StateChanged;rig=null;
+        }
+        void Strike(int damage)
+        {
+            if(damage<=0||!rig.Spawner.Enemy)return;
+            var at=rig.Spawner.Enemy.Body.position+Vector3.up*.35f;var points=new Vector3[16];
+            var player=rig.Spawner.Player;
+            for(int i=0;i<points.Length;i++){float angle=Mathf.Lerp(-100,100,i/(points.Length-1f))*Mathf.Deg2Rad;points[i]=at+player.right*Mathf.Sin(angle)*.55f+Vector3.up*Mathf.Cos(angle)*.45f;}
+            StrokeAt(points,new Color(2,1.4f,.4f),.1f,.22f);
         }
         void Parry(Vector3 at,float side)
         {

@@ -64,7 +64,8 @@ namespace Game2Week.Tests
             Assert.IsTrue(battle.Ui.TimingGauge.IsOpen);
             SceneCapture.Save("battle_4_Gauge");
             battle.Ui.TimingGauge.Press();
-            yield return new WaitForSeconds(0.5f);
+            float attackStart=Time.realtimeSinceStartup;
+            while(battle.Context.Enemy.CurrentHp==battle.Context.Enemy.MaxHp&&Time.realtimeSinceStartup-attackStart<3)yield return null;
             SceneCapture.Save("battle_4_Fight");
             Assert.Less(battle.Context.Enemy.CurrentHp, battle.Context.Enemy.MaxHp);
 
@@ -89,7 +90,7 @@ namespace Game2Week.Tests
             Assert.AreEqual("stage_002", battle.Context.Stage.id);
             Assert.AreEqual(new Vector2(21f, 24f), battle.Spawner.Arena.Size);
             Assert.AreEqual("주황 테스트 적", battle.Context.Enemy.Data.DisplayName);
-            Assert.AreEqual(3, battle.Context.Enemy.Data.Acts.Count);
+            Assert.AreEqual(4, battle.Context.Enemy.Data.Acts.Count);
 
             battle.Context.ChangeState(BattleStateId.EnemyTurn);
             yield return new WaitForSeconds(1.2f);

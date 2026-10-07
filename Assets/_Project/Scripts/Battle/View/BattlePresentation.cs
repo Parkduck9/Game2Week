@@ -20,6 +20,7 @@ namespace Game2Week.Battle.View
         PlayerMover player;
         PlayerAnimationDriver animationDriver;
         int playerMaxHp;
+        Game2Week.Data.CombatPresentationSettings combatSettings;
         readonly Dictionary<string,Func<string,bool>> poseActors=new(StringComparer.OrdinalIgnoreCase);
 
         public static BattleShot ShotFor(BattleStateId state) => state switch
@@ -27,16 +28,17 @@ namespace Game2Week.Battle.View
             BattleStateId.Intro => BattleShot.Intro,
             BattleStateId.EnemyTurn => BattleShot.Overview,
             BattleStateId.Fight => BattleShot.AttackCloseUp,
+            BattleStateId.ActionPresentation => BattleShot.AttackCloseUp,
             BattleStateId.Defeat => BattleShot.Overview,
             _ => BattleShot.EnemyFocus,
         };
 
-        public void Bind(BattleEvents battleEvents, EnemyView enemyView, PlayerMover playerMover,int maxHp=20)
+        public void Bind(BattleEvents battleEvents, EnemyView enemyView, PlayerMover playerMover,int maxHp=20,Game2Week.Data.CombatPresentationSettings settings=null)
         {
             Unbind();
             events = battleEvents;
             enemy = enemyView;
-            player = playerMover;playerMaxHp=maxHp;
+            player = playerMover;playerMaxHp=maxHp;combatSettings=settings;
             animationDriver=player?player.GetComponentInChildren<PlayerAnimationDriver>():null;
             poseActors.Clear();
             if(animationDriver){poseActors["heroine"]=animationDriver.PlayDialoguePose;poseActors["player"]=animationDriver.PlayDialoguePose;}
@@ -74,7 +76,8 @@ namespace Game2Week.Battle.View
         void OnEnemyDamaged(int amount)
         {
             if (amount <= 0 || !enemy) return;
-            enemy.PlayHit();
+            enemy.PlayHit();enemy.Recoil(enemy.transform.position-player.transform.position);
+            cameraDirector.Shake(combatSettings?combatSettings.shakeForce:2f);
             var pos = enemy.transform.position + Vector3.up * 0.6f;
             var cam = Camera.main;
             if (cam) pos += (cam.transform.position - pos).normalized * hitTowardCamera;

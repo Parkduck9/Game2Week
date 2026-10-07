@@ -148,6 +148,17 @@ namespace Game2Week.EditorTools.Animation
                         leftLeg=new Leg(-30*wave*dz,18+22*Mathf.Max(0,wave),3+25*wave*dx)};
                 });
             }
+            yield return new ClipSpec("Strike",.7f,false,t=>
+            {
+                float prepare=Ease(t/.28f),punch=Ease((t-.28f)/.18f),recover=Ease((t-.55f)/.45f);
+                float force=punch*(1-recover);
+                return new Pose {spineLean=4+15*force,spineTwist=-18*prepare+40*force,headNod=-5*force,
+                    right=new Arm(35*prepare+65*force,12-15*force,85*prepare-70*force),left=new Arm(35*prepare,12,70*prepare),
+                    rightLeg=new Leg(18*force,28*force),leftLeg=new Leg(-12*force,12*force)};
+            });
+            yield return new ClipSpec("Cheer",1.4f,false,t=>new Pose {right=new Arm(140*Bell(t),18,25),left=new Arm(115*Bell(t),22,25),headNod=-7*Bell(t),bob=.035f*Bell(t)});
+            yield return new ClipSpec("Play",1.4f,false,t=>{float hop=Mathf.Abs(Mathf.Sin(t*Mathf.PI*2));return new Pose{grounded=false,bob=.16f*hop,right=new Arm(30*hop,24,30),left=new Arm(30*hop,24,30),rightLeg=new Leg(18*hop,30*hop),leftLeg=new Leg(18*hop,30*hop)};});
+            yield return new ClipSpec("RunTogether",1.4f,false,t=>{float wave=Mathf.Sin(t*Mathf.PI*6)*Bell(t);return new Pose{spineLean=8*Bell(t),right=new Arm(12-30*wave,12,60),left=new Arm(12+30*wave,12,60),rightLeg=new Leg(30*wave,15+30*Mathf.Abs(wave)),leftLeg=new Leg(-30*wave,15+30*Mathf.Abs(wave)),bob=.025f*Mathf.Abs(wave)};});
             yield return new ClipSpec("Stop",.18f,false,t=>new Pose {spineLean=12*(1-Ease(t)),rightLeg=new Leg(18*(1-Ease(t)),26*(1-Ease(t))),leftLeg=new Leg(-12*(1-Ease(t)),10)});
             yield return new ClipSpec("HitStrong",.42f,false,t=>new Pose {spineLean=-35*Bell(t),headNod=-24*Bell(t),bob=-.05f*Bell(t),right=new Arm(-20*Bell(t),18+38*Bell(t),40),left=new Arm(-16*Bell(t),18+35*Bell(t),35),rightLeg=new Leg(28*Bell(t),50*Bell(t)),leftLeg=new Leg(-18*Bell(t),20*Bell(t))});
             yield return new ClipSpec("Victory",1.2f,false,t=>new Pose {right=new Arm(150*Ease(t/.45f),18,15),left=new Arm(10,16,30),headNod=-8*Ease(t/.45f),tailSway=8*Bell(t)});

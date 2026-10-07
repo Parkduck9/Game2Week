@@ -6213,6 +6213,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game2Week::Game2Week.Battle.View.BattleWorld
   effects: {fileID: 1305870191}
+  presentationSettings: {fileID: 11400000, guid: a19d329808cf91e418bf8fc4fe4400eb, type: 2}
   patternRunner: {fileID: 2076384554}
   actionSettings: {fileID: 0}
   threatFeedback: {fileID: 2076384555}

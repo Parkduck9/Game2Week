@@ -69,6 +69,7 @@ Undertale의 **전투 시스템에서 영감을 받은** 턴제 전투 게임을
 - 쳐내기는 오른손으로 왼쪽에서 오는 탄을 오른쪽 어깨 뒤로, 오른쪽 탄을 왼쪽 어깨 뒤로 흘린다. 입력 방향으로 이동을 계속한다. 적에게 단순 반사하는 방식이나 강제 뒤 밀림이 아니다. 점프는 후속 답변으로 포함이 확정됐고, 록온 가운데 버튼/점프 Space는 기본안이다.
 
 ### 5~8단계 결과로 생긴 규칙 (2026-10-06 합침)
+- 전투 연출 후속: `ActionPresentationState`의 순수 시계로 공격 영향·국소 정지·공동 행동·후퇴를 진행하고 `BattleWorld`는 표현만 처리한다. ACT 동작은 `ActOption.Motion`, 연출 값은 `CombatPresentationSettings.asset`. 시작점 재배치는 첫 적 턴에만 한다. 재현은 `CombatFeelAuthoring.Build`; 최신 설계는 `Plans/Combat_Feel_Plan.md`다.
 - 11단계: 그래픽 재현은 `GraphicsAuthoring.Build`, 툰 그래프 생성은 `Tools/author_toon_graph.py`. 주인공 원본 스킨 파츠는 자세 도구용으로 보존하고 통합 외형만 렌더하므로, 표시/숨기기는 처음 켜진 렌더러 상태를 보존해야 한다. 1080p 배치 측정은 `FrameMeasurement`로 직접 렌더하며 종료 때 측정을 끈 뒤 렌더 대상을 해제한다.
 - 12단계: 동작 재현은 `AnimationPhaseAuthoring.Build`(내부 `HeroineClipAuthoring.Build`), glb 클립 사용 금지. 대화 자세는 등록식 화자/자세 매핑으로 전달한다. 강약 피격은 표현만 구분하며 피해/체력 수치는 바꾸지 않는다. 록온 블렌드 방향은 캐릭터 로컬 속도다.
 - 10단계: 자비는 전투별 `SpareTracker`와 `EnemyData.SpareRule`, 대화는 `Tools ▸ Dialogue Editor`로만 JSON 저장. `ActOption.SpareFlags`와 대화 선택은 자비 플래그만 바꾸며 데미지/공격 패턴은 바꾸지 않는다. 샘플 재생성은 `DialogueSampleAuthoring.Generate`, 대화 글자 검증/아틀라스 재생성은 기존 폰트 도구를 사용한다.

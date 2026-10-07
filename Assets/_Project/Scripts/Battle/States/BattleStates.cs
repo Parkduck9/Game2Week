@@ -144,12 +144,13 @@ namespace Game2Week.Battle
             // 보석 공격 강화는 놓쳐도 소모된다 (한 번의 공격 기회에 쓰인 것)
             float boost = player.ConsumeAttackMultiplier();
             int damage = BattleFormulas.FightDamage(player.Data.Attack, accuracy, boost, enemy.Data.Defense);
-            int applied = enemy.TakeDamage(damage);
-            Context.Events.RaiseEnemyDamaged(applied);
-            Context.RaiseEnemyHp();
-            Context.Ui.ShowPopup(applied > 0 ? $"-{applied}" : BattleTexts.Miss);
-            Context.Ui.ShowDialogue(BattleTexts.FightResult(enemy.Data.DisplayName, applied),
-                () => { if (enemy.IsDefeated) Context.ChangeState(BattleStateId.Victory); else Context.NextTurn(); });
+            int applied=0;
+            Context.PlayPresentation(ActionCue.Strike,()=>
+            {
+                applied=enemy.TakeDamage(damage);Context.Events.RaiseEnemyDamaged(applied);Context.RaiseEnemyHp();
+                Context.Ui.ShowPopup(applied>0?$"-{applied}":BattleTexts.Miss);
+            },()=>Context.Ui.ShowDialogue(BattleTexts.FightResult(enemy.Data.DisplayName,applied),
+                ()=>{if(enemy.IsDefeated)Context.ChangeState(BattleStateId.Victory);else Context.NextTurn();}),damage>0);
         }
     }
 
@@ -166,21 +167,22 @@ namespace Game2Week.Battle
 
             Context.Ui.ShowListMenu(items, index =>
             {
-                string text;
-                if (index == 0) text = data.CheckText + (Context.Enemy.Spare.UsesRule ? "\n" + Context.Enemy.Spare.Hint : string.Empty);
-                else
+                var selectedAct=index>0?data.Acts[index-1]:null;
+                string text=string.Empty;
+                Context.PlayPresentation(selectedAct!=null?selectedAct.Motion:ActionCue.Talk,()=>
                 {
-                    bool wasSpareable = Context.Enemy.CanBeSpared;
-                    var act = data.Acts[index - 1];
-                    Context.Enemy.Spare.RecordAct(act.DisplayName);
-                    foreach (string flag in act.SpareFlags) Context.Enemy.Spare.SetFlag(flag);
-                    Context.Enemy.AddSpareProgress(act.SpareProgress);
-                    text = act.ResultText;
-                    if (!wasSpareable && Context.Enemy.CanBeSpared) text += "\n" + BattleTexts.NowSpareable;
-                }
-                Context.CompletePlayerTurn();
-                if (Context.Enemy.Spare.UsesRule) text += "\n" + Context.Enemy.Spare.Hint;
-                Context.Ui.ShowDialogue(text, Context.NextTurn);
+                    if(selectedAct==null)text=data.CheckText+(Context.Enemy.Spare.UsesRule?"\n"+Context.Enemy.Spare.Hint:string.Empty);
+                    else
+                    {
+                        bool wasSpareable=Context.Enemy.CanBeSpared;
+                        Context.Enemy.Spare.RecordAct(selectedAct.DisplayName);
+                        foreach(string flag in selectedAct.SpareFlags)Context.Enemy.Spare.SetFlag(flag);
+                        Context.Enemy.AddSpareProgress(selectedAct.SpareProgress);text=selectedAct.ResultText;
+                        if(!wasSpareable&&Context.Enemy.CanBeSpared)text+="\n"+BattleTexts.NowSpareable;
+                    }
+                    Context.CompletePlayerTurn();
+                    if(Context.Enemy.Spare.UsesRule)text+="\n"+Context.Enemy.Spare.Hint;
+                },()=>Context.Ui.ShowDialogue(text,Context.NextTurn));
             }, () => Context.ChangeState(BattleStateId.ActionMenu));
         }
     }
@@ -260,6 +262,7 @@ namespace Game2Week.Battle
         /// <summary>모든 전투 상태를 등록한다 (BattleController와 테스트가 같이 사용).</summary>
         public static void RegisterAll(BattleStateMachine machine, BattleContext context)
         {
+            machine.Register(BattleStateId.ActionPresentation,new ActionPresentationState(context));
             machine.Register(BattleStateId.Intro, new IntroState(context));
             machine.Register(BattleStateId.EnemyTurn, new EnemyTurnState(context));
             machine.Register(BattleStateId.ActionMenu, new ActionMenuState(context));

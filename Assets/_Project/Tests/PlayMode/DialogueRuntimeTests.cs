@@ -15,6 +15,16 @@ namespace Game2Week.Tests
         {
             battle.Ui.Dialogue.Advance(); battle.Ui.Dialogue.Advance(); yield return null;
         }
+        static IEnumerator WaitForResult(BattleController battle)
+        {
+            float start=Time.realtimeSinceStartup;
+            while(!battle.Ui.Dialogue.IsWaitingForInput){Assert.Less(Time.realtimeSinceStartup-start,5,"행동 결과 대기 시간 초과");yield return null;}
+        }
+        static IEnumerator WaitForTransition(BattleController battle)
+        {
+            float start=Time.realtimeSinceStartup;
+            while(battle.Context.CurrentState==BattleStateId.ActionPresentation){Assert.Less(Time.realtimeSinceStartup-start,5,"후퇴 대기 시간 초과");yield return null;}
+        }
         static IEnumerator Intro(BattleController battle)
         {
             yield return Close(battle); yield return Close(battle);
@@ -36,8 +46,9 @@ namespace Game2Week.Tests
             {
                 battle.Context.ChangeState(BattleStateId.ActionMenu); battle.Ui.ChooseMain(1);
                 battle.Ui.ChooseList(turn < 2 ? turn + 1 : 0);
+                yield return WaitForResult(battle);
                 if (turn < 2) Assert.IsFalse(battle.Context.Enemy.CanBeSpared);
-                yield return Close(battle);
+                yield return Close(battle);yield return WaitForTransition(battle);
             }
             Assert.IsTrue(battle.Context.Enemy.CanBeSpared); Assert.AreEqual(3, battle.Context.Enemy.Spare.NoFightTurns);
             Assert.AreEqual(BattleStateId.Dialogue, battle.Context.CurrentState); battle.Ui.Dialogue.Advance(); SceneCapture.Save("phase10_spare_ready");

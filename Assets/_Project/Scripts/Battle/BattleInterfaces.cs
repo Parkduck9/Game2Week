@@ -38,7 +38,7 @@ namespace Game2Week.Battle
     /// <summary>상태가 3D 경기장에 요청하는 창구 (이동·접촉 판정·보석 표시).</summary>
     public interface IBattleWorld
     {
-        /// <summary>탄막 턴 시작 — 주인공을 시작 칸으로.</summary>
+        /// <summary>탄막 턴 준비 — 첫 턴만 시작 칸, 이후에는 현재 위치 유지.</summary>
         void ResetPlayer();
 
         void MovePlayer(Vector2 input, float deltaTime);
