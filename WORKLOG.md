@@ -1031,3 +1031,15 @@
 ### 다음에 할 일
 - 사용자: Partner Center 제품 ID 화면의 `Package/Identity/Name`·`Package/Identity/Publisher`·`PublisherDisplayName` 값 전달.
 - Claude: 받은 값을 `ProductInfo.asset`에 → `Tools/build_windows.ps1` → `Tools/package_msix.ps1 -Version 1.0.0.0 -NoSign` → `Builds/Msix/*.msix`.
+---
+
+## 2026-10-13 — Claude: 스토어 제출용 MSIX 생성
+
+### 한 일
+- Partner Center 제품 ID 반영 (`ProductInfo.asset`): `packageIdentity` NIPAD.486861669FA84, `packagePublisher` CN=4E796DB7-794C-4B33-ACD0-E443A37E0440, `publisherDisplayName` NIPAD, 버전 1.0.0 (첫 출시).
+- `Tools/build_windows.ps1 -Version 1.0.0` → 169MB 빌드 성공. `Tools/package_msix.ps1 -Version 1.0.0.0 -NoSign` → `Builds/Msix/NIPAD.486861669FA84_1.0.0.0_x64.msix` (55MB, 서명 없음 = 스토어 제출용).
+- 매니페스트 Identity·표시 이름(닿을 때까지)·게시자 표시 이름 확인, 빌드 15초 실행 정상.
+
+### 다음에 할 일
+- 사용자: Partner Center 제출 → 패키지에 위 .msix 업로드, 가격·판매 지역, 속성(게임 장르), 연령 등급(IARC), 스토어 등록 정보(`Plans/Store_Listing.md`, 이미지 `Reference/store/`), runFullTrust 사유, 제출.
+- 다음 버전은 `ProductInfo.version`을 올리고 같은 두 명령 (버전은 항상 이전보다 커야 함).
