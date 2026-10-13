@@ -1058,3 +1058,15 @@
 
 ### 다음에 할 일
 - 사용자: 새 게임 제품으로 제출(가격·속성 범주 게임·연령 등급·패키지 업로드·스토어 등록 정보·스크린샷 v2).
+---
+
+## 2026-10-13 — 사용자: Microsoft Store 첫 제출 (Claude 안내)
+
+### 한 일
+- Partner Center 게임 제품 "닿을 때까지"(9NS0RQVCGXD6) 제출 1: 무료·전 세계·공개, 범주 게임(액션 + 어드벤처, 롤플레잉), 개인정보 미사용, 싱글 플레이어, 연령 등급(IARC), 패키지 `NIPAD.49884B7A255A3_1.0.0.0_x64.msix`, 한국어 목록(설명·기능·검색어·스크린샷 v2 5장·박스/포스터/로고/히어로 아트), runFullTrust 사유, 인증 참고 사항.
+- 개인정보 처리방침 `docs/privacy.md` (공개 URL https://github.com/Parkduck9/Game2Week/blob/main/docs/privacy.md). 스토어 아트 `Reference/store/boxart_1080x1080.png`·`poster_720x1080.png`.
+
+### 다음에 할 일
+- 사용자: 인증 결과(1~3일) 확인 → 수동 게시면 "지금 게시". 실패 시 사유를 Claude에게 전달.
+- 출시 뒤 업데이트: `ProductInfo.version` 올리기 → 빌드·MSIX → Partner Center 새 제출에서 패키지 교체.
+- 결정 대기: 적 이름(지금 "테스트 적" 임시), 소리 출처, 난이도 수치.
