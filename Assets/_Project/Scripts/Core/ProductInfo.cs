@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Game2Week.Core
 {
@@ -9,13 +9,13 @@ namespace Game2Week.Core
         public string companyName="DefaultCompany";
         public string productName="Game2Week";
         public string version="0.1.0";
-        public string displayName="타이틀 (가제)";
+        public string displayName="닿을 때까지";
         public string publisherDisplayName="Game2Week";
         public string packageIdentity="Game2Week.Dev";
         public string packagePublisher="CN=Game2Week Dev";
         public string description="3D 턴제 전투 게임";
         public static ProductInfo Current{get;private set;}
-        public static string Title=>Current?Current.displayName:"타이틀 (가제)";
+        public static string Title=>Current?Current.displayName:"닿을 때까지";
         void OnEnable()=>Current=this;
         void OnDisable(){if(Current==this)Current=null;}
         public string MsixVersion=>VersionForMsix(version);

@@ -22,7 +22,7 @@ param(
     [string]$Name = "Game2Week.Dev",                      # 스토어: 파트너 센터 Package/Identity/Name
     [string]$Publisher = "CN=Game2Week Dev",              # 스토어: 파트너 센터 Package/Identity/Publisher
     [string]$PublisherDisplayName = "Game2Week",
-    [string]$DisplayName = "타이틀 (가제)",
+    [string]$DisplayName = "닿을 때까지",
     [string]$Description = "3D 턴제 전투 게임",
     [switch]$NoSign,
     [switch]$CreateTestCert,

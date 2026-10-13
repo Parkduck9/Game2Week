@@ -1018,3 +1018,16 @@
 
 ### 다음에 할 일
 - 사용자: 에디터에서 Play를 여러 번(다른 창을 누른 뒤 포함) 눌러 키보드가 바로 먹는지 확인. 에디터를 다시 열어야 새 설정이 적용된다 (스크립트 다시 컴파일되면 자동).
+---
+
+## 2026-10-13 — Claude: 게임 이름 확정 "닿을 때까지"
+
+### 한 일
+- 사용자 결정: 게임 이름 **닿을 때까지** (영문 병기 후보 Until I Reach You). 개발자 계정 등록 완료, Partner Center 이름 예약.
+- `ProductInfo.asset` `displayName`, 코드 기본값(`ProductInfo.Title`), `Tools/package_msix.ps1` 기본 표시 이름, `Plans/Store_Listing.md/.html`(자리표시자 교체 + 자비 결말 문구·특징 추가).
+- 회사/제품(`DefaultCompany`/`Game2Week`)은 세이브 경로라 유지 (exe 이름 `Game2Week.exe`).
+- EditMode 213/213 (폰트 글자 검사 포함).
+
+### 다음에 할 일
+- 사용자: Partner Center 제품 ID 화면의 `Package/Identity/Name`·`Package/Identity/Publisher`·`PublisherDisplayName` 값 전달.
+- Claude: 받은 값을 `ProductInfo.asset`에 → `Tools/build_windows.ps1` → `Tools/package_msix.ps1 -Version 1.0.0.0 -NoSign` → `Builds/Msix/*.msix`.
