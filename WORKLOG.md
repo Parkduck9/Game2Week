@@ -1043,3 +1043,18 @@
 ### 다음에 할 일
 - 사용자: Partner Center 제출 → 패키지에 위 .msix 업로드, 가격·판매 지역, 속성(게임 장르), 연령 등급(IARC), 스토어 등록 정보(`Plans/Store_Listing.md`, 이미지 `Reference/store/`), runFullTrust 사유, 제출.
 - 다음 버전은 `ProductInfo.version`을 올리고 같은 두 명령 (버전은 항상 이전보다 커야 함).
+---
+
+## 2026-10-13 — Claude: 스토어 준비 수정 (게임 제품으로 재등록 · 제목 화면 · 스크린샷)
+
+### 한 일
+- 제목 화면: 씬에 고정된 "타이틀 (가제)" → `MainMenuController.titleText`가 `ProductInfo` 표시 이름으로 채움(씬 연결). v1 정적 모델(T자) → v2 `Player_Heroine` 프리팹(대기 동작)으로 교체.
+- 스토어 스크린샷 1920×1080 5장 (`StoreScreenshotTests`, `-storeShots`로만 실행) → `Reference/store/screenshot_v2_*.png`. `SceneCapture.Save(name, w, h)` 추가. 옛 1280×720 캡처는 데스크톱 최소(1366×768) 미달.
+- 사용자: 범주에 "게임"이 없어 앱 제품의 이름을 해제하고 **MSIX 또는 PWA 게임** 제품으로 다시 예약. 새 `packageIdentity` NIPAD.49884B7A255A3 (게시자 동일) → `Builds/Msix/NIPAD.49884B7A255A3_1.0.0.0_x64.msix` 다시 생성.
+- EditMode 213/213, PlayMode 45/45 (+측정·스크린샷 전용 2 건너뜀).
+
+### 결정 필요
+- 스크린샷·게임 안 적 이름이 임시("테스트 적", "주황 테스트 적") — 출시 전 바꿀지.
+
+### 다음에 할 일
+- 사용자: 새 게임 제품으로 제출(가격·속성 범주 게임·연령 등급·패키지 업로드·스토어 등록 정보·스크린샷 v2).

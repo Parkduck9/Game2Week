@@ -9,7 +9,10 @@ namespace Game2Week.Tests
     /// </summary>
     public static class SceneCapture
     {
-        public static void Save(string name)
+        public static void Save(string name) => Save(name, 1280, 720);
+
+        /// <summary>크기 지정 캡처 (스토어 스크린샷은 1920×1080 — 데스크톱 최소 1366×768)</summary>
+        public static void Save(string name, int width, int height)
         {
             var cam = Camera.main;
             if (cam == null) return;
@@ -24,7 +27,7 @@ namespace Game2Week.Tests
                 Canvas.ForceUpdateCanvases();
             }
 
-            var rt = new RenderTexture(1280, 720, 24) { antiAliasing = 4 };
+            var rt = new RenderTexture(width, height, 24) { antiAliasing = 4 };
             var previousTarget=cam.targetTexture;
             cam.targetTexture = rt;
             cam.Render();

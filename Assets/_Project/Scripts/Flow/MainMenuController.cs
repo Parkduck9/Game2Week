@@ -16,6 +16,8 @@ namespace Game2Week.Flow
         [SerializeField] MenuNavigator menu;
         [SerializeField] ConfirmPopup confirm;
         [SerializeField] SettingsPanel settings;
+        [Tooltip("제목 글자 — ProductInfo 표시 이름으로 채운다 (이름 확정 시 한 곳만 바꾸면 되게)")]
+        [SerializeField] TMPro.TMP_Text titleText;
 
         public MenuNavigator Menu => menu;
         public ConfirmPopup Confirm => confirm;
@@ -29,6 +31,7 @@ namespace Game2Week.Flow
         {
             session.ResetSession();
             session.ApplySettingsOnce();
+            if (titleText) titleText.text = UiTexts.GameTitle;
             ShowMenu(NewGameIndex);
         }
 
